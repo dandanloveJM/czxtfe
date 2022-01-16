@@ -8,9 +8,19 @@ import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 
 // 创建axios实例
 
-const request = axios.create({
+// 全局设置带cookie!
+axios.defaults.withCredentials = true
+
+export const request = axios.create({
   baseURL: import.meta.env.VITE_REQUEST_BASE_URL as string,
+  // baseURL: "http://localhost:8080",
   timeout: 6000
+})
+
+export const requestWithCookie = axios.create({
+  baseURL: import.meta.env.VITE_REQUEST_BASE_URL as string,
+  timeout: 6000,
+  withCredentials: true
 })
 
 /**
@@ -37,7 +47,7 @@ request.interceptors.request.use((config: AxiosRequestConfig): AxiosRequestConfi
  * @param { Object } response 返回的数据
  */
 request.interceptors.response.use((response: AxiosResponse): AxiosResponse | Promise<AxiosResponse> => {
-  if (response.data.code === 200) {
+  if (response.data.status === "ok" || response.data.code === 200) {
     return response
   } else if (response.data.code === -401) {
     // 登录失效
@@ -55,4 +65,3 @@ export const globalAxios = {
   }
 }
 
-export default request

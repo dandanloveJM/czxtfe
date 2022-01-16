@@ -6,28 +6,32 @@ import { LoginFrom } from '@/types/views/login'
 import { RouterTable } from '@/types/api/login'
 import { generator } from '@/utils/parsingRouter'
 import { login, info, menu, logout } from '@/api/login'
+import store from '@/store'
 
 // 处理用户登录、登出、个人信息、权限路由
 
 export type UserState = {
-  token: string,
-  name: string,
+  displayName: string,
+  id?: string,
   avatar: string,
-  roles: string[],
-  routers?: RouterTable
+  roleId: string,
+  username: string,
+  routers?: RouterTable,
+  logIn?:boolean
 }
 
 const state: UserState = {
-  // 标识
-  token: storage.get('token'),
   // 昵称
-  name: '',
+  username: '',
   // 头像
   avatar: '',
   // 角色(鉴权)
-  roles: [],
+  roleId: '',
   // 路由表(原始未解析)
-  routers: []
+  routers: [],
+  displayName:'',
+  //是否登录成功
+  logIn: false
 }
 
 const user = {
@@ -38,17 +42,25 @@ const user = {
 
   mutations: {
 
-    // 设置token
-    setToken (state: UserState, token: string) {
-      state.token = token
+    // // 设置token
+    // setToken (state: UserState, token: string) {
+    //   state.token = token
+    // },
+    setLogIn(state: UserState, logIn: boolean){
+      state.logIn = true
+    },
+
+    setDisplayname(state: UserState, name: string){
+      state.displayName = name
     },
     
-    // 设置用户信息
+    // // 设置用户信息
     setInfo (state: UserState, info: UserState) {
-      const { name, avatar, roles } = info
-      state.name = name
+      const { displayName, avatar, roleId, username } = info
+      state.displayName = displayName
       state.avatar = avatar
-      state.roles = roles
+      state.roleId = roleId
+      state.username = username
     },
 
     // 设置路由表(原始未解析)
@@ -60,7 +72,7 @@ const user = {
     clearState (state: UserState) {
       storage.remove('token')
       // 为了重新加载用户信息及路由组
-      state.name = ''
+      state.username = ''
     }
   
   },
@@ -72,10 +84,12 @@ const user = {
       return new Promise((resolve, reject) => {
         login(params).then(e => {
           const data = e.data
-          storage.set('token', data.token)
-          context.commit('setToken', data.token)
+          storage.set('logIn', "login")
+          context.commit('setLogIn', true)
           resolve(data)
         }).catch(err => {
+          console.log("错误")
+          console.dir(err)
           reject(err)
         })
       })
@@ -85,8 +99,14 @@ const user = {
     userInfo (context: ActionContext<UserState, AllState>) {
       return new Promise((resolve, reject) => {
         info().then(e => {
-          const info = e.data.info 
+          const info = e.data.data
+          console.log('iinfo')
+          console.dir(info)
+          storage.set('setInfo', info)
           context.commit('setInfo', info)
+     
+          console.log("store.state.user.displayName!!!!");
+          console.dir(state)
           resolve(e)
         }).catch(err => {
           message.error(err.message || err.data.message)

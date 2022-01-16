@@ -1,4 +1,4 @@
-import request from '../request'
+import {request, requestWithCookie} from '../request'
 import { AxiosResponse } from 'axios'
 import { LoginFrom } from '@/types/views/login'
 import { ResponseData } from '@/types/api/public'
@@ -12,7 +12,8 @@ type ConfigType<T=ResponseData> = Promise<AxiosResponse<T>>
  */
 export const login = (data: LoginFrom): ConfigType<LoginSuccess> => {
   return request({
-    url: '/login',
+    url: 'http://localhost:8080/auth/login',
+    // url: 'login',
     method: 'post',
     data
   })
@@ -23,9 +24,10 @@ export const login = (data: LoginFrom): ConfigType<LoginSuccess> => {
  * @returns data
  */
 export const info = (): ConfigType<UserInfo> => {
-  return request({
-    url: '/info',
-    method: 'get'
+  return requestWithCookie({
+    url: 'http://localhost:8080/userInfo',
+    method: 'get',
+    withCredentials: true
   })
 }
 
@@ -35,7 +37,7 @@ export const info = (): ConfigType<UserInfo> => {
 export const menu = (): ConfigType<RouterData> => {
   return request({
     url: '/menu',
-    method: 'get'
+    method: 'get',
   })
 }
 

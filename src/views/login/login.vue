@@ -5,7 +5,7 @@
       <a-col :xs="24" :sm="24" :md="12" :lg="10" :xl="6">
         <div class="login-container-form">
           <div class="login-container-hello">您好!</div>
-          <div class="login-container-title">欢迎来到通用管理后台</div>
+          <div class="login-container-title">欢迎使用产值管理系统</div>
           <a-form ref="formRef" :model="form" :rules="rules" @keyup.enter="handleSubmit">
             <a-form-item name="username">
               <a-input v-model:value="form.username" autocomplete="off" placeholder="请输入账号">
@@ -30,7 +30,7 @@
         </div>
       </a-col>
     </a-row>
-    <div class="login-container-tips">基于vue3+ant-design-vue+vite+ts开发的开源通用后台框架</div>
+    <div class="login-container-tips">2022-产值管理系统</div>
   </div>
 </template>
 
@@ -41,6 +41,7 @@ import { message } from 'ant-design-vue'
 import { LoginFrom } from '@/types/views/login'
 import { defineComponent, reactive, ref, UnwrapRef } from "vue"
 import { UserOutlined, LockOutlined } from '@ant-design/icons-vue'
+import {login} from "@/api/login"
 export default defineComponent({
   name: "login",
   components: {
@@ -81,11 +82,30 @@ export default defineComponent({
      */
     const handleSubmit = (): void => {
       formRef.value.validate().then(() => {
+        // login(form).then(response => {
+        //   console.log("response---")
+        //   console.dir(response)
+        // storage.set('token', "Token123456")
+        //   context.commit('setToken', "Token123456")
+        //   resolve(response.data)
+        //   if (response.status = 200){
+        //       const route = router.currentRoute.value
+        //       const url = route.query.redirect || '/'
+        //       console.log(url)
+        //       router.push(url as string)
+        //   }
+          
+        // }).catch(err => {
+        //   console.dir(err)
+        // })
         store.dispatch('user/login', form).then(e => {
           const route = router.currentRoute.value
           const url = route.query.redirect || '/'
+          console.log(url)
           router.push(url as string)
+
         }).catch(err => {
+          console.dir(err)
           message.error(err.message || err.data.message)
         })
       })

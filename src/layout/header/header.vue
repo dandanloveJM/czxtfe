@@ -16,12 +16,12 @@
     <div class="header__right">
       <a-dropdown :trigger="['click', 'hover']">
         <div class="header__avatar">
-          <a-avatar>
+          <!-- <a-avatar>
             <template #icon>
               <img :src="avatar" v-if="avatar.length > 0" />
               <img src="@/assets/layout/avatar.png" v-else />
             </template>
-          </a-avatar>
+          </a-avatar> -->
           <div class="header__avatar-name">{{ name.length > 0 ? name : 'admin' }}</div>
         </div>
         <template #overlay>
@@ -52,7 +52,7 @@ export default defineComponent({
   },
   computed: {
     ...mapState({
-      name: (state: any) => state.user.name,
+      name: (state: any) => state.user.displayName,
       avatar: (state: any) => state.user.avatar,
       routers: (state: any) => {
         const array: any[] = []
