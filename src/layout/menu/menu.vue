@@ -3,7 +3,7 @@
     <div class="menu__logo-icon">
       <img src="@/assets/layout/logo.svg" />
     </div>
-    <span v-show="!collapsed">通用后台</span>
+    <span v-show="!collapsed">产值管理系统</span>
   </div>
   <a-menu
     theme="dark"

@@ -36,7 +36,8 @@ export const info = (): ConfigType<UserInfo> => {
  */
 export const menu = (): ConfigType<RouterData> => {
   return request({
-    url: '/menu',
+    // url: '/menu',
+    url: 'http://localhost:8080/user/menu',
     method: 'get',
   })
 }
@@ -46,7 +47,8 @@ export const menu = (): ConfigType<RouterData> => {
  */
  export const logout = (): ConfigType => {
   return request({
-    url: '/logout',
-    method: 'post'
+    // url: '/logout',
+    url: 'http://localhost:8080/auth/logout',
+    method: 'get'
   })
 }
