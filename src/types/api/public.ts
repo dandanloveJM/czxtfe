@@ -1,5 +1,5 @@
 export interface ResponseData<T = any> {
-  code: number,
+  status: String,
   message: string,
   data?: T
 }
