@@ -7,7 +7,7 @@
         </li>
     </ul> -->
     <div class="table-wrapper">
-      <div class="tableWithData" v-if="state.taskList.length>0">
+      <div class="tableWithData" v-if="state.taskList.length > 0">
         <a-table
           :columns="columns"
           :data-source="state.taskList"
@@ -21,46 +21,80 @@
               <a-divider type="vertical" />
             </span>
           </template>
-          <template #type="{record}">
-            <span>{{typeMap[record.type]}}</span>
+          <template #type="{ record }">
+            <span>{{ typeMap[record.type] }}</span>
           </template>
-          <template #attachment="{record}">
+          <template #attachment="{ record }">
             <a :href="record.attachment">点击查看附件</a>
           </template>
         </a-table>
       </div>
       <div class="emptyTable" v-else>
-        <a-empty/>
+        <a-empty />
       </div>
     </div>
 
     <Modal
       ref="addModal"
       title="填写产值比例建议"
-      @ok="addSubmit"
+      @ok="onSubmitForm"
+      @cancel="onCancel"
       v-model:visible="visible"
       :confirm-loading="confirmLoading"
     >
-      <a-form>
-        <a-form-item> 成员：<a-select /> 产值比例: <a-input /> </a-form-item>
-        <a-form-item> 成员：<a-select /> 产值比例: <a-input /> </a-form-item>
-        <a-form-item> 成员：<a-select /> 产值比例: <a-input /> </a-form-item>
-        <a-form-item> 成员：<a-select /> 产值比例: <a-input /> </a-form-item>
-        <a-form-item> 成员：<a-select /> 产值比例: <a-input /> </a-form-item>
-        <a-form-item> 成员：<a-select /> 产值比例: <a-input /> </a-form-item>
-        <a-form-item> 成员：<a-select /> 产值比例: <a-input /> </a-form-item>
+      <a-form :model="formState" :label-col="labelCol">
+        <div class="line-wrapper">
+          <a-form-item label="成员" style="width: 45%">
+            <a-select v-model:value="formState.member1" show-search :options="state.candidates"
+            :filterOption="filterOption" />
+          </a-form-item>
+          <a-form-item label="产值比例" style="width: 45%">
+            <a-input-number v-model:value="formState.value1" />
+          </a-form-item>
+        </div>
+        <div class="line-wrapper">
+          <a-form-item label="成员" style="width: 45%">
+            <a-select v-model:value="formState.member2" />
+          </a-form-item>
+          <a-form-item label="产值比例" style="width: 45%">
+            <a-input v-model:value="formState.value2" />
+          </a-form-item>
+        </div>
+        <div class="line-wrapper">
+          <a-form-item label="成员" style="width: 45%">
+            <a-select v-model:value="formState.member3" />
+          </a-form-item>
+          <a-form-item label="产值比例" style="width: 45%">
+            <a-input v-model:value="formState.value3" />
+          </a-form-item>
+        </div>
+
+        <div class="line-wrapper">
+          <a-form-item label="成员" style="width: 45%">
+            <a-select v-model:value="formState.member4" />
+          </a-form-item>
+          <a-form-item label="产值比例" style="width: 45%">
+            <a-input v-model:value="formState.value4" />
+          </a-form-item>
+        </div>
       </a-form>
     </Modal>
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref, reactive, onMounted } from "vue";
+import {
+  defineComponent,
+  ref,
+  reactive,
+  onMounted,
+  UnwrapRef,
+  toRaw,
+  watchEffect,
+} from "vue";
 import aIcon from "@/components/aicon/aicon.vue";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
-import { getR1UnfinishedList } from "@/api/display";
-
-
+import { getR1UnfinishedList, getAllR1R2R3Users } from "@/api/display";
 
 const columns = [
   {
@@ -75,7 +109,7 @@ const columns = [
   },
   {
     title: "任务类型",
-    slots: {customRender: "type"},
+    slots: { customRender: "type" },
     key: "type",
   },
   {
@@ -85,7 +119,7 @@ const columns = [
   },
   {
     title: "附件",
-    slots: {customRender: "attachment"},
+    slots: { customRender: "attachment" },
     key: "attachment",
   },
 
@@ -96,6 +130,21 @@ const columns = [
   },
 ];
 
+interface Member {
+  userId: string;
+  displayName: string;
+}
+interface FormState {
+  label1: string;
+  member1: string;
+  value1: string;
+  member2?: string;
+  value2?: string;
+  member3?: string;
+  value3?: string;
+  member4?: string;
+  value4?: string;
+}
 
 export default defineComponent({
   name: "issue",
@@ -105,7 +154,6 @@ export default defineComponent({
   },
   data() {
     return {
-      // data,
       columns,
     };
   },
@@ -115,14 +163,47 @@ export default defineComponent({
     const confirmLoading = ref<boolean>(false);
     const state = reactive({
       taskList: [],
+      candidates: []
+    });
+    
+    const formState: UnwrapRef<FormState> = reactive({
+      label1:"",
+      member1: "",
+      value1: "",
+      member2: "",
+      value2: "",
+      member3: "",
+      value3: "",
+      member4: "",
+      value4: "",
     });
 
-    onMounted(async () => {
+    const fetchData = async () => {
       const data = await getR1UnfinishedList(20).then(
         (response) => response.data.data
       );
-      console.dir(data);
+     
       state.taskList = data;
+    };
+
+    const fetchCandidates = async () => {
+      const candidates = await getAllR1R2R3Users().then((response) => response.data.data)
+      const options = candidates.map(item => {
+        let tmp = {}
+        tmp['value'] = item['id']
+        tmp['label'] = item['displayName']
+        return tmp
+      })
+      state.candidates = options
+      console.log("---allr1r2r3")
+      console.dir(state.candidates)
+
+    }
+    onMounted(() => {
+      fetchCandidates()
+      watchEffect(() => {
+        fetchData();
+      });
     });
 
     // 点击表单添加按钮
@@ -134,22 +215,51 @@ export default defineComponent({
       visible.value = false;
     };
 
-  const typeMap = {
-  "1": "采集设计",
-  "2": "科研项目",
-  "3": "现场处理",
-  "4": "质量评价",
-  "5": "资料分析",
-  "6": "表层调查",
-  "7": "测量质控",
-  "8": "技术支持",
-  "9": "现场支持",
-  "10": "党建工作",
-};
+    const onSubmitForm = () => {
+      visible.value = false;
+      console.log("submit!", toRaw(formState));
+    };
 
+    const onCancel = () => {
+      visible.value = false;
+    }
 
+    const filterOption = (input: string, option: any) => {
+      console.log('--input')
+      console.log(input)
+      console.log(option.value)
+      return option.label.indexOf(input) >= 0;
+    };
 
-    return {typeMap, state, confirmLoading, visible, addModal, addAdvice, addSubmit };
+    const typeMap = {
+      "1": "采集设计",
+      "2": "科研项目",
+      "3": "现场处理",
+      "4": "质量评价",
+      "5": "资料分析",
+      "6": "表层调查",
+      "7": "测量质控",
+      "8": "技术支持",
+      "9": "现场支持",
+      "10": "党建工作",
+    };
+
+   
+
+    return {
+      labelCol: { style: { width: "150px", textAlign: "center" } },
+      formState,
+      typeMap,
+      state,
+      confirmLoading,
+      visible,
+      addModal,
+      addAdvice,
+      addSubmit,
+      onSubmitForm,
+      filterOption,
+      onCancel
+    };
   },
 });
 </script>
@@ -168,5 +278,9 @@ export default defineComponent({
       cursor: pointer;
     }
   }
+}
+.line-wrapper {
+  display: flex;
+  justify-content: center;
 }
 </style>
