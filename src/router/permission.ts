@@ -1,7 +1,7 @@
-import storage from 'store'
 import store from '@/store'
 import { whiteList } from './basics.router'
 import { Router, RouteRecordRaw } from 'vue-router'
+import localCache from '@/utils/localCache'
 
 
 const loginPath = '/login'
@@ -13,11 +13,11 @@ export const permission = (router: Router) => {
   
   router.beforeEach((to, from, next) => {
 
-    console.log("store.state.user.logIn")
-    console.log(store.state.user.logIn)
+  
 
     // 没有登陆
-    if(storage.get("logIn") !== "login"){
+    if(!localCache.getCache("login")){
+      console.log("没登录")
       if (whiteList.includes(to.path)) {
         next()
       } else {
@@ -25,18 +25,18 @@ export const permission = (router: Router) => {
       }
     } else {
       // 已经登陆了
-      console.dir(store.state.user.username)
+      console.log("登录了")
       if (to.path === loginPath){
         next({ path: defaultPath })
       } else {
-        if (!store.state.user.displayName){
+        if (!localCache.getCache("setInfo")){
           store.dispatch('user/userInfo')
           .then(()=>{
-            console.log("store.state.user.displayName");
-            console.dir(store.state.user.displayName)
             store.dispatch('user/menu').then((e) => {
               e.forEach((item: RouteRecordRaw) => {
                 router.addRoute(item)
+                console.log("---Luyou")
+                console.dir(item)
                 })
                 router.addRoute({ path: '/:pathMatch(.*)*', redirect: '/404' })
                 const redirect = from.query.redirect as string | undefined
@@ -46,6 +46,21 @@ export const permission = (router: Router) => {
                   next({ ...to })
                 }
             })
+          })
+        } else if (store.state.user.routers?.length==0) {
+          store.dispatch('user/menu').then((e) => {
+            e.forEach((item: RouteRecordRaw) => {
+              router.addRoute(item)
+              console.log("-重新获取--Luyou")
+              console.dir(item)
+              })
+              router.addRoute({ path: '/:pathMatch(.*)*', redirect: '/404' })
+              const redirect = from.query.redirect as string | undefined
+              if (redirect && to.fullPath === redirect) {
+                next({ ...to, replace: true })
+              } else {
+                next({ ...to })
+              }
           })
         } else {
           next()
