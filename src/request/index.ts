@@ -1,9 +1,11 @@
 import { App } from 'vue'
-import storage from 'store'
+// import sessionStorage from 'store'
 import router from '@/router'
 import { regAxios } from './install'
 import { message } from 'ant-design-vue'
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
+import { Router, RouteRecordRaw } from 'vue-router'
+import localCache from '@/utils/localCache'
 
 
 // 创建axios实例
@@ -14,7 +16,7 @@ axios.defaults.withCredentials = true
 export const request = axios.create({
   baseURL: import.meta.env.VITE_REQUEST_BASE_URL as string,
   // baseURL: "http://localhost:8080",
-  timeout: 6000
+  timeout: 60000000
 })
 
 export const requestWithCookie = axios.create({
@@ -37,7 +39,7 @@ const errorHandler = (error: AxiosError): AxiosError | Promise<AxiosError> => {
  * @param { Object } config 配置参数
  */
 request.interceptors.request.use((config: AxiosRequestConfig): AxiosRequestConfig => {
-  config.headers['token'] = storage.get('token') || ''
+  // config.headers['token'] = sessionStorage.get('token') || ''
   return config
 }, errorHandler)
 
@@ -47,11 +49,14 @@ request.interceptors.request.use((config: AxiosRequestConfig): AxiosRequestConfi
  * @param { Object } response 返回的数据
  */
 request.interceptors.response.use((response: AxiosResponse): AxiosResponse | Promise<AxiosResponse> => {
-  if (response.data.status === "ok" || response.data.code === 200) {
+  if (response.data.status === "ok") {
+    console.dir(response);
     return response
-  } else if (response.data.code === -401) {
+    
+  } else if (response.data.msg === "expire") {
     // 登录失效
-    storage.remove('token')
+    console.log("我也知道它过期了")
+    localCache.clearCache()
     router.push({ path: '/login', query: { redirect: router.currentRoute.value.fullPath } })
     return Promise.reject(response)
   } else {

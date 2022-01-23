@@ -1,4 +1,4 @@
-import storage from 'store'
+import localCache from '@/utils/localCache';
 import { AllState } from '../index'
 import { ActionContext } from 'vuex'
 import { message } from 'ant-design-vue'
@@ -70,7 +70,7 @@ const user = {
 
     // 用户退出登录
     clearState (state: UserState) {
-      storage.remove('token')
+      localCache.clearCache()
       // 为了重新加载用户信息及路由组
       state.username = ''
     }
@@ -84,7 +84,7 @@ const user = {
       return new Promise((resolve, reject) => {
         login(params).then(e => {
           const data = e.data
-          storage.set('logIn', "login")
+          localCache.setCache("login","login")
           context.commit('setLogIn', true)
           resolve(data)
         }).catch(err => {
@@ -102,11 +102,8 @@ const user = {
           const info = e.data.data
           console.log('iinfo')
           console.dir(info)
-          storage.set('setInfo', info)
+          localCache.setCache('setInfo', info)
           context.commit('setInfo', info)
-     
-          console.log("store.state.user.displayName!!!!");
-          console.dir(state)
           resolve(e)
         }).catch(err => {
           message.error(err.message || err.data.message)
