@@ -1,11 +1,6 @@
 <template>
   <div class="issue__container">
-    <!-- <ul>
-      <li v-for="item of state.taskList" :key="item.id">
-        <span>{{item.name}}</span>
-        <span>{{item.processId}}</span>
-        </li>
-    </ul> -->
+    <a-button type="primary" size="large">点击新建任务</a-button>
     <div class="table-wrapper">
       <div class="tableWithData" v-if="state.taskList.length > 0">
         <a-table
@@ -14,7 +9,7 @@
           :rowKey="(record) => record.processId"
         >
           <template #action="{ record }">
-            <span v-if="record.taskId">
+            <span v-if="record.activityName === 'R2/R1填写产值分配建议'">
               <a @click="() => addAdvice(record.processId, record.taskId)"
                 >点击上传产值比例建议</a
               >
@@ -22,6 +17,11 @@
               <a @click="() => rollback(record)">退回到上一节点</a>
               <a-divider type="vertical" />
             </span>
+            <span v-if="record.activityName === 'R2上传任务'">
+              <a href="">点击重新上传任务</a>
+               <a-divider type="vertical" />
+            </span>
+
             <span>
               <a @click="() => checkHistory(record.processId)"
                 >查看当前流程情况</a
@@ -152,13 +152,13 @@ import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 import {
-  getR1UnfinishedList,
+  getR2AllList,
   getAllR1R2R3Users,
   fillOutputValue,
   checkHistoryRequest,
   rollbackRequest,
 } from "@/api/display";
-import {typeMap} from "@/utils/config";
+import { typeMap } from "@/utils/config";
 
 const columns = [
   {
@@ -176,7 +176,7 @@ const columns = [
     slots: { customRender: "type" },
     key: "type",
   },
-   {
+  {
     title: "上传任务时间",
     dataIndex: "updatedAt",
     key: "updatedAt",
@@ -224,7 +224,7 @@ export default defineComponent({
   data() {
     return {
       columns,
-      typeMap
+      typeMap,
     };
   },
 
@@ -286,8 +286,8 @@ export default defineComponent({
     ];
 
     const fetchData = async () => {
-      const data = await getR1UnfinishedList(20).then(
-        (response) => response.data.data
+      const data = await getR2AllList(20).then(
+        (response) => response.data.data.unfinished
       );
 
       state.taskList = data;
@@ -403,7 +403,7 @@ export default defineComponent({
               antModal.success({
                 title: "数据上传成功",
               });
-              fetchData()
+              fetchData();
             } else {
               antModal.error({
                 title: "程序异常",
@@ -443,8 +443,6 @@ export default defineComponent({
     const filterOption = (input: string, option: any) => {
       return option.label.indexOf(input) >= 0;
     };
-
-    
 
     const addRecord = () => {
       dynamicForm.records.push({
@@ -511,12 +509,12 @@ export default defineComponent({
             title: "退回成功",
           });
           confirmLoading2.value = false;
-          fetchData()
+          fetchData();
 
           showRollback.value = false;
         })
         .catch((err) => {
-          console.log(err)
+          console.log(err);
           confirmLoading2.value = false;
           antModal.error({
             title: "程序异常",
@@ -612,5 +610,9 @@ export default defineComponent({
 
 .add-record-button {
   width: 100%;
+}
+
+.table-wrapper {
+  margin-top: 30px;
 }
 </style>
