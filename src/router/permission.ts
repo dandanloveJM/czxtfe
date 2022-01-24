@@ -48,6 +48,9 @@ export const permission = (router: Router) => {
             })
           })
         } else if (store.state.user.routers?.length==0) {
+
+          
+          
           store.dispatch('user/menu').then((e) => {
             e.forEach((item: RouteRecordRaw) => {
               router.addRoute(item)

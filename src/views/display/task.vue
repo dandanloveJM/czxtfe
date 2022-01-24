@@ -13,14 +13,19 @@
           :data-source="state.taskList"
           :rowKey="(record) => record.processId"
         >
-          <template #action="{record}">
-            <span>
+          <template #action="{ record }">
+            <span v-if="record.taskId">
               <a @click="() => addAdvice(record.processId, record.taskId)"
                 >点击上传产值比例建议</a
               >
               <a-divider type="vertical" />
-              <a>退回</a>
+              <a>退回到上一节点</a>
               <a-divider type="vertical" />
+            </span>
+            <span v-else>
+              <a @click="() => checkHistory(record.processId)"
+                >查看当前流程情况</a
+              >
             </span>
           </template>
           <template #type="{ record }">
@@ -93,6 +98,24 @@
         </a-form-item>
       </a-form>
     </Modal>
+
+    <Modal
+      ref="history"
+      title="查看当前审批流程"
+      v-model:visible="showHistory"
+      @ok="historyOk"
+    >
+      <a-spin v-if="historyLoading"/>
+      <a-table v-else
+        :dataSource="state.historyData"
+        :columns="historyColumns"
+        :rowKey="(record) => record.processId"
+      >
+        <template #comment="{ record }">
+          <span>{{ record.comment ? record.comment : "无" }}</span>
+        </template>
+      </a-table>
+    </Modal>
   </div>
 </template>
 <script lang="ts">
@@ -113,7 +136,12 @@ import aIcon from "@/components/aicon/aicon.vue";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
-import { getR1UnfinishedList, getAllR1R2R3Users } from "@/api/display";
+import {
+  getR1UnfinishedList,
+  getAllR1R2R3Users,
+  fillOutputValue,
+  checkHistoryRequest,
+} from "@/api/display";
 
 const columns = [
   {
@@ -137,11 +165,6 @@ const columns = [
     key: "ownerName",
   },
   {
-    title: "附件",
-    slots: { customRender: "attachment" },
-    key: "attachment",
-  },
-{
     title: "附件",
     slots: { customRender: "attachment" },
     key: "attachment",
@@ -183,15 +206,18 @@ export default defineComponent({
     const addModal = ref();
     const visible = ref<boolean>(false);
     const confirmLoading = ref<boolean>(false);
+    const showHistory = ref<boolean>(false);
+    const historyLoading = ref<boolean>(false);
     const state = reactive({
       taskList: [],
       candidates: [],
       userIdToNameMap: {},
-      processId:'',
-      taskId:''
+      processId: "",
+      taskId: "",
+      historyData: [],
     });
     const formRef = ref();
-   
+
     const dynamicForm: UnwrapRef<{
       records: PeopleAndProductRecord[];
     }> = reactive({
@@ -204,6 +230,29 @@ export default defineComponent({
         },
       ],
     });
+
+    const historyColumns = [
+  {
+    title: "时间",
+    dataIndex: "time",
+    key: "time",
+  },
+  {
+    title: "流程节点",
+    dataIndex: "activityName",
+    key: "activityName",
+  },
+  {
+    title: "操作人",
+    dataIndex: "displayName",
+    key: "displayName",
+  },
+  {
+    title: "审核意见",
+    slots: { customRender: "comment" },
+    key: "comment",
+  },
+];
 
     const fetchData = async () => {
       const data = await getR1UnfinishedList(20).then(
@@ -224,15 +273,13 @@ export default defineComponent({
         return tmp;
       });
       state.candidates = options;
-      const idNameMap = candidates.reduce((accumulator, currentValue)=>{
-        let id = currentValue['id']
-        let name = currentValue['displayName']
-        accumulator[id] = name
-        return accumulator
-      },{})
-      state.userIdToNameMap = idNameMap
-      console.log("---allr1r2r3");
-      console.dir(state.candidates);
+      const idNameMap = candidates.reduce((accumulator, currentValue) => {
+        let id = currentValue["id"];
+        let name = currentValue["displayName"];
+        accumulator[id] = name;
+        return accumulator;
+      }, {});
+      state.userIdToNameMap = idNameMap;
     };
     onMounted(() => {
       fetchCandidates();
@@ -309,30 +356,53 @@ export default defineComponent({
         });
         // TODO 构造参数 发送请求
         confirmLoading.value = true;
-   
 
-        let params = buildParam(toRaw(state.candidates), records, state.processId, state.taskId)
-      
-        visible.value = false;
+        let params = buildParam(
+          toRaw(state.candidates),
+          records,
+          state.processId,
+          state.taskId
+        );
+
+        fillOutputValue(params)
+          .then((response) => {
+            confirmLoading.value = false;
+            if (response.data.status === "ok") {
+              visible.value = false;
+              antModal.success({
+                title: "数据上传成功",
+              });
+            } else {
+              antModal.error({
+                title: "程序异常",
+              });
+            }
+          })
+          .catch((err) => {
+            confirmLoading.value = false;
+            antModal.error({
+              title: "程序异常",
+            });
+          });
       }
       console.log("submit!", toRaw(dynamicForm));
     };
 
     const buildParam = (candidates, records, processId, taskId) => {
-      const param = {}
-      param['processId'] = processId
-      param['taskId'] = taskId
-     
-      const data = records.map(item => {
-        let temp = {}
-        temp['userId'] = item.peopleValue
-        temp['percentage'] = item.productValue
-        temp['displayName'] = toRaw(state.userIdToNameMap)[item.peopleValue]
-        return temp
-      })
-      param['data'] = data
-      return param
-    }
+      const param = {};
+      param["processId"] = processId;
+      param["taskId"] = taskId;
+
+      const data = records.map((item) => {
+        let temp = {};
+        temp["userId"] = "" + item.peopleValue;
+        temp["percentage"] = "" + item.productValue;
+        temp["displayName"] = toRaw(state.userIdToNameMap)[item.peopleValue];
+        return temp;
+      });
+      param["data"] = JSON.stringify(data);
+      return param;
+    };
 
     const onCancel = () => {
       visible.value = false;
@@ -371,6 +441,27 @@ export default defineComponent({
       }
     };
 
+    const checkHistory = (processId: string) => {
+      showHistory.value = true;
+      historyLoading.value = true
+      console.log(showHistory.value)
+      checkHistoryRequest(processId)
+        .then((response) => {
+          const historyData = response.data.data;
+          state.historyData = historyData;
+          historyLoading.value = false
+        })
+        .catch((err) => {
+          antModal.error({
+            title: "程序异常",
+          });
+        });
+    };
+
+    const historyOk = () => {
+      showHistory.value = false;
+      state.historyData = []
+    }
     // let checkProductValue = async (rule: RuleObject, value: number) => {
     //   console.log("fuck");
     //   console.log(value);
@@ -424,6 +515,11 @@ export default defineComponent({
       removeRecord,
       // rules,
       formRef,
+      checkHistory,
+      historyOk,
+      showHistory,
+      historyLoading,
+      historyColumns
     };
   },
 });

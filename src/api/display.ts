@@ -11,7 +11,7 @@ export const getR1UnfinishedList = (
   return request({
     url: "http://localhost:8080/R1/displayUnfinishedProjects",
     method: "get",
-    params: { userId: 23 },
+    params,
   });
 };
 
@@ -21,3 +21,30 @@ export const getAllR1R2R3Users = (): ConfigType<AllR1R2R3Users> => {
     method: "get",
   });
 };
+
+
+export const fillOutputValue = (params): ConfigType<AllR1R2R3Users> => {
+  // console.log("axios看到的是啥啊")
+  // console.dir(data)
+  let data = new FormData()
+  for (const key in params) {
+    if (params.hasOwnProperty(key)) {
+      data.append(key, params[key])      
+    }
+  }
+
+  return request({
+    url: "http://localhost:8080/uploadOutputPercent",
+    method: "post",
+    data: data,
+  });
+}
+
+
+export const checkHistoryRequest = (param) => {
+  return request({
+    url: "http://localhost:8080/history/list",
+    method: "get",
+    params:{"processId": param}
+  });
+}
