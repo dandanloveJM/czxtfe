@@ -49,22 +49,25 @@ export const permission = (router: Router) => {
           })
         } else if (store.state.user.routers?.length==0) {
 
-          
-          
-          store.dispatch('user/menu').then((e) => {
-            e.forEach((item: RouteRecordRaw) => {
-              router.addRoute(item)
-              console.log("-重新获取--Luyou")
-              console.dir(item)
-              })
-              router.addRoute({ path: '/:pathMatch(.*)*', redirect: '/404' })
-              const redirect = from.query.redirect as string | undefined
-              if (redirect && to.fullPath === redirect) {
-                next({ ...to, replace: true })
-              } else {
-                next({ ...to })
-              }
+          store.dispatch('user/userInfo')
+          .then(()=>{
+            store.dispatch('user/menu').then((e) => {
+              e.forEach((item: RouteRecordRaw) => {
+                router.addRoute(item)
+                console.log("-重新获取--Luyou")
+                console.dir(item)
+                })
+                router.addRoute({ path: '/:pathMatch(.*)*', redirect: '/404' })
+                const redirect = from.query.redirect as string | undefined
+                if (redirect && to.fullPath === redirect) {
+                  next({ ...to, replace: true })
+                } else {
+                  next({ ...to })
+                }
+            })
           })
+          
+          
         } else {
           next()
         }
