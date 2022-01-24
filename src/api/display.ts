@@ -63,3 +63,10 @@ export const rollbackRequest = (params) => {
     data: data
   });
 }
+
+export const getR1FinishedList = () => {
+  return request({
+    url: "http://localhost:8080/R1/displayFinishedProjects",
+    method: "get",
+  });
+}

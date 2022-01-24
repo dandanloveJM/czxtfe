@@ -158,6 +158,7 @@ import {
   checkHistoryRequest,
   rollbackRequest,
 } from "@/api/display";
+import {typeMap} from "@/utils/config";
 
 const columns = [
   {
@@ -174,6 +175,11 @@ const columns = [
     title: "任务类型",
     slots: { customRender: "type" },
     key: "type",
+  },
+   {
+    title: "上传任务时间",
+    dataIndex: "updatedAt",
+    key: "updatedAt",
   },
   {
     title: "项目长",
@@ -218,6 +224,7 @@ export default defineComponent({
   data() {
     return {
       columns,
+      typeMap
     };
   },
 
@@ -437,18 +444,7 @@ export default defineComponent({
       return option.label.indexOf(input) >= 0;
     };
 
-    const typeMap = {
-      "1": "采集设计",
-      "2": "科研项目",
-      "3": "现场处理",
-      "4": "质量评价",
-      "5": "资料分析",
-      "6": "表层调查",
-      "7": "测量质控",
-      "8": "技术支持",
-      "9": "现场支持",
-      "10": "党建工作",
-    };
+    
 
     const addRecord = () => {
       dynamicForm.records.push({
@@ -565,7 +561,6 @@ export default defineComponent({
 
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
-      typeMap,
       state,
       confirmLoading,
       visible,
