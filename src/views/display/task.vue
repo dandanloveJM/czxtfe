@@ -19,7 +19,7 @@
                 >点击上传产值比例建议</a
               >
               <a-divider type="vertical" />
-              <a>退回到上一节点</a>
+              <a @click="() => rollback(record)">退回到上一节点</a>
               <a-divider type="vertical" />
             </span>
             <span v-else>
@@ -105,8 +105,9 @@
       v-model:visible="showHistory"
       @ok="historyOk"
     >
-      <a-spin v-if="historyLoading"/>
-      <a-table v-else
+      <a-spin v-if="historyLoading" />
+      <a-table
+        v-else
         :dataSource="state.historyData"
         :columns="historyColumns"
         :rowKey="(record) => record.processId"
@@ -115,6 +116,20 @@
           <span>{{ record.comment ? record.comment : "无" }}</span>
         </template>
       </a-table>
+    </Modal>
+
+    <Modal
+      ref="reject"
+      title="退回到上一流程"
+      v-model:visible="showRollback"
+      @ok="rollbackOk"
+      :confirm-loading="confirmLoading2"
+    >
+      <a-form ref="formRef2" :model="commentForm">
+        <a-form-item name="comment" label="审批意见及退回原因">
+          <a-input v-model:value="commentForm.comment" />
+        </a-form-item>
+      </a-form>
     </Modal>
   </div>
 </template>
@@ -141,6 +156,7 @@ import {
   getAllR1R2R3Users,
   fillOutputValue,
   checkHistoryRequest,
+  rollbackRequest,
 } from "@/api/display";
 
 const columns = [
@@ -188,6 +204,9 @@ interface PeopleAndProductRecord {
   productValue: number;
 }
 
+interface CommentForm {
+  comment: string | undefined;
+}
 export default defineComponent({
   name: "issue",
   components: {
@@ -208,6 +227,8 @@ export default defineComponent({
     const confirmLoading = ref<boolean>(false);
     const showHistory = ref<boolean>(false);
     const historyLoading = ref<boolean>(false);
+    const showRollback = ref<boolean>(false);
+    const confirmLoading2 = ref<boolean>(false);
     const state = reactive({
       taskList: [],
       candidates: [],
@@ -215,9 +236,12 @@ export default defineComponent({
       processId: "",
       taskId: "",
       historyData: [],
+      currentRollbackRecord: {},
+    });
+    const commentForm: UnwrapRef<CommentForm> = reactive({
+      comment: "",
     });
     const formRef = ref();
-
     const dynamicForm: UnwrapRef<{
       records: PeopleAndProductRecord[];
     }> = reactive({
@@ -232,27 +256,27 @@ export default defineComponent({
     });
 
     const historyColumns = [
-  {
-    title: "时间",
-    dataIndex: "time",
-    key: "time",
-  },
-  {
-    title: "流程节点",
-    dataIndex: "activityName",
-    key: "activityName",
-  },
-  {
-    title: "操作人",
-    dataIndex: "displayName",
-    key: "displayName",
-  },
-  {
-    title: "审核意见",
-    slots: { customRender: "comment" },
-    key: "comment",
-  },
-];
+      {
+        title: "时间",
+        dataIndex: "time",
+        key: "time",
+      },
+      {
+        title: "流程节点",
+        dataIndex: "activityName",
+        key: "activityName",
+      },
+      {
+        title: "操作人",
+        dataIndex: "displayName",
+        key: "displayName",
+      },
+      {
+        title: "审核意见",
+        slots: { customRender: "comment" },
+        key: "comment",
+      },
+    ];
 
     const fetchData = async () => {
       const data = await getR1UnfinishedList(20).then(
@@ -372,6 +396,7 @@ export default defineComponent({
               antModal.success({
                 title: "数据上传成功",
               });
+              fetchData()
             } else {
               antModal.error({
                 title: "程序异常",
@@ -443,13 +468,13 @@ export default defineComponent({
 
     const checkHistory = (processId: string) => {
       showHistory.value = true;
-      historyLoading.value = true
-      console.log(showHistory.value)
+      historyLoading.value = true;
+      console.log(showHistory.value);
       checkHistoryRequest(processId)
         .then((response) => {
           const historyData = response.data.data;
           state.historyData = historyData;
-          historyLoading.value = false
+          historyLoading.value = false;
         })
         .catch((err) => {
           antModal.error({
@@ -460,8 +485,48 @@ export default defineComponent({
 
     const historyOk = () => {
       showHistory.value = false;
-      state.historyData = []
-    }
+      state.historyData = [];
+    };
+
+    const rollback = (record) => {
+      // 打开Modal
+      showRollback.value = true;
+      // 拼接参数
+      const tmp = {};
+      tmp["processId"] = record.processId;
+      tmp["taskId"] = record.taskId;
+      tmp["targetKey"] = "uploadTask";
+      tmp["comment"] = "";
+      // 存数据到state
+      state.currentRollbackRecord = tmp;
+    };
+
+    const rollbackOk = () => {
+      //获取填写的comment值
+      const newComment = toRaw(commentForm).comment;
+      state.currentRollbackRecord["comment"] = newComment;
+      // send request
+      console.log("传参");
+      console.dir(toRaw(state.currentRollbackRecord));
+      confirmLoading2.value = true;
+      rollbackRequest(toRaw(state.currentRollbackRecord))
+        .then((response) => {
+          antModal.success({
+            title: "退回成功",
+          });
+          confirmLoading2.value = false;
+          fetchData()
+
+          showRollback.value = false;
+        })
+        .catch((err) => {
+          console.log(err)
+          confirmLoading2.value = false;
+          antModal.error({
+            title: "程序异常",
+          });
+        });
+    };
     // let checkProductValue = async (rule: RuleObject, value: number) => {
     //   console.log("fuck");
     //   console.log(value);
@@ -519,7 +584,12 @@ export default defineComponent({
       historyOk,
       showHistory,
       historyLoading,
-      historyColumns
+      historyColumns,
+      rollback,
+      showRollback,
+      rollbackOk,
+      commentForm,
+      confirmLoading2,
     };
   },
 });

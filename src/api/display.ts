@@ -48,3 +48,18 @@ export const checkHistoryRequest = (param) => {
     params:{"processId": param}
   });
 }
+
+
+export const rollbackRequest = (params) => {
+  let data = new FormData()
+  for (const key in params) {
+    if (params.hasOwnProperty(key)) {
+      data.append(key, params[key])      
+    }
+  }
+  return request({
+    url: "http://localhost:8080/reject",
+    method: "post",
+    data: data
+  });
+}
