@@ -77,3 +77,10 @@ export const getAllUserRank = () => {
     method: "get",
   });
 }
+
+export const getR2AllList = () => {
+  return request({
+    url: "http://localhost:8080/R2/Projects",
+    method: "get",
+  });
+}
