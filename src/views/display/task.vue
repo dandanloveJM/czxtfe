@@ -13,9 +13,11 @@
           :data-source="state.taskList"
           :rowKey="(record) => record.processId"
         >
-          <template #action="">
+          <template #action="{record}">
             <span>
-              <a @click="addAdvice">点击上传产值比例建议</a>
+              <a @click="() => addAdvice(record.processId, record.taskId)"
+                >点击上传产值比例建议</a
+              >
               <a-divider type="vertical" />
               <a>退回</a>
               <a-divider type="vertical" />
@@ -139,7 +141,11 @@ const columns = [
     slots: { customRender: "attachment" },
     key: "attachment",
   },
-
+{
+    title: "附件",
+    slots: { customRender: "attachment" },
+    key: "attachment",
+  },
   {
     title: "操作",
     key: "action",
@@ -176,13 +182,15 @@ export default defineComponent({
   setup(props, context) {
     const addModal = ref();
     const visible = ref<boolean>(false);
-    const noPeopleSelectedError = ref<boolean>(false);
     const confirmLoading = ref<boolean>(false);
     const state = reactive({
       taskList: [],
       candidates: [],
+      processId:'',
+      taskId:''
     });
     const formRef = ref();
+   
     const dynamicForm: UnwrapRef<{
       records: PeopleAndProductRecord[];
     }> = reactive({
@@ -226,8 +234,10 @@ export default defineComponent({
     });
 
     // 点击表单添加按钮
-    const addAdvice = () => {
+    const addAdvice = (processId: string, taskId: string) => {
       visible.value = true;
+      state.processId = processId;
+      state.taskId = taskId;
     };
 
     const addSubmit = (e: MouseEvent) => {
@@ -277,7 +287,7 @@ export default defineComponent({
       });
 
       if (sum !== 100) {
-        console.log(sum)
+        console.log(sum);
         isError += 1;
         antModal.error({
           title: "所有成员的产值比例之和必须刚好是100",
@@ -290,6 +300,10 @@ export default defineComponent({
           title: "填写成功，正在上传数据中",
         });
         // TODO 构造参数 发送请求
+        confirmLoading.value = true;
+        console.log('看看参数')
+        console.log(state.processId)
+        console.log(state.taskId)
         visible.value = false;
       }
       console.log("submit!", toRaw(dynamicForm));
