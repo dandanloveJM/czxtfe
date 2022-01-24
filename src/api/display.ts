@@ -70,3 +70,10 @@ export const getR1FinishedList = () => {
     method: "get",
   });
 }
+
+export const getAllUserRank = () => {
+  return request({
+    url: "http://localhost:8080/userRank",
+    method: "get",
+  });
+}
