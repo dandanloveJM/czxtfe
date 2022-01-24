@@ -42,41 +42,53 @@
       v-model:visible="visible"
       :confirm-loading="confirmLoading"
     >
-      <a-form :model="formState" :label-col="labelCol">
-        <div class="line-wrapper">
-          <a-form-item label="成员" style="width: 45%">
-            <a-select v-model:value="formState.member1" show-search :options="state.candidates"
-            :filterOption="filterOption" />
+      <a-form ref="formRef" :model="dynamicForm" :label-col="labelCol">
+        <div
+          class="line-wrapper"
+          v-for="(record, index) in dynamicForm.records"
+          :key="index"
+        >
+          <a-form-item
+            :label="record.peopleLabel"
+            style="min-width: 45%"
+            name="peopleValue"
+          >
+            <a-select
+              v-model:value="record.peopleValue"
+              show-search
+              :options="state.candidates"
+              :filterOption="filterOption"
+            />
           </a-form-item>
-          <a-form-item label="产值比例" style="width: 45%">
-            <a-input-number v-model:value="formState.value1" />
+          <a-form-item
+            name="productValue"
+            ref="productValue"
+            :label="record.productLabel"
+            style="min-width: 35%"
+          >
+            <a-input-number v-model:value="record.productValue" />
           </a-form-item>
+          <a-button
+            danger
+            v-if="dynamicForm.records.length > 1"
+            class="dynamic-delete-button"
+            :disabled="dynamicForm.records.length === 1"
+            @click="removeRecord(record)"
+          >
+            删除
+          </a-button>
         </div>
-        <div class="line-wrapper">
-          <a-form-item label="成员" style="width: 45%">
-            <a-select v-model:value="formState.member2" />
-          </a-form-item>
-          <a-form-item label="产值比例" style="width: 45%">
-            <a-input v-model:value="formState.value2" />
-          </a-form-item>
-        </div>
-        <div class="line-wrapper">
-          <a-form-item label="成员" style="width: 45%">
-            <a-select v-model:value="formState.member3" />
-          </a-form-item>
-          <a-form-item label="产值比例" style="width: 45%">
-            <a-input v-model:value="formState.value3" />
-          </a-form-item>
-        </div>
-
-        <div class="line-wrapper">
-          <a-form-item label="成员" style="width: 45%">
-            <a-select v-model:value="formState.member4" />
-          </a-form-item>
-          <a-form-item label="产值比例" style="width: 45%">
-            <a-input v-model:value="formState.value4" />
-          </a-form-item>
-        </div>
+        <a-form-item>
+          <a-button
+            type="dashed"
+            class="add-record-button"
+            @click="addRecord"
+            size="large"
+          >
+            <PlusOutlined />
+            点击增加项目成员
+          </a-button>
+        </a-form-item>
       </a-form>
     </Modal>
   </div>
@@ -91,7 +103,12 @@ import {
   toRaw,
   watchEffect,
 } from "vue";
+import {
+  RuleObject,
+  ValidateErrorEntity,
+} from "ant-design-vue/es/form/interface";
 import aIcon from "@/components/aicon/aicon.vue";
+import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 import { getR1UnfinishedList, getAllR1R2R3Users } from "@/api/display";
@@ -134,16 +151,12 @@ interface Member {
   userId: string;
   displayName: string;
 }
-interface FormState {
-  label1: string;
-  member1: string;
-  value1: string;
-  member2?: string;
-  value2?: string;
-  member3?: string;
-  value3?: string;
-  member4?: string;
-  value4?: string;
+
+interface PeopleAndProductRecord {
+  peopleLabel: string;
+  peopleValue: string;
+  productLabel: string;
+  productValue: number;
 }
 
 export default defineComponent({
@@ -151,56 +164,62 @@ export default defineComponent({
   components: {
     aIcon,
     Modal,
+    PlusOutlined,
+    MinusCircleOutlined,
   },
   data() {
     return {
       columns,
     };
   },
+
   setup(props, context) {
     const addModal = ref();
     const visible = ref<boolean>(false);
+    const noPeopleSelectedError = ref<boolean>(false);
     const confirmLoading = ref<boolean>(false);
     const state = reactive({
       taskList: [],
-      candidates: []
+      candidates: [],
     });
-    
-    const formState: UnwrapRef<FormState> = reactive({
-      label1:"",
-      member1: "",
-      value1: "",
-      member2: "",
-      value2: "",
-      member3: "",
-      value3: "",
-      member4: "",
-      value4: "",
+    const formRef = ref();
+    const dynamicForm: UnwrapRef<{
+      records: PeopleAndProductRecord[];
+    }> = reactive({
+      records: [
+        {
+          peopleLabel: "项目成员",
+          peopleValue: "",
+          productLabel: "建议产值比例",
+          productValue: 100,
+        },
+      ],
     });
 
     const fetchData = async () => {
       const data = await getR1UnfinishedList(20).then(
         (response) => response.data.data
       );
-     
+
       state.taskList = data;
     };
 
     const fetchCandidates = async () => {
-      const candidates = await getAllR1R2R3Users().then((response) => response.data.data)
-      const options = candidates.map(item => {
-        let tmp = {}
-        tmp['value'] = item['id']
-        tmp['label'] = item['displayName']
-        return tmp
-      })
-      state.candidates = options
-      console.log("---allr1r2r3")
-      console.dir(state.candidates)
-
-    }
+      const candidates = await getAllR1R2R3Users().then(
+        (response) => response.data.data
+      );
+      const options = candidates.map((item) => {
+        let tmp = {};
+        tmp["value"] = item["id"];
+        tmp["label"] = item["displayName"];
+        return tmp;
+      });
+      state.candidates = options;
+      console.log("---allr1r2r3");
+      console.dir(state.candidates);
+    };
     onMounted(() => {
-      fetchCandidates()
+      fetchCandidates();
       watchEffect(() => {
         fetchData();
       });
@@ -215,19 +234,72 @@ export default defineComponent({
       visible.value = false;
     };
 
+    const checkForDuplicates = (array) => {
+      return new Set(array).size !== array.length;
+    };
+
     const onSubmitForm = () => {
-      visible.value = false;
-      console.log("submit!", toRaw(formState));
+      // visible.value = false;
+      const records = toRaw(dynamicForm).records;
+      let sum = 0;
+      const peoples = records.map((item) => item.peopleValue);
+      const isDuplicates = checkForDuplicates(peoples);
+      let isError = 0;
+      if (isDuplicates) {
+        isError += 1;
+        antModal.error({
+          title: "项目成员不可以相同",
+        });
+        return;
+      }
+      records.forEach((element) => {
+        if (element.peopleValue === "") {
+          antModal.error({
+            title: "请选择一位项目成员",
+          });
+          isError += 1;
+          return;
+        } else if (
+          !element.productValue ||
+          element.productValue < 0 ||
+          element.productValue > 100 ||
+          !Number.isInteger(element.productValue)
+        ) {
+          isError += 1;
+          antModal.error({
+            title: "产值比例建议填写错误",
+            content: "产值比例建议需要为0到100的正整数",
+          });
+          return;
+        } else {
+          sum += element.productValue;
+        }
+      });
+
+      if (sum !== 100) {
+        console.log(sum)
+        isError += 1;
+        antModal.error({
+          title: "所有成员的产值比例之和必须刚好是100",
+        });
+        return;
+      }
+
+      if (isError === 0) {
+        antModal.success({
+          title: "填写成功，正在上传数据中",
+        });
+        // TODO 构造参数 发送请求
+        visible.value = false;
+      }
+      console.log("submit!", toRaw(dynamicForm));
     };
 
     const onCancel = () => {
       visible.value = false;
-    }
+    };
 
     const filterOption = (input: string, option: any) => {
-      console.log('--input')
-      console.log(input)
-      console.log(option.value)
       return option.label.indexOf(input) >= 0;
     };
 
@@ -244,11 +316,60 @@ export default defineComponent({
       "10": "党建工作",
     };
 
-   
+    const addRecord = () => {
+      dynamicForm.records.push({
+        peopleLabel: "项目成员",
+        peopleValue: "",
+        productLabel: "建议产值比例",
+        productValue: 100,
+      });
+    };
+
+    const removeRecord = (item: PeopleAndProductRecord) => {
+      let index = dynamicForm.records.indexOf(item);
+      if (index !== -1) {
+        dynamicForm.records.splice(index, 1);
+      }
+    };
+
+    // let checkProductValue = async (rule: RuleObject, value: number) => {
+    //   console.log("fuck");
+    //   console.log(value);
+    //   if (!value) {
+    //     return Promise.reject("请输入一个0到100的数字");
+    //   }
+    //   if (!Number.isInteger(value)) {
+    //     return Promise.reject("请输入整数");
+    //   }
+    //   if (value < 0) {
+    //     return Promise.reject("请输入正数");
+    //   }
+    //   if (value > 100) {
+    //     return Promise.reject("请输入小于等于100的正整数");
+    //   }
+    //   return Promise.resolve();
+    // };
+
+    // const rules = {
+    //   peopleValue: [
+    //     {
+    //       required: true,
+    //       message: "必须选择一位成员",
+    //       trigger: "change",
+    //     },
+    //   ],
+    //   productValue: [
+    //     {
+    //       required: true,
+    //       message: "必须填写一个0到100的正整数",
+    //       validator: checkProductValue,
+    //       trigger: "change",
+    //     },
+    //   ],
+    // };
 
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
-      formState,
       typeMap,
       state,
       confirmLoading,
@@ -258,7 +379,12 @@ export default defineComponent({
       addSubmit,
       onSubmitForm,
       filterOption,
-      onCancel
+      onCancel,
+      dynamicForm,
+      addRecord,
+      removeRecord,
+      // rules,
+      formRef,
     };
   },
 });
@@ -282,5 +408,9 @@ export default defineComponent({
 .line-wrapper {
   display: flex;
   justify-content: center;
+}
+
+.add-record-button {
+  width: 100%;
 }
 </style>
