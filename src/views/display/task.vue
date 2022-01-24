@@ -186,6 +186,7 @@ export default defineComponent({
     const state = reactive({
       taskList: [],
       candidates: [],
+      userIdToNameMap: {},
       processId:'',
       taskId:''
     });
@@ -223,6 +224,13 @@ export default defineComponent({
         return tmp;
       });
       state.candidates = options;
+      const idNameMap = candidates.reduce((accumulator, currentValue)=>{
+        let id = currentValue['id']
+        let name = currentValue['displayName']
+        accumulator[id] = name
+        return accumulator
+      },{})
+      state.userIdToNameMap = idNameMap
       console.log("---allr1r2r3");
       console.dir(state.candidates);
     };
@@ -301,13 +309,30 @@ export default defineComponent({
         });
         // TODO 构造参数 发送请求
         confirmLoading.value = true;
-        console.log('看看参数')
-        console.log(state.processId)
-        console.log(state.taskId)
+   
+
+        let params = buildParam(toRaw(state.candidates), records, state.processId, state.taskId)
+      
         visible.value = false;
       }
       console.log("submit!", toRaw(dynamicForm));
     };
+
+    const buildParam = (candidates, records, processId, taskId) => {
+      const param = {}
+      param['processId'] = processId
+      param['taskId'] = taskId
+     
+      const data = records.map(item => {
+        let temp = {}
+        temp['userId'] = item.peopleValue
+        temp['percentage'] = item.productValue
+        temp['displayName'] = toRaw(state.userIdToNameMap)[item.peopleValue]
+        return temp
+      })
+      param['data'] = data
+      return param
+    }
 
     const onCancel = () => {
       visible.value = false;
