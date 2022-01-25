@@ -1,6 +1,8 @@
 <template>
   <div class="issue__container">
-    <a-button type="primary" size="large">点击新建任务</a-button>
+    <a-button type="primary" size="large" @click="createNewProject"
+      >点击新建任务</a-button
+    >
     <div class="table-wrapper">
       <div class="tableWithData" v-if="state.taskList.length > 0">
         <a-table
@@ -10,22 +12,22 @@
         >
           <template #action="{ record }">
             <span v-if="record.activityName === 'R2/R1填写产值分配建议'">
-              <a @click="() => addAdvice(record.processId, record.taskId)"
-                >点击上传产值比例建议</a
-              >
+              <a @click="() => addAdvice(record.processId, record.taskId)">
+                点击上传产值比例建议
+              </a>
               <a-divider type="vertical" />
               <a @click="() => rollback(record)">退回到上一节点</a>
               <a-divider type="vertical" />
             </span>
             <span v-if="record.activityName === 'R2上传任务'">
               <a href="">点击重新上传任务</a>
-               <a-divider type="vertical" />
+              <a-divider type="vertical" />
             </span>
 
             <span>
-              <a @click="() => checkHistory(record.processId)"
-                >查看当前流程情况</a
-              >
+              <a @click="() => checkHistory(record.processId)">
+                查看当前流程情况
+              </a>
             </span>
           </template>
           <template #type="{ record }">
@@ -131,6 +133,52 @@
         </a-form-item>
       </a-form>
     </Modal>
+
+    <Modal
+      ref="createProject"
+      title="创建新任务"
+      v-model:visible="showNewProject"
+      @ok="createProjectOk"
+    >
+      <a-form ref="formRef3" :model="newFormState" :rules="projectRules">
+        <a-form-item name="name" label="项目名称">
+          <a-input v-model:value="newFormState.name" />
+        </a-form-item>
+        <a-form-item name="type" label="项目类型">
+          <a-select
+            v-model:value="newFormState.type"
+            show-search
+            :options="typeOptions"
+            :filterOption="filterOption"
+          />
+        </a-form-item>
+        <a-form-item name="number" label="项目编号">
+          <a-input v-model:value="newFormState.number" />
+        </a-form-item>
+        <a-form-item name="nextAssignee" label="指定谁填写产值比例">
+          <a-select
+            v-model:value="newFormState.nextAssignee"
+            show-search
+            :options="state.candidates"
+            :filterOption="filterOption"
+          />
+        </a-form-item>
+        <a-form-item name="file" label="上传附件">
+          <a-upload
+            :file-list="newFormState.fileList"
+            :remove="handleRemove"
+            :before-upload="beforeUpload"
+            @change="fileUploadChange"
+          >
+            <a-button>
+              <upload-outlined></upload-outlined>
+              点击上传附件
+            </a-button>
+          </a-upload>
+        </a-form-item>
+         <a-button style="margin-left: 10px" @click="resetProjectForm">重置数据</a-button>
+      </a-form>
+    </Modal>
   </div>
 </template>
 <script lang="ts">
@@ -147,6 +195,8 @@ import {
   RuleObject,
   ValidateErrorEntity,
 } from "ant-design-vue/es/form/interface";
+import { UploadOutlined } from "@ant-design/icons-vue";
+import { SelectTypes } from "ant-design-vue/es/select";
 import aIcon from "@/components/aicon/aicon.vue";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
@@ -157,9 +207,10 @@ import {
   fillOutputValue,
   checkHistoryRequest,
   rollbackRequest,
+  startProcess,
+  generateNewProject
 } from "@/api/display";
-import { typeMap } from "@/utils/config";
-
+import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 const columns = [
   {
     title: "任务名",
@@ -213,6 +264,29 @@ interface PeopleAndProductRecord {
 interface CommentForm {
   comment: string | undefined;
 }
+
+interface newFormState {
+  name: string;
+  number: string;
+  type: string;
+  fileList: [];
+  taskId: string;
+  processId: string;
+  nextAssignee: string;
+}
+
+interface FileItem {
+  uid: string;
+  name?: string;
+  status?: string;
+  response?: Response;
+  url: string;
+}
+
+interface FileInfo {
+  file: FileItem;
+  fileList: FileItem[];
+}
 export default defineComponent({
   name: "issue",
   components: {
@@ -220,6 +294,7 @@ export default defineComponent({
     Modal,
     PlusOutlined,
     MinusCircleOutlined,
+    UploadOutlined,
   },
   data() {
     return {
@@ -236,6 +311,8 @@ export default defineComponent({
     const historyLoading = ref<boolean>(false);
     const showRollback = ref<boolean>(false);
     const confirmLoading2 = ref<boolean>(false);
+    const showNewProject = ref<boolean>(false);
+    const formRef3 = ref();
     const state = reactive({
       taskList: [],
       candidates: [],
@@ -244,9 +321,21 @@ export default defineComponent({
       taskId: "",
       historyData: [],
       currentRollbackRecord: {},
+      newProcessId: "",
+      newTaskId: "",
     });
     const commentForm: UnwrapRef<CommentForm> = reactive({
       comment: "",
+    });
+
+    const newFormState: UnwrapRef<newFormState> = reactive({
+      name: "",
+      number: "",
+      type: "",
+      fileList: [],
+      taskId: "",
+      processId: "",
+      nextAssignee: "",
     });
     const formRef = ref();
     const dynamicForm: UnwrapRef<{
@@ -285,8 +374,12 @@ export default defineComponent({
       },
     ];
 
+    const typeOptions = TYPE_OPTIONS;
+    console.log("typeOptions");
+    console.dir(typeOptions);
+
     const fetchData = async () => {
-      const data = await getR2AllList(20).then(
+      const data = await getR2AllList().then(
         (response) => response.data.data.unfinished
       );
 
@@ -521,41 +614,99 @@ export default defineComponent({
           });
         });
     };
-    // let checkProductValue = async (rule: RuleObject, value: number) => {
-    //   console.log("fuck");
-    //   console.log(value);
-    //   if (!value) {
-    //     return Promise.reject("请输入一个0到100的数字");
-    //   }
-    //   if (!Number.isInteger(value)) {
-    //     return Promise.reject("请输入整数");
-    //   }
-    //   if (value < 0) {
-    //     return Promise.reject("请输入正数");
-    //   }
-    //   if (value > 100) {
-    //     return Promise.reject("请输入小于等于100的正整数");
-    //   }
-    //   return Promise.resolve();
-    // };
 
-    // const rules = {
-    //   peopleValue: [
-    //     {
-    //       required: true,
-    //       message: "必须选择一位成员",
-    //       trigger: "change",
-    //     },
-    //   ],
-    //   productValue: [
-    //     {
-    //       required: true,
-    //       message: "必须填写一个0到100的正整数",
-    //       validator: checkProductValue,
-    //       trigger: "change",
-    //     },
-    //   ],
-    // };
+    const createNewProject = () => {
+      showNewProject.value = true;
+      startProcess()
+        .then((response) => {
+          const data = response.data.data;
+          state.newProcessId = data.processId;
+          state.newTaskId = data["taskId"];
+        })
+        .catch((err) => {
+          console.log(err);
+          antModal.error({
+            title: "创建流程失败",
+          });
+        });
+    };
+
+    const createProjectOk = () => {
+      console.log("表单数据");
+      console.dir(formRef3.value);
+      const formData = toRaw(newFormState);
+      console.dir(formData);
+      formRef3.value
+        .validate()
+        .then(() => {
+          if(formData['nextAssignee'] === ''){
+            antModal.error({
+            title: "必须指定用户填写产值比例",
+          });
+            return 
+          }
+          showNewProject.value = false;
+      
+          const params = {};
+          params["processId"] = state.newProcessId;
+          params["taskId"] = state.newTaskId;
+          params["nextAssignee"] = formData.nextAssignee;
+          params["name"] = formData.name;
+          params["number"] = formData.number;
+          params["type"] = formData.type;
+          params["file"] =
+            formData["fileList"].length > 0 ? formData["fileList"][0].originFileObj : null;
+          console.log("拼接参数");
+          console.dir(params);
+
+          generateNewProject(params).then(()=>{
+            message.success("创建项目成功")
+            fetchData()
+          }).catch((err)=>{
+            console.log(err)
+            message.error("创建项目失败")
+          })
+        })
+        .catch((error) => {
+          console.log("error", error);
+        });
+    };
+
+    const handleRemove = (file) => {
+      const index = newFormState.fileList.indexOf(file);
+      const newFileList = newFormState.fileList.slice();
+      newFileList.splice(index, 1);
+      newFormState.fileList = newFileList;
+    };
+
+    const beforeUpload = (file) => {
+      newFormState.fileList = [...newFormState.fileList, file];
+      return false;
+    };
+
+    const fileUploadChange = (param) => {
+      const changedFileList = param.fileList.slice(-1);
+      newFormState.fileList = changedFileList;
+    };
+
+    const projectRules = {
+      name: [{ required: true, message: "请填写项目名称", trigger: "blur" }],
+      number: [
+        { required: true, message: "请填写任务书编号", trigger: "blur" },
+      ],
+      type: [{ required: true, message: "请选择项目类型", trigger: "change" }],
+      // nextAssignee: [
+      //   {
+      //     required: true,
+      //     message: "请指定由谁填写产值比例",
+      //     trigger: "change",
+      //   },
+      // ],
+    };
+   
+   const resetProjectForm = () => {
+      formRef3.value.resetFields();
+   }
 
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
@@ -583,6 +734,17 @@ export default defineComponent({
       rollbackOk,
       commentForm,
       confirmLoading2,
+      showNewProject,
+      createNewProject,
+      createProjectOk,
+      newFormState,
+      typeOptions,
+      handleRemove,
+      beforeUpload,
+      fileUploadChange,
+      projectRules,
+      formRef3,
+      resetProjectForm
     };
   },
 });

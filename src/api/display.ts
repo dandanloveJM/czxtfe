@@ -1,4 +1,4 @@
-import { request } from "../request";
+import { request, requestWithMultipart } from "../request";
 import { AxiosResponse } from "axios";
 import { R1UnfinishedList, AllR1R2R3Users } from "@/types/api/display";
 import { ResponseData } from "@/types/api/public";
@@ -82,5 +82,27 @@ export const getR2AllList = () => {
   return request({
     url: "http://localhost:8080/R2/Projects",
     method: "get",
+  });
+}
+
+export const startProcess = () => {
+  return request({
+    url: "http://localhost:8080/start",
+    method: "get",
+  })
+}
+
+export const generateNewProject = (params) => {
+  let data = new FormData()
+  for (const key in params) {
+    if (params.hasOwnProperty(key)) {
+      data.append(key, params[key])      
+    }
+  }
+
+  return requestWithMultipart({
+    url: "http://localhost:8080/uploadTaskInfo",
+    method: "post",
+    data: data
   });
 }

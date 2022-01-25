@@ -19,6 +19,15 @@ export const request = axios.create({
   timeout: 60000000
 })
 
+export const requestWithMultipart = axios.create({
+  baseURL: import.meta.env.VITE_REQUEST_BASE_URL as string,
+  // baseURL: "http://localhost:8080",
+  timeout: 60000000,
+  headers: {
+    'Content-Type': 'multipart/form-data'
+  }
+})
+
 export const requestWithCookie = axios.create({
   baseURL: import.meta.env.VITE_REQUEST_BASE_URL as string,
   timeout: 6000,
