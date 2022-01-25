@@ -125,3 +125,45 @@ export const r3Approve = (params) => {
     data: data,
   });
 };
+
+
+export const r4Approve = (params) => {
+  let data = new FormData();
+  for (const key in params) {
+    if (params.hasOwnProperty(key)) {
+      data.append(key, params[key]);
+    }
+  }
+
+  return requestWithMultipart({
+    url: "http://localhost:8080/r4/approveTask",
+    method: "post",
+    data: data,
+  });
+};
+
+
+export const getR4AllList = () => {
+  return request({
+    url: "http://localhost:8080/R4/Projects",
+    method: "get",
+  });
+};
+
+
+export const getTeamRank = () => {
+
+  return request({
+    url: "http://localhost:8080/teamRank",
+    method: "get",
+  });
+}
+
+export const getTeamBonus = () => {
+  
+  
+  return request({
+    url: "http://localhost:8080/teamBonus",
+    method: "get",
+  });
+}
