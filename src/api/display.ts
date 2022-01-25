@@ -22,14 +22,13 @@ export const getAllR1R2R3Users = (): ConfigType<AllR1R2R3Users> => {
   });
 };
 
-
 export const fillOutputValue = (params): ConfigType<AllR1R2R3Users> => {
   // console.log("axios看到的是啥啊")
   // console.dir(data)
-  let data = new FormData()
+  let data = new FormData();
   for (const key in params) {
     if (params.hasOwnProperty(key)) {
-      data.append(key, params[key])      
+      data.append(key, params[key]);
     }
   }
 
@@ -38,71 +37,91 @@ export const fillOutputValue = (params): ConfigType<AllR1R2R3Users> => {
     method: "post",
     data: data,
   });
-}
-
+};
 
 export const checkHistoryRequest = (param) => {
   return request({
     url: "http://localhost:8080/history/list",
     method: "get",
-    params:{"processId": param}
+    params: { processId: param },
   });
-}
-
+};
 
 export const rollbackRequest = (params) => {
-  let data = new FormData()
+  let data = new FormData();
   for (const key in params) {
     if (params.hasOwnProperty(key)) {
-      data.append(key, params[key])      
+      data.append(key, params[key]);
     }
   }
   return request({
     url: "http://localhost:8080/reject",
     method: "post",
-    data: data
+    data: data,
   });
-}
+};
 
 export const getR1FinishedList = () => {
   return request({
     url: "http://localhost:8080/R1/displayFinishedProjects",
     method: "get",
   });
-}
+};
 
 export const getAllUserRank = () => {
   return request({
     url: "http://localhost:8080/userRank",
     method: "get",
   });
-}
+};
 
 export const getR2AllList = () => {
   return request({
     url: "http://localhost:8080/R2/Projects",
     method: "get",
   });
-}
+};
 
 export const startProcess = () => {
   return request({
     url: "http://localhost:8080/start",
     method: "get",
-  })
-}
+  });
+};
 
 export const generateNewProject = (params) => {
-  let data = new FormData()
+  let data = new FormData();
   for (const key in params) {
     if (params.hasOwnProperty(key)) {
-      data.append(key, params[key])      
+      data.append(key, params[key]);
     }
   }
 
   return requestWithMultipart({
     url: "http://localhost:8080/uploadTaskInfo",
     method: "post",
-    data: data
+    data: data,
   });
-}
+};
+
+export const getR3AllList = () => {
+  return request({
+    url: "http://localhost:8080/R3/Projects",
+    method: "get",
+  });
+};
+
+export const r3Approve = (params) => {
+  let data = new FormData();
+  for (const key in params) {
+    if (params.hasOwnProperty(key)) {
+      data.append(key, params[key]);
+    }
+  }
+
+  return requestWithMultipart({
+    url: "http://localhost:8080/r3/approveTask",
+    method: "post",
+    data: data,
+  });
+};
