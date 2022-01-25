@@ -28,6 +28,10 @@
               >
             </span>
           </template>
+
+          <template #updatedAt="{ record }">
+            <span>{{ changeTime(record.updatedAt) }}</span>
+          </template>
           <template #type="{ record }">
             <span>{{ typeMap[record.type] }}</span>
           </template>
@@ -158,7 +162,7 @@ import {
   checkHistoryRequest,
   rollbackRequest,
 } from "@/api/display";
-import {typeMap} from "@/utils/config";
+import { typeMap } from "@/utils/config";
 
 const columns = [
   {
@@ -176,9 +180,9 @@ const columns = [
     slots: { customRender: "type" },
     key: "type",
   },
-   {
+  {
     title: "上传任务时间",
-    dataIndex: "updatedAt",
+    slots: { customRender: "updatedAt" },
     key: "updatedAt",
   },
   {
@@ -224,7 +228,7 @@ export default defineComponent({
   data() {
     return {
       columns,
-      typeMap
+      typeMap,
     };
   },
 
@@ -403,7 +407,7 @@ export default defineComponent({
               antModal.success({
                 title: "数据上传成功",
               });
-              fetchData()
+              fetchData();
             } else {
               antModal.error({
                 title: "程序异常",
@@ -443,8 +447,6 @@ export default defineComponent({
     const filterOption = (input: string, option: any) => {
       return option.label.indexOf(input) >= 0;
     };
-
-    
 
     const addRecord = () => {
       dynamicForm.records.push({
@@ -511,12 +513,12 @@ export default defineComponent({
             title: "退回成功",
           });
           confirmLoading2.value = false;
-          fetchData()
+          fetchData();
 
           showRollback.value = false;
         })
         .catch((err) => {
-          console.log(err)
+          console.log(err);
           confirmLoading2.value = false;
           antModal.error({
             title: "程序异常",
@@ -558,7 +560,9 @@ export default defineComponent({
     //     },
     //   ],
     // };
-
+    const changeTime = (time) => {
+      return moment(time).add(8, "hours").format("lll");
+    };
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
       state,
@@ -585,6 +589,7 @@ export default defineComponent({
       rollbackOk,
       commentForm,
       confirmLoading2,
+      changeTime,
     };
   },
 });

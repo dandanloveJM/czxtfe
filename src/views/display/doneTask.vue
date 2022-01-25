@@ -5,16 +5,19 @@
         <a-table
           :columns="columns"
           :data-source="state.taskList"
-          :rowKey="record => record.processId"
+          :rowKey="(record) => record.processId"
         >
           <template #type="{ record }">
             <span>{{ TYPE_MAP[record.type] }}</span>
           </template>
+          <template #updatedAt="{ record }">
+            <span>{{ changeTime(record.updatedAt) }}</span>
+          </template>
           <template #totalPercentage="{ record }">
-            <span>{{ record.totalPercentage + '%' }}</span>
+            <span>{{ record.totalPercentage + "%" }}</span>
           </template>
           <template #percentage="{ record }">
-            <span>{{ record.percentage + '%' }}</span>
+            <span>{{ record.percentage + "%" }}</span>
           </template>
         </a-table>
       </div>
@@ -37,6 +40,7 @@ import {
 } from "vue";
 import { typeMap } from "@/utils/config";
 import { getR1FinishedList } from "@/api/display";
+import moment from "moment";
 
 export default defineComponent({
   name: "el_done",
@@ -50,7 +54,6 @@ export default defineComponent({
     });
 
     const columns = [
-
       {
         title: "任务名",
         dataIndex: "name",
@@ -68,7 +71,7 @@ export default defineComponent({
       },
       {
         title: "完成时间",
-        dataIndex: "updatedAt",
+        slots: { customRender: "updatedAt" },
         key: "updatedAt",
       },
       {
@@ -103,7 +106,7 @@ export default defineComponent({
 
       const doneTaskList = data.map((item) => {
         let temp = {};
-        temp["processId"] = item.processId
+        temp["processId"] = item.processId;
         temp["name"] = item.project.name;
         temp["number"] = item.project.number;
         temp["type"] = item.project.type;
@@ -118,6 +121,10 @@ export default defineComponent({
       state.taskList = doneTaskList;
     };
 
+    const changeTime = (time) => {
+      return moment(time).add(8, "hours").format("lll");
+    };
+
     onMounted(() => {
       watchEffect(() => {
         fetchData();
@@ -127,7 +134,8 @@ export default defineComponent({
     return {
       TYPE_MAP,
       state,
-      columns
+      columns,
+      changeTime,
     };
   },
 });

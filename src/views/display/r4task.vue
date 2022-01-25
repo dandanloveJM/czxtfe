@@ -7,9 +7,10 @@
           :data-source="state.taskList"
           :rowKey="(record) => record.processId"
         >
+          <template #updatedAt="{ record }">
+            <span>{{ changeTime(record.updatedAt) }}</span>
+          </template>
           <template #action="{ record }">
-           
-
             <span v-if="record.activityName === 'R4审核'">
               <a
                 @click="
@@ -135,7 +136,7 @@
 
       <div class="button-wrapper">
         <div class="reject-button">
-              <a-button @click="() => rollbackTo('R3check')"
+          <a-button @click="() => rollbackTo('R3check')"
             >退回，室主任重新审核</a-button
           >
           <a-button @click="() => rollbackTo('fillNumbers')"
@@ -144,7 +145,6 @@
           <a-button @click="() => rollbackTo('uploadTask')"
             >退回，重新上传任务</a-button
           >
-          
         </div>
         <div class="agree">
           <a-button @click="() => agreeTo()" type="primary">审核通过</a-button>
@@ -184,6 +184,7 @@ import {
   r4Approve,
 } from "@/api/display";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
+import moment from "moment";
 const columns = [
   {
     title: "任务名",
@@ -202,7 +203,7 @@ const columns = [
   },
   {
     title: "上传任务时间",
-    dataIndex: "updatedAt",
+    slots: { customRender: "updatedAt" },
     key: "updatedAt",
   },
   {
@@ -402,9 +403,6 @@ export default defineComponent({
       return new Set(array).size !== array.length;
     };
 
-
-
-
     const onCancel = () => {
       visible.value = false;
     };
@@ -506,14 +504,14 @@ export default defineComponent({
       params["targetKey"] = targetKey;
       params["comment"] = toRaw(commentForm).comment || "";
 
-      commentForm.comment = ''
+      commentForm.comment = "";
 
       rollbackRequest(params)
         .then((response) => {
           antModal.success({
             title: "退回成功",
           });
-           fetchData();
+          fetchData();
 
           showCheck.value = false;
           state.checkProcessId = "";
@@ -533,15 +531,15 @@ export default defineComponent({
       params["taskId"] = state.checkTaskId;
       params["comment"] = toRaw(commentForm).comment || "";
 
-      commentForm.comment = ''
+      commentForm.comment = "";
 
       r4Approve(params)
         .then((response) => {
           antModal.success({
             title: "审核通过成功",
           });
-           fetchData();
-           
+          fetchData();
+
           showCheck.value = false;
           state.checkProcessId = "";
           state.checkTaskId = "";
@@ -553,7 +551,9 @@ export default defineComponent({
           });
         });
     };
-
+    const changeTime = (time) => {
+      return moment(time).add(8, "hours").format("lll");
+    };
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
       state,
@@ -562,7 +562,7 @@ export default defineComponent({
       addModal,
       addAdvice,
       addSubmit,
-    
+
       filterOption,
       onCancel,
       dynamicForm,
@@ -588,7 +588,7 @@ export default defineComponent({
       check,
       rollbackTo,
       agreeTo,
-
+      changeTime,
     };
   },
 });

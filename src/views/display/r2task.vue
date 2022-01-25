@@ -36,6 +36,9 @@
           <template #type="{ record }">
             <span>{{ typeMap[record.type] }}</span>
           </template>
+          <template #updatedAt="{ record }">
+            <span>{{ changeTime(record.updatedAt) }}</span>
+          </template>
           <template #attachment="{ record }">
             <a :href="record.attachment">点击查看附件</a>
           </template>
@@ -216,6 +219,8 @@ import {
   generateNewProject,
 } from "@/api/display";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
+import moment from "moment";
+
 const columns = [
   {
     title: "任务名",
@@ -234,7 +239,7 @@ const columns = [
   },
   {
     title: "上传任务时间",
-    dataIndex: "updatedAt",
+    slots: { customRender: "updatedAt" },
     key: "updatedAt",
   },
   {
@@ -727,6 +732,9 @@ export default defineComponent({
       formRef3.value.resetFields();
     };
 
+    const changeTime = (time) => {
+      return moment(time).add(8, 'hours').format('lll')
+    };
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
       state,
@@ -765,6 +773,7 @@ export default defineComponent({
       formRef3,
       resetProjectForm,
       reuploadProjects,
+      changeTime
     };
   },
 });

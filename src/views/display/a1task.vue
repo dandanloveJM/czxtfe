@@ -7,23 +7,20 @@
           :data-source="state.taskList"
           :rowKey="(record) => record.processId"
         >
-         <template #updatedAt="{ record }">
-            <span>{{ changeTime(record.updatedAt) }}</span>
-          </template>
           <template #action="{ record }">
-            <span v-if="record.activityName === 'R2/R1填写产值分配建议'">
-              <a @click="() => addAdvice(record.processId, record.taskId)">
-                点击上传产值比例建议
-              </a>
+            <span v-if="record.activityName === 'A1填写产值'">
+              <a @click="() => setValue(record.processId, record.taskId)"
+                >赋予总产值及完成比例</a
+              >
               <a-divider type="vertical" />
             </span>
 
-            <span v-if="record.activityName === 'R3审核'">
+            <span>
               <a
                 @click="
                   () => check(record.processId, record.taskId, record.products)
                 "
-                >点击审核</a
+                >点击审核退回</a
               >
               <a-divider type="vertical" />
             </span>
@@ -34,6 +31,11 @@
               </a>
             </span>
           </template>
+
+          <template #updatedAt="{ record }">
+            <span>{{ changeTime(record.updatedAt) }}</span>
+          </template>
+
           <template #type="{ record }">
             <span>{{ typeMap[record.type] }}</span>
           </template>
@@ -46,64 +48,6 @@
         <a-empty />
       </div>
     </div>
-
-    <Modal
-      ref="addModal"
-      title="填写产值比例建议"
-      @ok="onSubmitForm"
-      @cancel="onCancel"
-      v-model:visible="visible"
-      :confirm-loading="confirmLoading"
-    >
-      <a-form ref="formRef" :model="dynamicForm" :label-col="labelCol">
-        <div
-          class="line-wrapper"
-          v-for="(record, index) in dynamicForm.records"
-          :key="index"
-        >
-          <a-form-item
-            :label="record.peopleLabel"
-            style="min-width: 45%"
-            name="peopleValue"
-          >
-            <a-select
-              v-model:value="record.peopleValue"
-              show-search
-              :options="state.candidates"
-              :filterOption="filterOption"
-            />
-          </a-form-item>
-          <a-form-item
-            name="productValue"
-            ref="productValue"
-            :label="record.productLabel"
-            style="min-width: 35%"
-          >
-            <a-input-number v-model:value="record.productValue" />
-          </a-form-item>
-          <a-button
-            danger
-            v-if="dynamicForm.records.length > 1"
-            class="dynamic-delete-button"
-            :disabled="dynamicForm.records.length === 1"
-            @click="removeRecord(record)"
-          >
-            删除
-          </a-button>
-        </div>
-        <a-form-item>
-          <a-button
-            type="dashed"
-            class="add-record-button"
-            @click="addRecord"
-            size="large"
-          >
-            <PlusOutlined />
-            点击增加项目成员
-          </a-button>
-        </a-form-item>
-      </a-form>
-    </Modal>
 
     <Modal
       ref="history"
@@ -143,6 +87,12 @@
 
       <div class="button-wrapper">
         <div class="reject-button">
+          <a-button @click="() => rollbackTo('R4check')"
+            >退回，分管领导重新审核</a-button
+          >
+          <a-button @click="() => rollbackTo('R3check')"
+            >退回，室主任重新审核</a-button
+          >
           <a-button @click="() => rollbackTo('fillNumbers')"
             >退回，重新填写产值比例</a-button
           >
@@ -150,10 +100,28 @@
             >退回，重新上传任务</a-button
           >
         </div>
-        <div class="agree">
-          <a-button @click="() => agreeTo()" type="primary">审核通过</a-button>
-        </div>
       </div>
+    </Modal>
+
+    <Modal
+      title="设置项目的总产值及完成比例"
+      v-model:visible="showModify"
+      @ok="resetOk"
+    >
+      <a-form ref="a1FormRef" :model="a1FormState">
+        <a-form-item name="total" label="项目总产值">
+          <a-input-number v-model:value="a1FormState.total" />
+        </a-form-item>
+        <a-form-item name="ratio" label="完成比例">
+          <a-input-number
+            v-model:value="a1FormState.ratio"
+            :min="0"
+            :max="100"
+            :formatter="(value) => `${value}%`"
+            :parser="(value) => value.replace('%', '')"
+          /><span>填写0-100的正整数</span>
+        </a-form-item>
+      </a-form>
     </Modal>
   </div>
 </template>
@@ -178,18 +146,17 @@ import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 import {
-  getR3AllList,
+  getA1Data,
   getAllR1R2R3Users,
   fillOutputValue,
   checkHistoryRequest,
   rollbackRequest,
   startProcess,
   generateNewProject,
-  r3Approve,
+  a1SetProduct,
 } from "@/api/display";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 import moment from "moment";
-
 
 const columns = [
   {
@@ -209,7 +176,7 @@ const columns = [
   },
   {
     title: "上传任务时间",
-         slots: { customRender: "updatedAt" },
+    slots: { customRender: "updatedAt" },
     key: "updatedAt",
   },
   {
@@ -305,9 +272,18 @@ export default defineComponent({
       checkProcessId: "",
       checkTaskId: "",
       products: [],
+      currentProcessId: "",
+      currentTaskId: "",
     });
     const commentForm: UnwrapRef<CommentForm> = reactive({
       comment: "",
+    });
+
+    const showModify = ref<boolean>(false);
+    const a1FormRef = ref();
+    const a1FormState: UnwrapRef<A1FormState> = reactive({
+      total: 0,
+      ratio: 100,
     });
 
     const newFormState: UnwrapRef<newFormState> = reactive({
@@ -361,34 +337,14 @@ export default defineComponent({
     console.dir(typeOptions);
 
     const fetchData = async () => {
-      const data = await getR3AllList().then(
+      const data = await getA1Data().then(
         (response) => response.data.data.unfinished
       );
 
       state.taskList = data;
     };
 
-    const fetchCandidates = async () => {
-      const candidates = await getAllR1R2R3Users().then(
-        (response) => response.data.data
-      );
-      const options = candidates.map((item) => {
-        let tmp = {};
-        tmp["value"] = item["id"];
-        tmp["label"] = item["displayName"];
-        return tmp;
-      });
-      state.candidates = options;
-      const idNameMap = candidates.reduce((accumulator, currentValue) => {
-        let id = currentValue["id"];
-        let name = currentValue["displayName"];
-        accumulator[id] = name;
-        return accumulator;
-      }, {});
-      state.userIdToNameMap = idNameMap;
-    };
     onMounted(() => {
-      fetchCandidates();
       watchEffect(() => {
         fetchData();
       });
@@ -409,130 +365,8 @@ export default defineComponent({
       return new Set(array).size !== array.length;
     };
 
-    const onSubmitForm = () => {
-      // visible.value = false;
-      const records = toRaw(dynamicForm).records;
-      let sum = 0;
-      const peoples = records.map((item) => item.peopleValue);
-      const isDuplicates = checkForDuplicates(peoples);
-      let isError = 0;
-      if (isDuplicates) {
-        isError += 1;
-        antModal.error({
-          title: "项目成员不可以相同",
-        });
-        return;
-      }
-      records.forEach((element) => {
-        if (element.peopleValue === "") {
-          antModal.error({
-            title: "请选择一位项目成员",
-          });
-          isError += 1;
-          return;
-        } else if (
-          !element.productValue ||
-          element.productValue < 0 ||
-          element.productValue > 100 ||
-          !Number.isInteger(element.productValue)
-        ) {
-          isError += 1;
-          antModal.error({
-            title: "产值比例建议填写错误",
-            content: "产值比例建议需要为0到100的正整数",
-          });
-          return;
-        } else {
-          sum += element.productValue;
-        }
-      });
-
-      if (sum !== 100) {
-        console.log(sum);
-        isError += 1;
-        antModal.error({
-          title: "所有成员的产值比例之和必须刚好是100",
-        });
-        return;
-      }
-
-      if (isError === 0) {
-        antModal.success({
-          title: "填写成功，正在上传数据中",
-        });
-        // TODO 构造参数 发送请求
-        confirmLoading.value = true;
-
-        let params = buildParam(
-          toRaw(state.candidates),
-          records,
-          state.processId,
-          state.taskId
-        );
-
-        fillOutputValue(params)
-          .then((response) => {
-            confirmLoading.value = false;
-            if (response.data.status === "ok") {
-              visible.value = false;
-              antModal.success({
-                title: "数据上传成功",
-              });
-              fetchData();
-            } else {
-              antModal.error({
-                title: "程序异常",
-              });
-            }
-          })
-          .catch((err) => {
-            confirmLoading.value = false;
-            antModal.error({
-              title: "程序异常",
-            });
-          });
-      }
-      console.log("submit!", toRaw(dynamicForm));
-    };
-
-    const buildParam = (candidates, records, processId, taskId) => {
-      const param = {};
-      param["processId"] = processId;
-      param["taskId"] = taskId;
-
-      const data = records.map((item) => {
-        let temp = {};
-        temp["userId"] = "" + item.peopleValue;
-        temp["percentage"] = "" + item.productValue;
-        temp["displayName"] = toRaw(state.userIdToNameMap)[item.peopleValue];
-        return temp;
-      });
-      param["data"] = JSON.stringify(data);
-      return param;
-    };
-
     const onCancel = () => {
       visible.value = false;
-    };
-
-    const filterOption = (input: string, option: any) => {
-      return option.label.indexOf(input) >= 0;
-    };
-
-    const addRecord = () => {
-      dynamicForm.records.push({
-        peopleLabel: "项目成员",
-        peopleValue: "",
-        productLabel: "建议产值比例",
-        productValue: 100,
-      });
-    };
-
-    const removeRecord = (item: PeopleAndProductRecord) => {
-      let index = dynamicForm.records.indexOf(item);
-      if (index !== -1) {
-        dynamicForm.records.splice(index, 1);
-      }
     };
 
     const checkHistory = (processId: string) => {
@@ -612,14 +446,14 @@ export default defineComponent({
       params["targetKey"] = targetKey;
       params["comment"] = toRaw(commentForm).comment || "";
 
-      commentForm.comment = ''
+      commentForm.comment = "";
 
       rollbackRequest(params)
         .then((response) => {
           antModal.success({
             title: "退回成功",
           });
-           fetchData();
+          fetchData();
 
           showCheck.value = false;
           state.checkProcessId = "";
@@ -633,24 +467,58 @@ export default defineComponent({
         });
     };
 
-    const agreeTo = () => {
+    // const agreeTo = () => {
+    //   const params = {};
+    //   params["processId"] = state.checkProcessId;
+    //   params["taskId"] = state.checkTaskId;
+    //   params["comment"] = toRaw(commentForm).comment || "";
+
+    //   commentForm.comment = "";
+
+    //   r4Approve(params)
+    //     .then((response) => {
+    //       antModal.success({
+    //         title: "审核通过成功",
+    //       });
+    //       fetchData();
+
+    //       showCheck.value = false;
+    //       state.checkProcessId = "";
+    //       state.checkTaskId = "";
+    //     })
+    //     .catch((err) => {
+    //       console.log(err);
+    //       antModal.error({
+    //         title: "程序异常",
+    //       });
+    //     });
+    // };
+
+    const setValue = (processId, taskId) => {
+      showModify.value = true;
+      state.currentProcessId = processId;
+      state.currentTaskId = taskId;
+    };
+
+    const resetOk = () => {
+      // 1. 拼接参数 ，发请求，1.关闭modal, 2. 清空state.products
       const params = {};
-      params["processId"] = state.checkProcessId;
-      params["taskId"] = state.checkTaskId;
-      params["comment"] = toRaw(commentForm).comment || "";
+      const a1FormState2 = toRaw(a1FormState);
+      params["processId"] = state.currentProcessId;
+      params["taskId"] = state.currentTaskId;
+      params["total"] = a1FormState2.total;
+      params["ratio"] = a1FormState2.ratio;
 
-      commentForm.comment = ''
-
-      r3Approve(params)
+      a1SetProduct(params)
         .then((response) => {
           antModal.success({
-            title: "审核通过成功",
+            title: "设置产值及比例成功",
           });
-           fetchData();
-           
-          showCheck.value = false;
-          state.checkProcessId = "";
-          state.checkTaskId = "";
+          fetchData();
+
+          showModify.value = false;
+          state.currentProcessId = "";
+          state.currentTaskId = "";
         })
         .catch((err) => {
           console.log(err);
@@ -659,9 +527,10 @@ export default defineComponent({
           });
         });
     };
- const changeTime = (time) => {
-      return moment(time).add(8, 'hours').format('lll')
+    const changeTime = (time) => {
+      return moment(time).add(8, "hours").format("lll");
     };
+
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
       state,
@@ -670,12 +539,10 @@ export default defineComponent({
       addModal,
       addAdvice,
       addSubmit,
-      onSubmitForm,
-      filterOption,
+
       onCancel,
       dynamicForm,
-      addRecord,
-      removeRecord,
+
       // rules,
       formRef,
       checkHistory,
@@ -695,9 +562,13 @@ export default defineComponent({
       productColumns,
       check,
       rollbackTo,
-      agreeTo,
-      changeTime
 
+      showModify,
+      resetOk,
+      setValue,
+      a1FormState,
+      a1FormRef,
+      changeTime,
     };
   },
 });

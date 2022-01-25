@@ -126,7 +126,6 @@ export const r3Approve = (params) => {
   });
 };
 
-
 export const r4Approve = (params) => {
   let data = new FormData();
   for (const key in params) {
@@ -142,7 +141,6 @@ export const r4Approve = (params) => {
   });
 };
 
-
 export const getR4AllList = () => {
   return request({
     url: "http://localhost:8080/R4/Projects",
@@ -150,20 +148,54 @@ export const getR4AllList = () => {
   });
 };
 
-
 export const getTeamRank = () => {
-
   return request({
     url: "http://localhost:8080/teamRank",
     method: "get",
   });
-}
+};
 
 export const getTeamBonus = () => {
-  
-  
   return request({
     url: "http://localhost:8080/teamBonus",
     method: "get",
+  });
+};
+
+export const getA1Data = () => {
+  return request({
+    url: "http://localhost:8080/A1/Projects",
+    method: "get",
+  });
+};
+
+export const a1SetProduct = (params) => {
+  let data = new FormData();
+  for (const key in params) {
+    if (params.hasOwnProperty(key)) {
+      data.append(key, params[key]);
+    }
+  }
+
+  return request({
+    url: "http://localhost:8080/fillValue",
+    method: "post",
+    data: data,
+  });
+};
+
+
+export const a1ModifyProduct = (params) => {
+  let data = new FormData();
+  for (const key in params) {
+    if (params.hasOwnProperty(key)) {
+      data.append(key, params[key]);
+    }
+  }
+
+  return request({
+    url: "http://localhost:8080/resetValue",
+    method: "post",
+    data: data,
   });
 }

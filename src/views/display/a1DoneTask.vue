@@ -7,11 +7,11 @@
           :data-source="state.taskList"
           :rowKey="(record) => record.processId"
         >
-          <template #updatedAt="{ record }">
-            <span>{{ changeTime(record.updatedAt) }}</span>
-          </template>
           <template #type="{ record }">
             <span>{{ TYPE_MAP[record.type] }}</span>
+          </template>
+          <template #updatedAt="{ record }">
+            <span>{{ changeTime(record.updatedAt) }}</span>
           </template>
           <template #totalPercentage="{ record }">
             <span>{{ record.totalPercentage + "%" }}</span>
@@ -19,6 +19,11 @@
           <template #products="{ record }">
             <a @click="() => showProducts(record.products)"
               >点击查看团队成员产值详情</a
+            >
+          </template>
+          <template #action="{ record }">
+            <a @click="() => modifyProducts(record.processId)"
+              >修改总产值及完成比例</a
             >
           </template>
         </a-table>
@@ -42,6 +47,27 @@
         </template>
       </a-table>
     </Modal>
+
+    <Modal
+      title="修改项目的总产值及完成比例"
+      v-model:visible="showModify"
+      @ok="resetOk"
+    >
+      <a-form ref="a1FormRef" :model="a1FormState">
+        <a-form-item name="total" label="项目总产值">
+          <a-input-number v-model:value="a1FormState.total" />
+        </a-form-item>
+        <a-form-item name="ratio" label="完成比例">
+          <a-input-number
+            v-model:value="a1FormState.ratio"
+            :min="0"
+            :max="100"
+            :formatter="(value) => `${value}%`"
+            :parser="(value) => value.replace('%', '')"
+          /><span>填写0-100的正整数</span>
+        </a-form-item>
+      </a-form>
+    </Modal>
   </div>
 </template>
 <script lang="ts">
@@ -56,10 +82,15 @@ import {
   watchEffect,
 } from "vue";
 import { typeMap } from "@/utils/config";
-import { getR4AllList } from "@/api/display";
+import { getA1Data, a1ModifyProduct } from "@/api/display";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 import moment from "moment";
+
+interface A1FormState {
+  total: number;
+  ratio: number;
+}
 
 export default defineComponent({
   name: "el_done",
@@ -73,8 +104,15 @@ export default defineComponent({
     const state = reactive({
       taskList: [],
       products: [],
+      currentProcessId: "",
     });
     const visible = ref<boolean>(false);
+    const showModify = ref<boolean>(false);
+    const a1FormRef = ref();
+    const a1FormState: UnwrapRef<A1FormState> = reactive({
+      total: 0,
+      ratio: 100,
+    });
 
     const columns = [
       {
@@ -112,6 +150,11 @@ export default defineComponent({
         slots: { customRender: "products" },
         key: "products",
       },
+      {
+        title: "操作",
+        key: "action",
+        slots: { customRender: "action" },
+      },
     ];
 
     const productColumns = [
@@ -133,7 +176,7 @@ export default defineComponent({
     ];
 
     const fetchData = async () => {
-      const data = await getR4AllList().then(
+      const data = await getA1Data().then(
         (response) => response.data.data.finished
       );
       if (data.length === 0) {
@@ -159,9 +202,41 @@ export default defineComponent({
       visible.value = false;
       state.products = [];
     };
+
+    const modifyProducts = (processId) => {
+      showModify.value = true;
+      state.currentProcessId = processId;
+    };
+    const resetOk = () => {
+      // 1. 拼接参数 ，发请求，1.关闭modal, 2. 清空state.products
+      const params = {};
+      const a1FormState2 = toRaw(a1FormState);
+      params["processId"] = state.currentProcessId;
+      params["total"] = a1FormState2.total;
+      params["ratio"] = a1FormState2.ratio;
+
+      a1ModifyProduct(params)
+        .then((response) => {
+          antModal.success({
+            title: "产值及比例修改成功",
+          });
+          fetchData();
+
+          showModify.value = false;
+          state.currentProcessId = "";
+        })
+        .catch((err) => {
+          console.log(err);
+          antModal.error({
+            title: "程序异常",
+          });
+        });
+    };
+
     const changeTime = (time) => {
       return moment(time).add(8, "hours").format("lll");
     };
+
     return {
       TYPE_MAP,
       state,
@@ -170,6 +245,11 @@ export default defineComponent({
       productsOk,
       showProducts,
       visible,
+      showModify,
+      resetOk,
+      modifyProducts,
+      a1FormState,
+      a1FormRef,
       changeTime,
     };
   },

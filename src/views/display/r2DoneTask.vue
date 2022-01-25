@@ -10,6 +10,9 @@
           <template #type="{ record }">
             <span>{{ TYPE_MAP[record.type] }}</span>
           </template>
+           <template #updatedAt="{ record }">
+            <span>{{ changeTime(record.updatedAt) }}</span>
+          </template>
           <template #totalPercentage="{ record }">
           <span>{{ record.totalPercentage + "%" }}</span>
         </template>
@@ -56,6 +59,7 @@ import { typeMap } from "@/utils/config";
 import { getR2AllList } from "@/api/display";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
+import moment from 'moment'
 
 export default defineComponent({
   name: "el_done",
@@ -88,7 +92,7 @@ export default defineComponent({
       },
       {
         title: "完成时间",
-        dataIndex: "updatedAt",
+       slots: { customRender: "updatedAt" },
         key: "updatedAt",
       },
       {
@@ -154,6 +158,9 @@ export default defineComponent({
       state.products = [];
     };
 
+const changeTime = (time) => {
+      return moment(time).add(8, 'hours').format('lll')
+    };
     return {
       TYPE_MAP,
       state,
@@ -162,6 +169,7 @@ export default defineComponent({
       productsOk,
       showProducts,
       visible,
+      changeTime
     };
   },
 });
