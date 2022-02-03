@@ -25,7 +25,7 @@ export default defineComponent({
     width: {
       type: [Number, String],
       required: false,
-      default: 900
+      default: 1000
     }
   },
   setup (props, context) {

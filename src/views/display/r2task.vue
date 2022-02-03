@@ -4,7 +4,7 @@
       >点击新建任务</a-button
     >
     <div class="table-wrapper">
-      <div class="tableWithData" v-if="state.taskList.length > 0">
+      <div class="tableWithData" v-if="state.taskList != null">
         <a-table
           :columns="columns"
           :data-source="state.taskList"
@@ -40,7 +40,13 @@
             <span>{{ changeTime(record.updatedAt) }}</span>
           </template>
           <template #attachment="{ record }">
-            <a :href="record.attachment">点击查看附件</a>
+            <img
+              :src="record.attachment"
+              style="width: 200px"
+              title="点击显示详情"
+              @click="() => showImg(record.attachment)"
+            />
+            <!-- <a :href="record.attachment">点击查看附件</a> -->
           </template>
         </a-table>
       </div>
@@ -187,6 +193,10 @@
         >
       </a-form>
     </Modal>
+
+    <Modal title="查看附件原图" v-model:visible="showPreview" width="1200" :footer="null">
+      <img :src="state.previewURL" style="max-width:1100px;" />
+    </Modal>
   </div>
 </template>
 <script lang="ts">
@@ -248,7 +258,7 @@ const columns = [
     key: "ownerName",
   },
   {
-    title: "附件",
+    title: "附件(点击可放大)",
     slots: { customRender: "attachment" },
     key: "attachment",
   },
@@ -322,6 +332,7 @@ export default defineComponent({
     const showRollback = ref<boolean>(false);
     const confirmLoading2 = ref<boolean>(false);
     const showNewProject = ref<boolean>(false);
+    const showPreview = ref<boolean>(false);
     const formRef3 = ref();
     const state = reactive({
       taskList: [],
@@ -333,6 +344,7 @@ export default defineComponent({
       currentRollbackRecord: {},
       newProcessId: "",
       newTaskId: "",
+      previewURL: "",
     });
     const commentForm: UnwrapRef<CommentForm> = reactive({
       comment: "",
@@ -733,7 +745,12 @@ export default defineComponent({
     };
 
     const changeTime = (time) => {
-      return moment(time).add(8, 'hours').format('lll')
+      return moment(time).add(8, "hours").format("lll");
+    };
+
+    const showImg = (srcURL) => {
+      showPreview.value = true
+      state.previewURL = srcURL
     };
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
@@ -773,7 +790,9 @@ export default defineComponent({
       formRef3,
       resetProjectForm,
       reuploadProjects,
-      changeTime
+      changeTime,
+      showPreview,
+      showImg,
     };
   },
 });
