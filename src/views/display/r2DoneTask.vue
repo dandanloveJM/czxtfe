@@ -10,12 +10,12 @@
           <template #type="{ record }">
             <span>{{ TYPE_MAP[record.type] }}</span>
           </template>
-           <template #updatedAt="{ record }">
+          <template #updatedAt="{ record }">
             <span>{{ changeTime(record.updatedAt) }}</span>
           </template>
           <template #totalPercentage="{ record }">
-          <span>{{ record.totalPercentage + "%" }}</span>
-        </template>
+            <span>{{ record.totalPercentage + "%" }}</span>
+          </template>
           <template #products="{ record }">
             <a @click="() => showProducts(record.products)"
               >点击查看团队成员产值详情</a
@@ -59,12 +59,14 @@ import { typeMap } from "@/utils/config";
 import { getR2AllList } from "@/api/display";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
-import moment from 'moment'
+import moment from "moment";
 
 export default defineComponent({
   name: "el_done",
   components: {
-    aIcon, Modal, antModal
+    aIcon,
+    Modal,
+    antModal,
   },
   setup() {
     const TYPE_MAP = typeMap;
@@ -92,7 +94,7 @@ export default defineComponent({
       },
       {
         title: "完成时间",
-       slots: { customRender: "updatedAt" },
+        slots: { customRender: "updatedAt" },
         key: "updatedAt",
       },
       {
@@ -131,14 +133,12 @@ export default defineComponent({
     ];
 
     const fetchData = async () => {
-      const data = await getR2AllList().then(
-        (response) => response.data.data.finished
-      );
-      if (data.length === 0) {
+      const data = await getR2AllList().then((response) => response.data.data);
+      if (data.hasOwnProperty("empty") || data.finished.length === 0) {
         state.taskList = [];
       }
 
-      state.taskList = data;
+      state.taskList = data.finished;
     };
 
     onMounted(() => {
@@ -158,8 +158,8 @@ export default defineComponent({
       state.products = [];
     };
 
-const changeTime = (time) => {
-      return moment(time).add(8, 'hours').format('lll')
+    const changeTime = (time) => {
+      return moment(time).add(8, "hours").format("lll");
     };
     return {
       TYPE_MAP,
@@ -169,7 +169,7 @@ const changeTime = (time) => {
       productsOk,
       showProducts,
       visible,
-      changeTime
+      changeTime,
     };
   },
 });
