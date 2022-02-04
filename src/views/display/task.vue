@@ -77,7 +77,11 @@
             :label="record.productLabel"
             style="min-width: 35%"
           >
-            <a-input-number v-model:value="record.productValue" />
+            <a-input-number
+              v-model:value="record.productValue"
+              :formatter="(value) => `${value}%`"
+              :parser="(value) => value.replace('%', '')"
+            />
           </a-form-item>
           <a-button
             danger

@@ -87,7 +87,11 @@
             :label="record.productLabel"
             style="min-width: 35%"
           >
-            <a-input-number v-model:value="record.productValue" />
+            <a-input-number
+              v-model:value="record.productValue"
+              :formatter="(value) => `${value}%`"
+              :parser="(value) => value.replace('%', '')"
+            />
           </a-form-item>
           <a-button
             danger
@@ -194,8 +198,13 @@
       </a-form>
     </Modal>
 
-    <Modal title="查看附件原图" v-model:visible="showPreview" width="1200" :footer="null">
-      <img :src="state.previewURL" style="max-width:1100px;" />
+    <Modal
+      title="查看附件原图"
+      v-model:visible="showPreview"
+      width="1200"
+      :footer="null"
+    >
+      <img :src="state.previewURL" style="max-width: 1100px" />
     </Modal>
   </div>
 </template>
@@ -749,8 +758,8 @@ export default defineComponent({
     };
 
     const showImg = (srcURL) => {
-      showPreview.value = true
-      state.previewURL = srcURL
+      showPreview.value = true;
+      state.previewURL = srcURL;
     };
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },

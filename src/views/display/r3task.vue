@@ -7,7 +7,7 @@
           :data-source="state.taskList"
           :rowKey="(record) => record.processId"
         >
-         <template #updatedAt="{ record }">
+          <template #updatedAt="{ record }">
             <span>{{ changeTime(record.updatedAt) }}</span>
           </template>
           <template #action="{ record }">
@@ -79,7 +79,11 @@
             :label="record.productLabel"
             style="min-width: 35%"
           >
-            <a-input-number v-model:value="record.productValue" />
+            <a-input-number
+              v-model:value="record.productValue"
+              :formatter="(value) => `${value}%`"
+              :parser="(value) => value.replace('%', '')"
+            />
           </a-form-item>
           <a-button
             danger
@@ -190,7 +194,6 @@ import {
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 import moment from "moment";
 
-
 const columns = [
   {
     title: "任务名",
@@ -209,7 +212,7 @@ const columns = [
   },
   {
     title: "上传任务时间",
-         slots: { customRender: "updatedAt" },
+    slots: { customRender: "updatedAt" },
     key: "updatedAt",
   },
   {
@@ -612,14 +615,14 @@ export default defineComponent({
       params["targetKey"] = targetKey;
       params["comment"] = toRaw(commentForm).comment || "";
 
-      commentForm.comment = ''
+      commentForm.comment = "";
 
       rollbackRequest(params)
         .then((response) => {
           antModal.success({
             title: "退回成功",
           });
-           fetchData();
+          fetchData();
 
           showCheck.value = false;
           state.checkProcessId = "";
@@ -639,15 +642,15 @@ export default defineComponent({
       params["taskId"] = state.checkTaskId;
       params["comment"] = toRaw(commentForm).comment || "";
 
-      commentForm.comment = ''
+      commentForm.comment = "";
 
       r3Approve(params)
         .then((response) => {
           antModal.success({
             title: "审核通过成功",
           });
-           fetchData();
-           
+          fetchData();
+
           showCheck.value = false;
           state.checkProcessId = "";
           state.checkTaskId = "";
@@ -659,8 +662,8 @@ export default defineComponent({
           });
         });
     };
- const changeTime = (time) => {
-      return moment(time).add(8, 'hours').format('lll')
+    const changeTime = (time) => {
+      return moment(time).add(8, "hours").format("lll");
     };
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
@@ -696,8 +699,7 @@ export default defineComponent({
       check,
       rollbackTo,
       agreeTo,
-      changeTime
-
+      changeTime,
     };
   },
 });

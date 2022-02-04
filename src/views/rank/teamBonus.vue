@@ -56,7 +56,7 @@ export default defineComponent({
         key: "teamRank",
       },
       {
-        title: "部门奖金",
+        title: "30%产值待分配",
         dataIndex: "productSum",
         key: "productSum",
       },

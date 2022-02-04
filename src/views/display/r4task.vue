@@ -40,64 +40,7 @@
       </div>
     </div>
 
-    <Modal
-      ref="addModal"
-      title="填写产值比例建议"
-      @ok="onSubmitForm"
-      @cancel="onCancel"
-      v-model:visible="visible"
-      :confirm-loading="confirmLoading"
-    >
-      <a-form ref="formRef" :model="dynamicForm" :label-col="labelCol">
-        <div
-          class="line-wrapper"
-          v-for="(record, index) in dynamicForm.records"
-          :key="index"
-        >
-          <a-form-item
-            :label="record.peopleLabel"
-            style="min-width: 45%"
-            name="peopleValue"
-          >
-            <a-select
-              v-model:value="record.peopleValue"
-              show-search
-              :options="state.candidates"
-              :filterOption="filterOption"
-            />
-          </a-form-item>
-          <a-form-item
-            name="productValue"
-            ref="productValue"
-            :label="record.productLabel"
-            style="min-width: 35%"
-          >
-            <a-input-number v-model:value="record.productValue" />
-          </a-form-item>
-          <a-button
-            danger
-            v-if="dynamicForm.records.length > 1"
-            class="dynamic-delete-button"
-            :disabled="dynamicForm.records.length === 1"
-            @click="removeRecord(record)"
-          >
-            删除
-          </a-button>
-        </div>
-        <a-form-item>
-          <a-button
-            type="dashed"
-            class="add-record-button"
-            @click="addRecord"
-            size="large"
-          >
-            <PlusOutlined />
-            点击增加项目成员
-          </a-button>
-        </a-form-item>
-      </a-form>
-    </Modal>
-
+   
     <Modal
       ref="history"
       title="查看当前审批流程"
@@ -411,22 +354,9 @@ export default defineComponent({
       return option.label.indexOf(input) >= 0;
     };
 
-    const addRecord = () => {
-      dynamicForm.records.push({
-        peopleLabel: "项目成员",
-        peopleValue: "",
-        productLabel: "建议产值比例",
-        productValue: 100,
-      });
-    };
+  
 
-    const removeRecord = (item: PeopleAndProductRecord) => {
-      let index = dynamicForm.records.indexOf(item);
-      if (index !== -1) {
-        dynamicForm.records.splice(index, 1);
-      }
-    };
-
+  
     const checkHistory = (processId: string) => {
       showHistory.value = true;
       historyLoading.value = true;
@@ -566,8 +496,7 @@ export default defineComponent({
       filterOption,
       onCancel,
       dynamicForm,
-      addRecord,
-      removeRecord,
+     
       // rules,
       formRef,
       checkHistory,
