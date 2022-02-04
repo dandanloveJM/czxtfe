@@ -467,16 +467,12 @@ export default defineComponent({
       let isError = 0;
       if (isDuplicates) {
         isError += 1;
-        antModal.error({
-          title: "项目成员不可以相同",
-        });
+        message.error("项目成员不可以相同");
         return;
       }
       records.forEach((element) => {
         if (element.peopleValue === "") {
-          antModal.error({
-            title: "请选择一位项目成员",
-          });
+          message.error("请选择一位项目成员");
           isError += 1;
           return;
         } else if (
@@ -486,10 +482,8 @@ export default defineComponent({
           !Number.isInteger(element.productValue)
         ) {
           isError += 1;
-          antModal.error({
-            title: "产值比例建议填写错误",
-            content: "产值比例建议需要为0到100的正整数",
-          });
+          message.error("产值比例建议填写错误,需要为0到100的正整数");
+
           return;
         } else {
           sum += element.productValue;
@@ -499,16 +493,12 @@ export default defineComponent({
       if (sum !== 100) {
         console.log(sum);
         isError += 1;
-        antModal.error({
-          title: "所有成员的产值比例之和必须刚好是100",
-        });
+        message.error("所有成员的产值比例之和必须刚好是100");
         return;
       }
 
       if (isError === 0) {
-        antModal.success({
-          title: "填写成功，正在上传数据中",
-        });
+        message.success("填写成功，正在上传数据中");
         // TODO 构造参数 发送请求
         confirmLoading.value = true;
 
@@ -524,21 +514,15 @@ export default defineComponent({
             confirmLoading.value = false;
             if (response.data.status === "ok") {
               visible.value = false;
-              antModal.success({
-                title: "数据上传成功",
-              });
+              message.success("数据上传成功");
               fetchData();
             } else {
-              antModal.error({
-                title: "程序异常",
-              });
+              message.error("程序异常");
             }
           })
           .catch((err) => {
             confirmLoading.value = false;
-            antModal.error({
-              title: "程序异常",
-            });
+            message.error("程序异常");
           });
       }
       console.log("submit!", toRaw(dynamicForm));
@@ -595,9 +579,7 @@ export default defineComponent({
           historyLoading.value = false;
         })
         .catch((err) => {
-          antModal.error({
-            title: "程序异常",
-          });
+          message.error("程序异常");
         });
     };
 
@@ -629,9 +611,7 @@ export default defineComponent({
       confirmLoading2.value = true;
       rollbackRequest(toRaw(state.currentRollbackRecord))
         .then((response) => {
-          antModal.success({
-            title: "退回成功",
-          });
+          message.success("退回成功");
           confirmLoading2.value = false;
           fetchData();
 
@@ -640,9 +620,7 @@ export default defineComponent({
         .catch((err) => {
           console.log(err);
           confirmLoading2.value = false;
-          antModal.error({
-            title: "程序异常",
-          });
+          message.error("程序异常");
         });
     };
 
@@ -662,9 +640,7 @@ export default defineComponent({
         })
         .catch((err) => {
           console.log(err);
-          antModal.error({
-            title: "创建流程失败",
-          });
+          message.error("创建流程失败");
         });
     };
 
@@ -677,9 +653,13 @@ export default defineComponent({
         .validate()
         .then(() => {
           if (formData["nextAssignee"] === "") {
-            antModal.error({
-              title: "必须指定用户填写产值比例",
-            });
+            message.error("必须指定用户填写产值比例");
+            return;
+          }
+
+          // 附件不能为空
+          if (formData["fileList"].length === 0) {
+            message.error("必须上传附件");
             return;
           }
           showNewProject.value = false;

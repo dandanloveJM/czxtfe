@@ -397,9 +397,7 @@ export default defineComponent({
           historyLoading.value = false;
         })
         .catch((err) => {
-          antModal.error({
-            title: "程序异常",
-          });
+          message.error("程序异常");
         });
     };
 
@@ -418,9 +416,7 @@ export default defineComponent({
       confirmLoading2.value = true;
       rollbackRequest(toRaw(state.currentRollbackRecord))
         .then((response) => {
-          antModal.success({
-            title: "退回成功",
-          });
+          message.success("退回成功");
           confirmLoading2.value = false;
           fetchData();
 
@@ -429,9 +425,7 @@ export default defineComponent({
         .catch((err) => {
           console.log(err);
           confirmLoading2.value = false;
-          antModal.error({
-            title: "程序异常",
-          });
+          message.error("程序异常");
         });
     };
 
@@ -467,9 +461,7 @@ export default defineComponent({
 
       rollbackRequest(params)
         .then((response) => {
-          antModal.success({
-            title: "退回成功",
-          });
+          message.success("退回成功");
           fetchData();
 
           showCheck.value = false;
@@ -478,9 +470,7 @@ export default defineComponent({
         })
         .catch((err) => {
           console.log(err);
-          antModal.error({
-            title: "程序异常",
-          });
+          message.error("程序异常");
         });
     };
 
@@ -528,9 +518,7 @@ export default defineComponent({
 
       a1SetProduct(params)
         .then((response) => {
-          antModal.success({
-            title: "设置产值及比例成功",
-          });
+          message.success("设置产值及比例成功");
           fetchData();
 
           showModify.value = false;
@@ -539,9 +527,7 @@ export default defineComponent({
         })
         .catch((err) => {
           console.log(err);
-          antModal.error({
-            title: "程序异常",
-          });
+          message.error("程序异常");
         });
     };
     const changeTime = (time) => {

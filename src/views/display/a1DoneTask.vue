@@ -217,9 +217,7 @@ export default defineComponent({
 
       a1ModifyProduct(params)
         .then((response) => {
-          antModal.success({
-            title: "产值及比例修改成功",
-          });
+          message.success("产值及比例修改成功");
           fetchData();
 
           showModify.value = false;
@@ -227,9 +225,7 @@ export default defineComponent({
         })
         .catch((err) => {
           console.log(err);
-          antModal.error({
-            title: "程序异常",
-          });
+          message.error("程序异常");
         });
     };
 
