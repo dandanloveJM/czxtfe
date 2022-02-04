@@ -31,7 +31,13 @@
             <span>{{ typeMap[record.type] }}</span>
           </template>
           <template #attachment="{ record }">
-            <a :href="record.attachment">点击查看附件</a>
+            <img
+              :src="record.attachment"
+              style="width: 200px"
+              title="点击显示详情"
+              @click="() => showImg(record.attachment)"
+            />
+            <!-- <a :href="record.attachment">点击查看附件</a> -->
           </template>
         </a-table>
       </div>
@@ -40,7 +46,14 @@
       </div>
     </div>
 
-   
+    <Modal
+      title="查看附件原图"
+      v-model:visible="showPreview"
+      width="1200"
+      :footer="null"
+    >
+      <img :src="state.previewURL" style="max-width: 1100px" />
+    </Modal>
     <Modal
       ref="history"
       title="查看当前审批流程"
@@ -155,7 +168,7 @@ const columns = [
     key: "ownerName",
   },
   {
-    title: "附件",
+    title: "附件(点击可放大)",
     slots: { customRender: "attachment" },
     key: "attachment",
   },
@@ -231,6 +244,7 @@ export default defineComponent({
     const showNewProject = ref<boolean>(false);
     const formRef3 = ref();
     const showCheck = ref<boolean>(false);
+    const showPreview = ref<boolean>(false);
     const state = reactive({
       taskList: [],
       candidates: [],
@@ -242,6 +256,7 @@ export default defineComponent({
       checkProcessId: "",
       checkTaskId: "",
       products: [],
+      previewURL: "",
     });
     const commentForm: UnwrapRef<CommentForm> = reactive({
       comment: "",
@@ -354,9 +369,6 @@ export default defineComponent({
       return option.label.indexOf(input) >= 0;
     };
 
-  
-
-  
     const checkHistory = (processId: string) => {
       showHistory.value = true;
       historyLoading.value = true;
@@ -484,6 +496,11 @@ export default defineComponent({
     const changeTime = (time) => {
       return moment(time).add(8, "hours").format("lll");
     };
+
+    const showImg = (srcURL) => {
+      showPreview.value = true;
+      state.previewURL = srcURL;
+    };
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
       state,
@@ -496,7 +513,7 @@ export default defineComponent({
       filterOption,
       onCancel,
       dynamicForm,
-     
+
       // rules,
       formRef,
       checkHistory,
@@ -518,6 +535,8 @@ export default defineComponent({
       rollbackTo,
       agreeTo,
       changeTime,
+      showPreview,
+      showImg,
     };
   },
 });
