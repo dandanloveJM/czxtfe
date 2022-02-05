@@ -35,7 +35,7 @@
                 流程查看
               </a-button>
             </span>
-          </template>s
+          </template>
           <template #type="{ record }">
             <span>{{ typeMap[record.type] }}</span>
           </template>
@@ -62,14 +62,25 @@
     >
       <img :src="state.previewURL" style="max-width: 1100px" />
     </Modal>
-    <Modal
+    <a-modal
       ref="addModal"
       title="填写产值比例建议"
-      @ok="onSubmitForm"
-      @cancel="onCancel"
       v-model:visible="visible"
       :confirm-loading="confirmLoading"
+      @ok="onSubmitForm"
+      @cancel="onCancel"
+      width="1000px"
     >
+      <template #footer>
+        <a-button key="back" @click="handleCancel">暂存并关闭</a-button>
+        <a-button
+          key="submit"
+          type="primary"
+          :loading="confirmLoading"
+          @click="onSubmitForm"
+          >确认并发送
+        </a-button>
+      </template>
       <a-form ref="formRef" :model="dynamicForm" :label-col="labelCol">
         <div
           class="line-wrapper"
@@ -122,7 +133,7 @@
           </a-button>
         </a-form-item>
       </a-form>
-    </Modal>
+    </a-modal>
 
     <Modal
       ref="history"
@@ -208,6 +219,7 @@ import {
 } from "@/api/display";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 import moment from "moment";
+import localStorageStore from "@/utils/localStorageStore";
 
 const columns = [
   {
@@ -419,6 +431,14 @@ export default defineComponent({
       visible.value = true;
       state.processId = processId;
       state.taskId = taskId;
+      dynamicForm.records = localStorageStore.getCache(processId) || [
+        {
+          peopleLabel: "项目成员",
+          peopleValue: "",
+          productLabel: "建议产值比例",
+          productValue: 100,
+        },
+      ];
     };
 
     const addSubmit = (e: MouseEvent) => {
@@ -482,6 +502,8 @@ export default defineComponent({
         fillOutputValue(params)
           .then((response) => {
             confirmLoading.value = false;
+            //  删除缓存
+            localStorageStore.deleteCache(state.processId);
             if (response.data.status === "ok") {
               visible.value = false;
               message.success("数据上传成功");
@@ -657,6 +679,11 @@ export default defineComponent({
       showPreview.value = true;
       state.previewURL = srcURL;
     };
+
+    const handleCancel = () => {
+      localStorageStore.setCache(state.processId, dynamicForm.records);
+      visible.value = false;
+    };
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
       state,
@@ -694,6 +721,7 @@ export default defineComponent({
       changeTime,
       showPreview,
       showImg,
+      handleCancel,
     };
   },
 });
