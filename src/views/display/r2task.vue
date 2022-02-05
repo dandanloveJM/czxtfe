@@ -12,25 +12,27 @@
         >
           <template #action="{ record }">
             <span v-if="record.activityName === 'R2/R1填写产值分配建议'">
-              <a @click="() => addAdvice(record.processId, record.taskId)">
-                点击上传产值比例建议
-              </a>
+              <a-button
+                @click="() => addAdvice(record.processId, record.taskId)"
+              >
+                产值分配
+              </a-button>
               <a-divider type="vertical" />
-              <a @click="() => rollback(record)">退回到上一节点</a>
+              <a-button @click="() => rollback(record)">节点回退</a-button>
               <a-divider type="vertical" />
             </span>
             <span v-if="record.activityName === 'R2上传任务'">
-              <a
+              <a-button
                 @click="() => reuploadProjects(record.processId, record.taskId)"
-                >点击重新上传任务</a
-              >
+                >重新上传任务
+              </a-button>
               <a-divider type="vertical" />
             </span>
 
             <span>
-              <a @click="() => checkHistory(record.processId)">
-                查看当前流程情况
-              </a>
+              <a-button @click="() => checkHistory(record.processId)">
+                流程查看
+              </a-button>
             </span>
           </template>
           <template #type="{ record }">

@@ -68,7 +68,10 @@ request.interceptors.response.use((response: AxiosResponse): AxiosResponse | Pro
     localCache.clearCache()
     router.push({ path: '/login', query: { redirect: router.currentRoute.value.fullPath } })
     return Promise.reject(response)
-  } else {
+  } else if (response.status===403){
+    router.push({path:'/403'})
+  }
+  else {
     return Promise.reject(response)
   }
 }, errorHandler)

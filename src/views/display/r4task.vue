@@ -12,19 +12,19 @@
           </template>
           <template #action="{ record }">
             <span v-if="record.activityName === 'R4审核'">
-              <a
+              <a-button
                 @click="
                   () => check(record.processId, record.taskId, record.products)
                 "
-                >点击审核</a
+                >点击审核</a-button
               >
               <a-divider type="vertical" />
             </span>
 
             <span>
-              <a @click="() => checkHistory(record.processId)">
-                查看当前流程情况
-              </a>
+              <a-button @click="() => checkHistory(record.processId)">
+                流程查看
+              </a-button>
             </span>
           </template>
           <template #type="{ record }">

@@ -9,26 +9,26 @@
         >
           <template #action="{ record }">
             <span v-if="record.activityName === 'A1填写产值'">
-              <a @click="() => setValue(record.processId, record.taskId)"
-                >赋予总产值及完成比例</a
+              <a-button @click="() => setValue(record.processId, record.taskId)"
+                >赋予产值</a-button
               >
               <a-divider type="vertical" />
             </span>
 
             <span>
-              <a
+              <a-button
                 @click="
                   () => check(record.processId, record.taskId, record.products)
                 "
-                >点击审核退回</a
-              >
+                >节点退回
+              </a-button>
               <a-divider type="vertical" />
             </span>
 
             <span>
-              <a @click="() => checkHistory(record.processId)">
-                查看当前流程情况
-              </a>
+              <a-button @click="() => checkHistory(record.processId)">
+                流程查看
+              </a-button>
             </span>
           </template>
 

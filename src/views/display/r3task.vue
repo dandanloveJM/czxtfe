@@ -12,28 +12,30 @@
           </template>
           <template #action="{ record }">
             <span v-if="record.activityName === 'R2/R1填写产值分配建议'">
-              <a @click="() => addAdvice(record.processId, record.taskId)">
-                点击上传产值比例建议
-              </a>
+              <a-button
+                @click="() => addAdvice(record.processId, record.taskId)"
+              >
+                产值分配
+              </a-button>
               <a-divider type="vertical" />
             </span>
 
             <span v-if="record.activityName === 'R3审核'">
-              <a
+              <a-button
                 @click="
                   () => check(record.processId, record.taskId, record.products)
                 "
-                >点击审核</a
-              >
+                >点击审核
+              </a-button>
               <a-divider type="vertical" />
             </span>
 
             <span>
-              <a @click="() => checkHistory(record.processId)">
-                查看当前流程情况
-              </a>
+              <a-button @click="() => checkHistory(record.processId)">
+                流程查看
+              </a-button>
             </span>
-          </template>
+          </template>s
           <template #type="{ record }">
             <span>{{ typeMap[record.type] }}</span>
           </template>
@@ -461,12 +463,12 @@ export default defineComponent({
       if (sum !== 100) {
         console.log(sum);
         isError += 1;
-        message.error( "所有成员的产值比例之和必须刚好是100");
+        message.error("所有成员的产值比例之和必须刚好是100");
         return;
       }
 
       if (isError === 0) {
-        message.success( "填写成功，正在上传数据中");
+        message.success("填写成功，正在上传数据中");
         // TODO 构造参数 发送请求
         confirmLoading.value = true;
 
@@ -482,7 +484,7 @@ export default defineComponent({
             confirmLoading.value = false;
             if (response.data.status === "ok") {
               visible.value = false;
-              message.success( "数据上传成功");
+              message.success("数据上传成功");
               fetchData();
             } else {
               message.error("程序异常");
@@ -547,7 +549,7 @@ export default defineComponent({
           historyLoading.value = false;
         })
         .catch((err) => {
-          message.error( "程序异常");
+          message.error("程序异常");
         });
     };
 
@@ -566,7 +568,7 @@ export default defineComponent({
       confirmLoading2.value = true;
       rollbackRequest(toRaw(state.currentRollbackRecord))
         .then((response) => {
-          message.success( "退回成功");
+          message.success("退回成功");
           confirmLoading2.value = false;
           fetchData();
 
@@ -636,7 +638,7 @@ export default defineComponent({
 
       r3Approve(params)
         .then((response) => {
-          message.success( "审核通过成功");
+          message.success("审核通过成功");
           fetchData();
 
           showCheck.value = false;

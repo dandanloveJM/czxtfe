@@ -15,17 +15,18 @@
         >
           <template #action="{ record }">
             <span v-if="record.taskId">
-              <a @click="() => addAdvice(record.processId, record.taskId)"
-                >点击上传产值比例建议</a
+              <a-button
+                @click="() => addAdvice(record.processId, record.taskId)"
+                >产值分配</a-button
               >
               <a-divider type="vertical" />
-              <a @click="() => rollback(record)">退回到上一节点</a>
+              <a-button @click="() => rollback(record)">节点回退</a-button>
               <a-divider type="vertical" />
             </span>
             <span>
-              <a @click="() => checkHistory(record.processId)"
-                >查看当前流程情况</a
-              >
+              <a-button @click="() => checkHistory(record.processId)"
+                >流程查看
+              </a-button>
             </span>
           </template>
 
@@ -378,12 +379,12 @@ export default defineComponent({
       let isError = 0;
       if (isDuplicates) {
         isError += 1;
-        message.error( "项目成员不可以相同");
+        message.error("项目成员不可以相同");
         return;
       }
       records.forEach((element) => {
         if (element.peopleValue === "") {
-          message.error( "请选择一位项目成员");
+          message.error("请选择一位项目成员");
           isError += 1;
           return;
         } else if (
@@ -434,7 +435,7 @@ export default defineComponent({
           })
           .catch((err) => {
             confirmLoading.value = false;
-            message.error( "程序异常");
+            message.error("程序异常");
           });
       }
       console.log("submit!", toRaw(dynamicForm));
