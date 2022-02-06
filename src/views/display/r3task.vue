@@ -886,13 +886,11 @@ export default defineComponent({
 }
 
 .label-style > :first-child > label {
-  border: 1px solid red;
   font-size: 18px;
 }
 
 .check-form-label .label-style label {
   font-size: 18px;
-  border: 1px solid red;
 }
 
 .ant-form-item-label > label {

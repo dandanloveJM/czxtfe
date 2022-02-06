@@ -12,12 +12,8 @@
           </template>
           <template #action="{ record }">
             <span v-if="record.activityName === 'R4审核'">
-              <a-button
-                @click="
-                  () => check(record.processId, record.taskId, record.products)
-                "
-                >点击审核</a-button
-              >
+              <a-button @click="() => check(record)">点击审核 </a-button>
+
               <a-divider type="vertical" />
             </span>
 
@@ -74,15 +70,62 @@
     </Modal>
 
     <Modal title="审核流程" v-model:visible="showCheck" :footer="null">
-      <a-table
-        :columns="productColumns"
-        :data-source="state.products"
-        :rowKey="(record) => record.id"
-      >
-        <template #percentage="{ record }">
-          <span>{{ record.percentage + "%" }}</span>
-        </template>
-      </a-table>
+      <a-tabs v-model:activeKey="activeKey">
+        <a-tab-pane key="1">
+          <template #tab>
+            <span class="tab-title-header">
+              <AppstoreTwoTone />
+              项目详情
+            </span>
+          </template>
+          <a-table
+            :columns="columnsWithoutOperation"
+            :data-source="[state.checkRecord]"
+            :rowKey="(record) => record.processId"
+            :pagination="false"
+          >
+            <template #updatedAt="{ record }">
+              <span>{{ changeTime(record.updatedAt) }}</span>
+            </template>
+
+            <template #type="{ record }">
+              <span>{{ typeMap[record.type] }}</span>
+            </template>
+            <template #attachment="{ record }">
+              <img
+                :src="record.attachment"
+                style="width: 200px"
+                title="点击显示详情"
+                @click="() => showImg(record.attachment)"
+              />
+              <!-- <a :href="record.attachment">点击查看附件</a> -->
+            </template>
+          </a-table>
+        </a-tab-pane>
+        <a-tab-pane key="2">
+          <template #tab>
+            <span class="tab-title-header">
+              <CrownTwoTone />
+              产值比例
+            </span>
+          </template>
+          <a-table
+            :columns="productColumns"
+            :data-source="state.products"
+            :rowKey="(record) => record.id"
+            :pagination="false"
+          >
+            <template #percentage="{ record }">
+              <span>{{ record.percentage + "%" }}</span>
+            </template>
+          </a-table>
+        </a-tab-pane>
+      </a-tabs>
+
+      <header class="header-title-wrapper header-title-wrapper-with-margin-top">
+        <EditTwoTone />
+        <span class="header-title">流程审批</span>
+      </header>
 
       <a-form ref="formRef2" :model="commentForm">
         <a-form-item name="comment" label="审批意见">
@@ -92,18 +135,32 @@
 
       <div class="button-wrapper">
         <div class="reject-button">
-          <a-button @click="() => rollbackTo('R3check')"
+          <a-button
+            type="primary"
+            danger
+            size="large"
+            @click="() => rollbackTo('R3check')"
             >退回，室主任重新审核</a-button
           >
-          <a-button @click="() => rollbackTo('fillNumbers')"
+          <a-button
+            type="primary"
+            danger
+            size="large"
+            @click="() => rollbackTo('fillNumbers')"
             >退回，重新填写产值比例</a-button
           >
-          <a-button @click="() => rollbackTo('uploadTask')"
+          <a-button
+            type="primary"
+            danger
+            size="large"
+            @click="() => rollbackTo('uploadTask')"
             >退回，重新上传任务</a-button
           >
         </div>
         <div class="agree">
-          <a-button @click="() => agreeTo()" type="primary">审核通过</a-button>
+          <a-button @click="() => agreeTo()" type="primary" size="large"
+            >审核通过</a-button
+          >
         </div>
       </div>
     </Modal>
@@ -126,7 +183,13 @@ import {
 import { UploadOutlined } from "@ant-design/icons-vue";
 import { SelectTypes } from "ant-design-vue/es/select";
 import aIcon from "@/components/aicon/aicon.vue";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons-vue";
+import {
+  MinusCircleOutlined,
+  PlusOutlined,
+  AppstoreTwoTone,
+  CrownTwoTone,
+  EditTwoTone,
+} from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 import {
@@ -141,6 +204,7 @@ import {
 } from "@/api/display";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 import moment from "moment";
+import { debounce } from "lodash-es";
 const columns = [
   {
     title: "任务名",
@@ -225,6 +289,9 @@ export default defineComponent({
     PlusOutlined,
     MinusCircleOutlined,
     UploadOutlined,
+    CrownTwoTone,
+    AppstoreTwoTone,
+    EditTwoTone,
   },
   data() {
     return {
@@ -257,6 +324,7 @@ export default defineComponent({
       checkTaskId: "",
       products: [],
       previewURL: "",
+      checkRecord: {},
     });
     const commentForm: UnwrapRef<CommentForm> = reactive({
       comment: "",
@@ -284,6 +352,38 @@ export default defineComponent({
         },
       ],
     });
+    const columnsWithoutOperation = [
+      {
+        title: "任务名",
+        dataIndex: "name",
+        key: "name",
+      },
+      {
+        title: "任务书编号",
+        dataIndex: "number",
+        key: "number",
+      },
+      {
+        title: "任务类型",
+        slots: { customRender: "type" },
+        key: "type",
+      },
+      {
+        title: "上传任务时间",
+        slots: { customRender: "updatedAt" },
+        key: "updatedAt",
+      },
+      {
+        title: "项目长",
+        dataIndex: "ownerName",
+        key: "ownerName",
+      },
+      {
+        title: "附件(点击可放大)",
+        slots: { customRender: "attachment" },
+        key: "attachment",
+      },
+    ];
 
     const historyColumns = [
       {
@@ -380,7 +480,7 @@ export default defineComponent({
           historyLoading.value = false;
         })
         .catch((err) => {
-          message.error( "程序异常");
+          message.error("程序异常");
         });
     };
 
@@ -389,35 +489,14 @@ export default defineComponent({
       state.historyData = [];
     };
 
-    const rollbackOk = () => {
-      //获取填写的comment值
-      const newComment = toRaw(commentForm).comment;
-      state.currentRollbackRecord["comment"] = newComment;
-      // send request
-      console.log("传参");
-      console.dir(toRaw(state.currentRollbackRecord));
-      confirmLoading2.value = true;
-      rollbackRequest(toRaw(state.currentRollbackRecord))
-        .then((response) => {
-          message.success("退回成功");
-          confirmLoading2.value = false;
-          fetchData();
-
-          showRollback.value = false;
-        })
-        .catch((err) => {
-          console.log(err);
-          confirmLoading2.value = false;
-          message.error("程序异常");
-        });
-    };
-
-    const check = (processId, taskId, products) => {
+  
+    const check = (record) => {
       showCheck.value = true;
 
-      state.products = products;
-      state.checkProcessId = processId;
-      state.checkTaskId = taskId;
+      state.products = record.products;
+      state.checkProcessId = record.processId;
+      state.checkTaskId = record.taskId;
+      state.checkRecord = record;
     };
 
     const productColumns = [
@@ -433,7 +512,7 @@ export default defineComponent({
       },
     ];
 
-    const rollbackTo = (targetKey) => {
+    const rollbackTo = debounce((targetKey) => {
       const params = {};
       params["processId"] = state.checkProcessId;
       params["taskId"] = state.checkTaskId;
@@ -455,9 +534,9 @@ export default defineComponent({
           console.log(err);
           message.error("程序异常");
         });
-    };
+    }, 1000);
 
-    const agreeTo = () => {
+    const agreeTo = debounce(() => {
       const params = {};
       params["processId"] = state.checkProcessId;
       params["taskId"] = state.checkTaskId;
@@ -467,7 +546,7 @@ export default defineComponent({
 
       r4Approve(params)
         .then((response) => {
-          message.success( "审核通过成功");
+          message.success("审核通过成功");
           fetchData();
 
           showCheck.value = false;
@@ -478,7 +557,7 @@ export default defineComponent({
           console.log(err);
           message.error("程序异常");
         });
-    };
+    }, 1000);
     const changeTime = (time) => {
       return moment(time).add(8, "hours").format("lll");
     };
@@ -508,7 +587,7 @@ export default defineComponent({
       historyLoading,
       historyColumns,
       showRollback,
-      rollbackOk,
+
       commentForm,
       confirmLoading2,
       showNewProject,
@@ -523,6 +602,9 @@ export default defineComponent({
       changeTime,
       showPreview,
       showImg,
+      columnsWithoutOperation,
+      activeKey: ref("1"),
+      labelColOfCheck: { style: { fontSize: "18px" } },
     };
   },
 });
@@ -559,10 +641,41 @@ export default defineComponent({
 .button-wrapper {
   margin-top: 30px;
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
 
   .reject-button .ant-btn {
     margin-right: 20px;
   }
+}
+
+.header-title-wrapper {
+  font-size: 22px;
+  margin-bottom: 10px;
+  .header-title {
+    margin-left: 10px;
+  }
+}
+
+.header-title-wrapper-with-margin-top {
+  margin-top: 20px;
+}
+
+.tab-title-header {
+  font-size: 20px;
+}
+.label-wrapper {
+  font-size: 18px;
+}
+
+.label-style > :first-child > label {
+  font-size: 18px;
+}
+
+.check-form-label .label-style label {
+  font-size: 18px;
+}
+
+.ant-form-item-label > label {
+  font-size: 18px;
 }
 </style>
