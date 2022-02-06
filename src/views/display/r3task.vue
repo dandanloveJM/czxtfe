@@ -21,12 +21,7 @@
             </span>
 
             <span v-if="record.activityName === 'R3审核'">
-              <a-button
-                @click="
-                  () => check(record.processId, record.taskId, record.products)
-                "
-                >点击审核
-              </a-button>
+              <a-button @click="() => check(record)">点击审核 </a-button>
               <a-divider type="vertical" />
             </span>
 
@@ -155,33 +150,92 @@
     </Modal>
 
     <Modal title="审核流程" v-model:visible="showCheck" :footer="null">
-      <a-table
-        :columns="productColumns"
-        :data-source="state.products"
-        :rowKey="(record) => record.id"
-      >
-        <template #percentage="{ record }">
-          <span>{{ record.percentage + "%" }}</span>
-        </template>
-      </a-table>
+      <a-tabs v-model:activeKey="activeKey">
+        <a-tab-pane key="1">
+          <template #tab>
+            <span class="tab-title-header">
+              <AppstoreTwoTone />
+              项目详情
+            </span>
+          </template>
+          <a-table
+            :columns="columnsWithoutOperation"
+            :data-source="[state.checkRecord]"
+            :rowKey="(record) => record.processId"
+            :pagination="false"
+          >
+            <template #updatedAt="{ record }">
+              <span>{{ changeTime(record.updatedAt) }}</span>
+            </template>
+
+            <template #type="{ record }">
+              <span>{{ typeMap[record.type] }}</span>
+            </template>
+            <template #attachment="{ record }">
+              <img
+                :src="record.attachment"
+                style="width: 200px"
+                title="点击显示详情"
+                @click="() => showImg(record.attachment)"
+              />
+              <!-- <a :href="record.attachment">点击查看附件</a> -->
+            </template>
+          </a-table>
+        </a-tab-pane>
+        <a-tab-pane key="2">
+          <template #tab>
+            <span class="tab-title-header">
+              <CrownTwoTone />
+              产值比例
+            </span>
+          </template>
+          <a-table
+            :columns="productColumns"
+            :data-source="state.products"
+            :rowKey="(record) => record.id"
+            :pagination="false"
+          >
+            <template #percentage="{ record }">
+              <span>{{ record.percentage + "%" }}</span>
+            </template>
+          </a-table>
+        </a-tab-pane>
+      </a-tabs>
+
+      <header class="header-title-wrapper header-title-wrapper-with-margin-top">
+        <EditTwoTone />
+        <span class="header-title">流程审批</span>
+      </header>
 
       <a-form ref="formRef2" :model="commentForm">
-        <a-form-item name="comment" label="审批意见">
-          <a-input v-model:value="commentForm.comment" />
-        </a-form-item>
+        <div class="check-form-label">
+          <a-form-item name="comment" label="审批意见" class="label-style">
+            <a-input v-model:value="commentForm.comment" />
+          </a-form-item>
+        </div>
       </a-form>
 
       <div class="button-wrapper">
         <div class="reject-button">
-          <a-button @click="() => rollbackTo('fillNumbers')"
+          <a-button
+            type="primary"
+            danger
+            size="large"
+            @click="() => rollbackTo('fillNumbers')"
             >退回，重新填写产值比例</a-button
           >
-          <a-button @click="() => rollbackTo('uploadTask')"
+          <a-button
+            type="primary"
+            danger
+            size="large"
+            @click="() => rollbackTo('uploadTask')"
             >退回，重新上传任务</a-button
           >
         </div>
         <div class="agree">
-          <a-button @click="() => agreeTo()" type="primary">审核通过</a-button>
+          <a-button @click="() => agreeTo()" type="primary" size="large"
+            >审核通过</a-button
+          >
         </div>
       </div>
     </Modal>
@@ -204,7 +258,13 @@ import {
 import { UploadOutlined } from "@ant-design/icons-vue";
 import { SelectTypes } from "ant-design-vue/es/select";
 import aIcon from "@/components/aicon/aicon.vue";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons-vue";
+import {
+  MinusCircleOutlined,
+  PlusOutlined,
+  AppstoreTwoTone,
+  CrownTwoTone,
+  EditTwoTone,
+} from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 import {
@@ -305,6 +365,9 @@ export default defineComponent({
     PlusOutlined,
     MinusCircleOutlined,
     UploadOutlined,
+    CrownTwoTone,
+    AppstoreTwoTone,
+    EditTwoTone,
   },
   data() {
     return {
@@ -333,6 +396,7 @@ export default defineComponent({
       taskId: "",
       historyData: [],
       currentRollbackRecord: {},
+      checkRecord: {},
       checkProcessId: "",
       checkTaskId: "",
       products: [],
@@ -385,6 +449,39 @@ export default defineComponent({
         title: "审核意见",
         slots: { customRender: "comment" },
         key: "comment",
+      },
+    ];
+
+    const columnsWithoutOperation = [
+      {
+        title: "任务名",
+        dataIndex: "name",
+        key: "name",
+      },
+      {
+        title: "任务书编号",
+        dataIndex: "number",
+        key: "number",
+      },
+      {
+        title: "任务类型",
+        slots: { customRender: "type" },
+        key: "type",
+      },
+      {
+        title: "上传任务时间",
+        slots: { customRender: "updatedAt" },
+        key: "updatedAt",
+      },
+      {
+        title: "项目长",
+        dataIndex: "ownerName",
+        key: "ownerName",
+      },
+      {
+        title: "附件(点击可放大)",
+        slots: { customRender: "attachment" },
+        key: "attachment",
       },
     ];
 
@@ -603,12 +700,13 @@ export default defineComponent({
         });
     };
 
-    const check = (processId, taskId, products) => {
+    const check = (record) => {
       showCheck.value = true;
 
-      state.products = products;
-      state.checkProcessId = processId;
-      state.checkTaskId = taskId;
+      state.products = record.products;
+      state.checkRecord = record;
+      state.checkProcessId = record.processId;
+      state.checkTaskId = record.taskId;
     };
 
     const productColumns = [
@@ -722,6 +820,9 @@ export default defineComponent({
       showPreview,
       showImg,
       handleCancel,
+      columnsWithoutOperation,
+      activeKey: ref("1"),
+      labelColOfCheck: { style: { fontSize: "18px" } },
     };
   },
 });
@@ -758,10 +859,43 @@ export default defineComponent({
 .button-wrapper {
   margin-top: 30px;
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
 
   .reject-button .ant-btn {
     margin-right: 20px;
   }
+}
+
+.header-title-wrapper {
+  font-size: 22px;
+  margin-bottom: 10px;
+  .header-title {
+    margin-left: 10px;
+  }
+}
+
+.header-title-wrapper-with-margin-top {
+  margin-top: 20px;
+}
+
+.tab-title-header {
+  font-size: 20px;
+}
+.label-wrapper {
+  font-size: 18px;
+}
+
+.label-style > :first-child > label {
+  border: 1px solid red;
+  font-size: 18px;
+}
+
+.check-form-label .label-style label {
+  font-size: 18px;
+  border: 1px solid red;
+}
+
+.ant-form-item-label > label {
+  font-size: 18px;
 }
 </style>
