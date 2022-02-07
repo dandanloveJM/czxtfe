@@ -1,5 +1,16 @@
 <template>
   <div class="doneTask__container">
+    <div class="filters-wrapper">
+      <div class="search-filter-wrapper">
+        <a-input-search
+          v-model:value="searchValue"
+          placeholder="搜索项目名称"
+          enter-button="搜索"
+          size="large"
+          @search="onSearch"
+        />
+      </div>
+    </div>
     <div class="table-wrapper">
       <div class="tableWithData" v-if="state.taskList.length > 0">
         <a-table
@@ -41,11 +52,13 @@ import {
 import { typeMap } from "@/utils/config";
 import { getR1FinishedList } from "@/api/display";
 import moment from "moment";
+import { SearchOutlined } from "@ant-design/icons-vue";
 
 export default defineComponent({
   name: "el_done",
   components: {
     aIcon,
+    SearchOutlined,
   },
   setup() {
     const TYPE_MAP = typeMap;
@@ -96,8 +109,8 @@ export default defineComponent({
       },
     ];
 
-    const fetchData = async () => {
-      const data = await getR1FinishedList().then(
+    const fetchData = async (query: string) => {
+      const data = await getR1FinishedList(query, 2022).then(
         (response) => response.data.data
       );
       if (data.length === 0) {
@@ -126,18 +139,35 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      watchEffect(() => {
-        fetchData();
-      });
+      fetchData("");
     });
 
+    const searchValue = ref<string>("");
+    const onSearch = (searchValue: string) => {
+      console.log("use value", searchValue);
+      fetchData(searchValue);
+    };
     return {
       TYPE_MAP,
       state,
       columns,
       changeTime,
+       searchValue,
+      onSearch,
     };
   },
 });
 </script>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.doneTask__container {
+  padding: 20px;
+}
+.filters-wrapper {
+  margin-bottom: 30px;
+
+  .search-filter-wrapper {
+  width: 300px;
+}
+
+}
+</style>
