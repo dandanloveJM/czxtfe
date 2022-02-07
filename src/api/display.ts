@@ -6,12 +6,13 @@ import { ResponseData } from "@/types/api/public";
 type ConfigType<T = ResponseData> = Promise<AxiosResponse<T>>;
 
 export const getR1UnfinishedList = (
-  param: any
+  param: string,
+  year: number
 ): ConfigType<R1UnfinishedList> => {
   return request({
     url: "http://localhost:8080/R1/displayUnfinishedProjects",
     method: "get",
-    params:{ query: param },
+    params:{ query: param, year: year },
   });
 };
 
@@ -61,10 +62,11 @@ export const rollbackRequest = (params) => {
   });
 };
 
-export const getR1FinishedList = () => {
+export const getR1FinishedList = (query:string, year:number) => {
   return request({
     url: "http://localhost:8080/R1/displayFinishedProjects",
     method: "get",
+    params: {query: query}
   });
 };
 

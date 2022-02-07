@@ -16,6 +16,18 @@
           @search="onSearch"
         />
       </div>
+      <header class="header-wrapper">
+        <CalendarTwoTone />
+        <span>按年度筛选：</span>
+        <a-select
+          ref="select"
+          v-model:value="value1"
+          style="width: 120px"
+          :options="options1"
+          @change="handleChange"
+        >
+        </a-select>
+      </header>
     </div>
 
     <div class="table-wrapper">
@@ -24,6 +36,7 @@
           :columns="columns"
           :data-source="state.taskList"
           :rowKey="(record) => record.processId"
+          :loading="tableLoading"
         >
           <template #action="{ record }">
             <span v-if="record.taskId">
@@ -197,6 +210,7 @@ import {
   MinusCircleOutlined,
   PlusOutlined,
   SearchOutlined,
+  CalendarTwoTone,
 } from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
@@ -210,6 +224,7 @@ import {
 import { typeMap } from "@/utils/config";
 import moment from "moment";
 import localStorageStore from "@/utils/localStorageStore";
+import { SelectTypes } from "ant-design-vue/es/select";
 
 const columns = [
   {
@@ -272,6 +287,7 @@ export default defineComponent({
     PlusOutlined,
     MinusCircleOutlined,
     SearchOutlined,
+    CalendarTwoTone,
   },
   data() {
     return {
@@ -289,6 +305,7 @@ export default defineComponent({
     const showRollback = ref<boolean>(false);
     const confirmLoading2 = ref<boolean>(false);
     const showPreview = ref<boolean>(false);
+    const tableLoading = ref<boolean>(false);
     const state = reactive({
       taskList: [],
       candidates: [],
@@ -339,10 +356,11 @@ export default defineComponent({
       },
     ];
 
-    const fetchData = async (query:string) => {
-      const data = await getR1UnfinishedList(query).then(
-        (response) => response.data.data
-      );
+    const fetchData = async (query: string, year: number) => {
+      const data = await getR1UnfinishedList(query, year).then((response) => {
+        tableLoading.value = false;
+        return response.data.data;
+      });
 
       state.taskList = data;
     };
@@ -368,7 +386,7 @@ export default defineComponent({
     };
     onMounted(() => {
       fetchCandidates();
-      fetchData("");
+      fetchData("", 2022);
     });
 
     // 点击表单添加按钮
@@ -454,7 +472,7 @@ export default defineComponent({
             if (response.data.status === "ok") {
               visible.value = false;
               message.success("数据上传成功");
-              fetchData("");
+              fetchData("", 2022);
             } else {
               message.error("程序异常");
             }
@@ -552,7 +570,7 @@ export default defineComponent({
         .then((response) => {
           message.success("退回成功");
           confirmLoading2.value = false;
-          fetchData("");
+          fetchData("", 2022);
 
           showRollback.value = false;
         })
@@ -613,7 +631,30 @@ export default defineComponent({
     const searchValue = ref<string>("");
     const onSearch = (searchValue: string) => {
       console.log("use value", searchValue);
-      fetchData(searchValue)
+      fetchData(searchValue, 2022);
+    };
+
+    const options1 = ref<SelectTypes["options"]>([
+      {
+        value: "2022",
+        label: "2022",
+      },
+      {
+        value: "2023",
+        label: "2023",
+      },
+
+      {
+        value: "2024",
+        label: "2024",
+      },
+    ]);
+
+    const handleChange = (value: string) => {
+      const year = Number(value);
+      console.log(value);
+      tableLoading.value = true;
+      fetchData("", year);
     };
 
     return {
@@ -649,6 +690,10 @@ export default defineComponent({
 
       searchValue,
       onSearch,
+      tableLoading,
+      value1: ref("2022"),
+      options1,
+      handleChange,
     };
   },
 });
@@ -680,12 +725,20 @@ export default defineComponent({
 
 .filters-wrapper {
   margin-bottom: 30px;
+  display: flex;
+  align-items: center;
 
   .search-filter-wrapper {
-  width: 300px;
+    width: 300px;
+  }
+  .table-wrapper {
+    padding: 20px;
+  }
+
+  .header-wrapper {
+    font-size: 20px;
+    line-height: 1.5;
+    margin-left: 40px;
+  }
 }
-
-}
-
-
 </style>
