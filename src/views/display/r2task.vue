@@ -373,7 +373,7 @@ export default defineComponent({
       comment: "",
     });
 
-    const newFormState: UnwrapRef<newFormState> = reactive({
+const createNewFormState = () => ({
       name: "",
       number: "",
       type: "",
@@ -381,7 +381,10 @@ export default defineComponent({
       taskId: "",
       processId: "",
       nextAssignee: "",
-    });
+    })
+
+
+    const newFormState: UnwrapRef<newFormState> = reactive(createNewFormState());
     const formRef = ref();
     const dynamicForm: UnwrapRef<{
       records: PeopleAndProductRecord[];
@@ -710,9 +713,7 @@ export default defineComponent({
               state.newTaskId = "";
 
               // 清空表单数据
-              Object.keys(newFormState).forEach((key) => {
-                delete newFormState[key];
-              });
+             Object.assign(newFormState, createNewFormState())
 
               fetchData();
             })
@@ -734,6 +735,8 @@ export default defineComponent({
     };
 
     const beforeUpload = (file) => {
+      console.log("newFormState.fileList")
+      console.dir(newFormState.fileList)
       newFormState.fileList = [...newFormState.fileList, file];
       return false;
     };

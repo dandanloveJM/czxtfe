@@ -218,14 +218,14 @@
       <div class="button-wrapper">
         <div class="reject-button">
           <a-button
-            type="primary"
+           
             danger
             size="large"
             @click="() => rollbackTo('fillNumbers')"
             >退回，重新填写产值比例</a-button
           >
           <a-button
-            type="primary"
+            
             danger
             size="large"
             @click="() => rollbackTo('uploadTask')"
@@ -754,7 +754,9 @@ export default defineComponent({
       params["taskId"] = state.checkTaskId;
       params["comment"] = toRaw(commentForm).comment || "";
 
-      commentForm.comment = "";
+console.log("参数")
+      console.log(params)
+     
 
       r3Approve(params)
         .then((response) => {
@@ -764,6 +766,7 @@ export default defineComponent({
           showCheck.value = false;
           state.checkProcessId = "";
           state.checkTaskId = "";
+          commentForm.comment = "";
         })
         .catch((err) => {
           console.log(err);

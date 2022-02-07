@@ -137,21 +137,21 @@
 
       <div class="button-wrapper">
         <div class="reject-button">
-          <a-button @click="() => rollbackTo('R4check')" type="primary" danger
+          <a-button @click="() => rollbackTo('R4check')"  danger
             >退回至分管领导
           </a-button>
-          <a-button @click="() => rollbackTo('R3check')" type="primary" danger
+          <a-button @click="() => rollbackTo('R3check')"  danger
             >退回至室主任
           </a-button>
           <a-button
             @click="() => rollbackTo('fillNumbers')"
-            type="primary"
+            
             danger
             >退回，重新填写产值比例
           </a-button>
           <a-button
             @click="() => rollbackTo('uploadTask')"
-            type="primary"
+           
             danger
             >退回，重新上传任务
           </a-button>
