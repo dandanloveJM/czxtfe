@@ -9,19 +9,7 @@
         >
           <template #action="{ record }">
             <span v-if="record.activityName === 'A1填写产值'">
-              <a-button @click="() => setValue(record.processId, record.taskId)"
-                >赋予产值</a-button
-              >
-              <a-divider type="vertical" />
-            </span>
-
-            <span>
-              <a-button
-                @click="
-                  () => check(record.processId, record.taskId, record.products)
-                "
-                >节点退回
-              </a-button>
+              <a-button @click="() => check(record)">赋予产值 </a-button>
               <a-divider type="vertical" />
             </span>
 
@@ -84,15 +72,62 @@
     </Modal>
 
     <Modal title="审核流程" v-model:visible="showCheck" :footer="null">
-      <a-table
-        :columns="productColumns"
-        :data-source="state.products"
-        :rowKey="(record) => record.id"
-      >
-        <template #percentage="{ record }">
-          <span>{{ record.percentage + "%" }}</span>
-        </template>
-      </a-table>
+      <a-tabs v-model:activeKey="activeKey">
+        <a-tab-pane key="1">
+          <template #tab>
+            <span class="tab-title-header">
+              <AppstoreTwoTone />
+              项目详情
+            </span>
+          </template>
+          <a-table
+            :columns="columnsWithoutOperation"
+            :data-source="state.checkRecord"
+            :rowKey="(record) => record.processId"
+            :pagination="false"
+          >
+            <template #updatedAt="{ record }">
+              <span>{{ changeTime(record.updatedAt) }}</span>
+            </template>
+
+            <template #type="{ record }">
+              <span>{{ typeMap[record.type] }}</span>
+            </template>
+            <template #attachment="{ record }">
+              <img
+                :src="record.attachment"
+                style="width: 200px"
+                title="点击显示详情"
+                @click="() => showImg(record.attachment)"
+              />
+              <!-- <a :href="record.attachment">点击查看附件</a> -->
+            </template>
+          </a-table>
+        </a-tab-pane>
+        <a-tab-pane key="2">
+          <template #tab>
+            <span class="tab-title-header">
+              <CrownTwoTone />
+              产值比例
+            </span>
+          </template>
+          <a-table
+            :columns="productColumns"
+            :data-source="state.products"
+            :rowKey="(record) => record.id"
+            :pagination="false"
+          >
+            <template #percentage="{ record }">
+              <span>{{ record.percentage + "%" }}</span>
+            </template>
+          </a-table>
+        </a-tab-pane>
+      </a-tabs>
+
+      <header class="header-title-wrapper header-title-wrapper-with-margin-top">
+        <EditTwoTone />
+        <span class="header-title">流程审批与赋予产值</span>
+      </header>
 
       <a-form ref="formRef2" :model="commentForm">
         <a-form-item name="comment" label="审批意见">
@@ -102,18 +137,29 @@
 
       <div class="button-wrapper">
         <div class="reject-button">
-          <a-button @click="() => rollbackTo('R4check')"
-            >退回，分管领导重新审核</a-button
-          >
-          <a-button @click="() => rollbackTo('R3check')"
-            >退回，室主任重新审核</a-button
-          >
-          <a-button @click="() => rollbackTo('fillNumbers')"
-            >退回，重新填写产值比例</a-button
-          >
-          <a-button @click="() => rollbackTo('uploadTask')"
-            >退回，重新上传任务</a-button
-          >
+          <a-button @click="() => rollbackTo('R4check')" type="primary" danger
+            >退回至分管领导
+          </a-button>
+          <a-button @click="() => rollbackTo('R3check')" type="primary" danger
+            >退回至室主任
+          </a-button>
+          <a-button
+            @click="() => rollbackTo('fillNumbers')"
+            type="primary"
+            danger
+            >退回，重新填写产值比例
+          </a-button>
+          <a-button
+            @click="() => rollbackTo('uploadTask')"
+            type="primary"
+            danger
+            >退回，重新上传任务
+          </a-button>
+        </div>
+        <div class="agree">
+          <a-button @click="() => setValue()" type="primary"
+            >赋予产值
+          </a-button>
         </div>
       </div>
     </Modal>
@@ -122,6 +168,7 @@
       title="设置项目的总产值及完成比例"
       v-model:visible="showModify"
       @ok="resetOk"
+      width="600"
     >
       <a-form ref="a1FormRef" :model="a1FormState">
         <a-form-item name="total" label="项目总产值">
@@ -157,7 +204,13 @@ import {
 import { UploadOutlined } from "@ant-design/icons-vue";
 import { SelectTypes } from "ant-design-vue/es/select";
 import aIcon from "@/components/aicon/aicon.vue";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons-vue";
+import {
+  MinusCircleOutlined,
+  PlusOutlined,
+  AppstoreTwoTone,
+  CrownTwoTone,
+  EditTwoTone,
+} from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 import {
@@ -257,6 +310,9 @@ export default defineComponent({
     PlusOutlined,
     MinusCircleOutlined,
     UploadOutlined,
+    AppstoreTwoTone,
+    CrownTwoTone,
+    EditTwoTone,
   },
   data() {
     return {
@@ -291,6 +347,7 @@ export default defineComponent({
       currentProcessId: "",
       currentTaskId: "",
       previewURL: "",
+      checkRecord: [],
     });
     const commentForm: UnwrapRef<CommentForm> = reactive({
       comment: "",
@@ -346,6 +403,39 @@ export default defineComponent({
         title: "审核意见",
         slots: { customRender: "comment" },
         key: "comment",
+      },
+    ];
+
+    const columnsWithoutOperation = [
+      {
+        title: "任务名",
+        dataIndex: "name",
+        key: "name",
+      },
+      {
+        title: "任务书编号",
+        dataIndex: "number",
+        key: "number",
+      },
+      {
+        title: "任务类型",
+        slots: { customRender: "type" },
+        key: "type",
+      },
+      {
+        title: "上传任务时间",
+        slots: { customRender: "updatedAt" },
+        key: "updatedAt",
+      },
+      {
+        title: "项目长",
+        dataIndex: "ownerName",
+        key: "ownerName",
+      },
+      {
+        title: "附件(点击可放大)",
+        slots: { customRender: "attachment" },
+        key: "attachment",
       },
     ];
 
@@ -429,12 +519,16 @@ export default defineComponent({
         });
     };
 
-    const check = (processId, taskId, products) => {
+    const check = (record) => {
       showCheck.value = true;
-
-      state.products = products;
-      state.checkProcessId = processId;
-      state.checkTaskId = taskId;
+      const arr = [];
+      arr.push(record);
+      state.products = record.products;
+      state.checkProcessId = record.processId;
+      state.checkTaskId = record.taskId;
+      state.checkRecord = arr;
+      console.log('fuck')
+      console.dir(record)
     };
 
     const productColumns = [
@@ -501,18 +595,19 @@ export default defineComponent({
     //     });
     // };
 
-    const setValue = (processId, taskId) => {
+    const setValue = () => {
       showModify.value = true;
-      state.currentProcessId = processId;
-      state.currentTaskId = taskId;
+      // state.currentProcessId = state.checkRecord.processId;
+      // state.currentTaskId = state.checkRecord.taskId;
     };
 
     const resetOk = () => {
       // 1. 拼接参数 ，发请求，1.关闭modal, 2. 清空state.products
       const params = {};
       const a1FormState2 = toRaw(a1FormState);
-      params["processId"] = state.currentProcessId;
-      params["taskId"] = state.currentTaskId;
+      showCheck.value=false
+      params["processId"] = state.checkProcessId;
+      params["taskId"] = state.checkTaskId;
       params["total"] = a1FormState2.total;
       params["ratio"] = a1FormState2.ratio;
 
@@ -578,6 +673,10 @@ export default defineComponent({
       changeTime,
       showPreview,
       showImg,
+
+      columnsWithoutOperation,
+      activeKey: ref("1"),
+      labelColOfCheck: { style: { fontSize: "18px" } },
     };
   },
 });
@@ -619,5 +718,36 @@ export default defineComponent({
   .reject-button .ant-btn {
     margin-right: 20px;
   }
+}
+
+.header-title-wrapper {
+  font-size: 22px;
+  margin-bottom: 10px;
+  .header-title {
+    margin-left: 10px;
+  }
+}
+
+.header-title-wrapper-with-margin-top {
+  margin-top: 20px;
+}
+
+.tab-title-header {
+  font-size: 20px;
+}
+.label-wrapper {
+  font-size: 18px;
+}
+
+.label-style > :first-child > label {
+  font-size: 18px;
+}
+
+.check-form-label .label-style label {
+  font-size: 18px;
+}
+
+.ant-form-item-label > label {
+  font-size: 18px;
 }
 </style>
