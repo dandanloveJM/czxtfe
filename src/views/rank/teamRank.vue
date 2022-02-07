@@ -51,6 +51,7 @@ export default defineComponent({
   name: "el_user_rank",
   components: {
     aIcon,
+    CalendarTwoTone,
   },
   setup() {
     const TEAM_MAP = teamMap;

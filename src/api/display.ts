@@ -157,10 +157,11 @@ export const getTeamRank = (param) => {
   });
 };
 
-export const getTeamBonus = () => {
+export const getTeamBonus = (param) => {
   return request({
     url: "http://localhost:8080/teamBonus",
     method: "get",
+    params: { year: param },
   });
 };
 

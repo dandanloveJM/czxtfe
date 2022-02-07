@@ -2,12 +2,24 @@
   <div class="doneTask__container">
     <div class="table-wrapper">
       <div class="tableWithData" v-if="state.taskList.length > 0">
+        <header class="header-wrapper">
+          <CalendarTwoTone />
+          <span>按年度筛选：</span>
+          <a-select
+            ref="select"
+            v-model:value="value1"
+            style="width: 120px"
+            :options="options1"
+            @change="handleChange"
+          >
+          </a-select>
+        </header>
         <a-table
           :columns="columns"
           :data-source="state.taskList"
           :rowKey="(record) => record.rankId"
+          :loading="tableLoading"
         >
-
           <template #teamRank="{ record }">
             <span>{{ TEAM_MAP[record.teamRank] }}</span>
           </template>
@@ -32,17 +44,22 @@ import {
 } from "vue";
 import { teamMap } from "@/utils/config";
 import { getTeamBonus } from "@/api/display";
+import { CalendarTwoTone } from "@ant-design/icons-vue";
+import { SelectTypes } from "ant-design-vue/es/select";
 
 export default defineComponent({
   name: "el_user_rank",
   components: {
     aIcon,
+    CalendarTwoTone,
   },
   setup() {
     const TEAM_MAP = teamMap;
     const state = reactive({
       taskList: [],
     });
+
+    const tableLoading = ref<boolean>(false);
 
     const columns = [
       {
@@ -52,7 +69,7 @@ export default defineComponent({
       },
       {
         title: "部门",
-         slots: { customRender: "teamRank" },
+        slots: { customRender: "teamRank" },
         key: "teamRank",
       },
       {
@@ -62,10 +79,11 @@ export default defineComponent({
       },
     ];
 
-    const fetchData = async () => {
-      const data = await getTeamBonus().then(
-        (response) => response.data.data
-      );
+    const fetchData = async (year: number) => {
+      const data = await getTeamBonus(year).then((response) => {
+        tableLoading.value = false;
+        return response.data.data;
+      });
       if (data.length === 0) {
         state.taskList = [];
       }
@@ -74,17 +92,51 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      watchEffect(() => {
-        fetchData();
-      });
+      fetchData(2022);
     });
+
+    const options1 = ref<SelectTypes["options"]>([
+      {
+        value: "2022",
+        label: "2022",
+      },
+      {
+        value: "2023",
+        label: "2023",
+      },
+
+      {
+        value: "2024",
+        label: "2024",
+      },
+    ]);
+
+    const handleChange = (value: string) => {
+      const year = Number(value);
+      console.log(value);
+      tableLoading.value = true;
+      fetchData(year);
+    };
 
     return {
       state,
       columns,
       TEAM_MAP,
+      value1: ref("2022"),
+      options1,
+      handleChange,
+      tableLoading,
     };
   },
 });
 </script>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.table-wrapper {
+  padding: 20px;
+  .header-wrapper {
+    font-size: 20px;
+    line-height: 1.5;
+    margin-bottom: 30px;
+  }
+}
+</style>
