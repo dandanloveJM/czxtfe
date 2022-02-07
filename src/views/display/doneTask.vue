@@ -10,6 +10,18 @@
           @search="onSearch"
         />
       </div>
+      <header class="header-wrapper">
+        <CalendarTwoTone />
+        <span>按年度筛选：</span>
+        <a-select
+          ref="select"
+          v-model:value="value1"
+          style="width: 120px"
+          :options="options1"
+          @change="handleChange"
+        >
+        </a-select>
+      </header>
     </div>
     <div class="table-wrapper">
       <div class="tableWithData" v-if="state.taskList.length > 0">
@@ -17,6 +29,7 @@
           :columns="columns"
           :data-source="state.taskList"
           :rowKey="(record) => record.processId"
+          :loading="tableLoading"
         >
           <template #type="{ record }">
             <span>{{ TYPE_MAP[record.type] }}</span>
@@ -52,19 +65,22 @@ import {
 import { typeMap } from "@/utils/config";
 import { getR1FinishedList } from "@/api/display";
 import moment from "moment";
-import { SearchOutlined } from "@ant-design/icons-vue";
+import { SearchOutlined, CalendarTwoTone } from "@ant-design/icons-vue";
+import { SelectTypes } from "ant-design-vue/es/select";
 
 export default defineComponent({
   name: "el_done",
   components: {
     aIcon,
     SearchOutlined,
+    CalendarTwoTone,
   },
   setup() {
     const TYPE_MAP = typeMap;
     const state = reactive({
       taskList: [],
     });
+    const tableLoading = ref<boolean>(false);
 
     const columns = [
       {
@@ -109,10 +125,11 @@ export default defineComponent({
       },
     ];
 
-    const fetchData = async (query: string) => {
-      const data = await getR1FinishedList(query, 2022).then(
-        (response) => response.data.data
-      );
+    const fetchData = async (query: string, year: number) => {
+      const data = await getR1FinishedList(query, year).then((response) => {
+        tableLoading.value = false;
+        return response.data.data;
+      });
       if (data.length === 0) {
         state.taskList = [];
       }
@@ -139,21 +156,48 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      fetchData("");
+      fetchData("", 2022);
     });
 
     const searchValue = ref<string>("");
     const onSearch = (searchValue: string) => {
       console.log("use value", searchValue);
-      fetchData(searchValue);
+      fetchData(searchValue, 2022);
     };
+
+    const options1 = ref<SelectTypes["options"]>([
+      {
+        value: "2022",
+        label: "2022",
+      },
+      {
+        value: "2023",
+        label: "2023",
+      },
+
+      {
+        value: "2024",
+        label: "2024",
+      },
+    ]);
+
+    const handleChange = (value: string) => {
+      const year = Number(value);
+      tableLoading.value = true;
+      fetchData("", year);
+    };
+
     return {
       TYPE_MAP,
       state,
       columns,
       changeTime,
-       searchValue,
+      searchValue,
       onSearch,
+      tableLoading,
+      value1: ref("2022"),
+      options1,
+      handleChange,
     };
   },
 });
@@ -164,10 +208,20 @@ export default defineComponent({
 }
 .filters-wrapper {
   margin-bottom: 30px;
+  display: flex;
+  align-items: center;
 
   .search-filter-wrapper {
-  width: 300px;
-}
+    width: 300px;
+  }
+  .table-wrapper {
+    padding: 20px;
+  }
 
+  .header-wrapper {
+    font-size: 20px;
+    line-height: 1.5;
+    margin-left: 40px;
+  }
 }
 </style>

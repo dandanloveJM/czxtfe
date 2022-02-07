@@ -66,7 +66,7 @@ export const getR1FinishedList = (query:string, year:number) => {
   return request({
     url: "http://localhost:8080/R1/displayFinishedProjects",
     method: "get",
-    params: {query: query}
+    params: {query: query, year: year}
   });
 };
 
