@@ -149,10 +149,11 @@ export const getR4AllList = () => {
   });
 };
 
-export const getTeamRank = () => {
+export const getTeamRank = (param) => {
   return request({
     url: "http://localhost:8080/teamRank",
     method: "get",
+    params: { year: param },
   });
 };
 
