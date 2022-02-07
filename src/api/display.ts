@@ -68,10 +68,11 @@ export const getR1FinishedList = () => {
   });
 };
 
-export const getAllUserRank = () => {
+export const getAllUserRank = (param) => {
   return request({
     url: "http://localhost:8080/userRank",
     method: "get",
+    params: { year: param },
   });
 };
 
