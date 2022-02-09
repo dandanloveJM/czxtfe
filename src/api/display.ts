@@ -6,13 +6,15 @@ import { ResponseData } from "@/types/api/public";
 type ConfigType<T = ResponseData> = Promise<AxiosResponse<T>>;
 
 export const getR1UnfinishedList = (
-  param: string,
-  year: number
+  name: string,
+  number: string,
+  type: string,
+  year: string
 ): ConfigType<R1UnfinishedList> => {
   return request({
     url: "http://localhost:8080/R1/displayUnfinishedProjects",
     method: "get",
-    params:{ query: param, year: year },
+    params:{ query: name, year: year, type: type, number:number},
   });
 };
 
@@ -70,18 +72,19 @@ export const getR1FinishedList = (query:string, year:number) => {
   });
 };
 
-export const getAllUserRank = (param) => {
+export const getAllUserRank = (year:number) => {
   return request({
     url: "http://localhost:8080/userRank",
     method: "get",
-    params: { year: param },
+    params: { year: year },
   });
 };
 
-export const getR2AllList = () => {
+export const getR2AllList = (query:string, year:number) => {
   return request({
     url: "http://localhost:8080/R2/Projects",
     method: "get",
+    params: {query: query, year: year}
   });
 };
 
