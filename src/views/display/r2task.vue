@@ -476,11 +476,15 @@ export default defineComponent({
       const data = await getR2AllList(name, number, type, year).then(
         (response) => {
           tableLoading.value = false;
-          return response.data.data.unfinished;
+          return response.data.data;
         }
       );
 
-      state.taskList = data;
+      if (data.hasOwnProperty("empty") || data.finished.length === 0) {
+        state.taskList = [];
+      }
+
+      state.taskList = data.unfinished;
     };
 
     const fetchCandidates = async () => {
