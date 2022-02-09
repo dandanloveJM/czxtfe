@@ -120,10 +120,16 @@ export const generateNewProject = (params) => {
   });
 };
 
-export const getR3AllList = () => {
+export const getR3AllList = (
+  query: string,
+  number: string,
+  type: string,
+  year: string
+) => {
   return request({
     url: "http://localhost:8080/R3/Projects",
     method: "get",
+    params: { query: query, year: year, type: type, number: number },
   });
 };
 
