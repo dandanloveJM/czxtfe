@@ -19,6 +19,7 @@
               :options="typeOptions"
               style="width: 120px"
               :filterOption="filterOption"
+              :allowClear="true"
             />
           </a-form-item>
           <a-form-item name="number" label="项目编号">
