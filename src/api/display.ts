@@ -85,11 +85,16 @@ export const getAllUserRank = (year: number) => {
   });
 };
 
-export const getR2AllList = (query: string, year: number) => {
+export const getR2AllList = (
+  query: string,
+  number: string,
+  type: string,
+  year: string
+) => {
   return request({
     url: "http://localhost:8080/R2/Projects",
     method: "get",
-    params: { query: query, year: year },
+    params: { query: query, year: year, type: type, number: number },
   });
 };
 

@@ -3,12 +3,44 @@
     <a-button type="primary" size="large" @click="createNewProject"
       >点击新建任务</a-button
     >
+    <div class="filters-wrapper">
+      <div class="search-filter-wrapper">
+        <a-form ref="filter-form" :model="filterFormState" layout="inline">
+          <a-form-item name="name" label="项目名称">
+            <a-input v-model:value="filterFormState.name" />
+          </a-form-item>
+          <a-form-item name="type" label="项目类型">
+            <a-select
+              v-model:value="filterFormState.type"
+              show-search
+              :options="typeOptions"
+              style="width: 120px"
+              :filterOption="filterOption"
+            />
+          </a-form-item>
+          <a-form-item name="number" label="项目编号">
+            <a-input v-model:value="filterFormState.number" />
+          </a-form-item>
+          <a-form-item name="year" label="按年度筛选">
+            <a-select
+              v-model:value="filterFormState.year"
+              style="width: 120px"
+              :options="options1"
+            />
+          </a-form-item>
+          <a-form-item :wrapper-col="wrapperCol">
+            <a-button type="primary" @click="searchFilters">搜索</a-button>
+          </a-form-item>
+        </a-form>
+      </div>
+    </div>
     <div class="table-wrapper">
       <div class="tableWithData" v-if="state.taskList != null">
         <a-table
           :columns="columns"
           :data-source="state.taskList"
           :rowKey="(record) => record.processId"
+          :loading="tableLoading"
         >
           <template #action="{ record }">
             <span v-if="record.activityName === 'R2/R1填写产值分配建议'">
@@ -254,6 +286,13 @@ import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 import moment from "moment";
 import localStorageStore from "@/utils/localStorageStore";
 
+interface filterFormState {
+  name: string;
+  number: string;
+  type: string;
+  year: string;
+}
+
 const columns = [
   {
     title: "任务名",
@@ -357,6 +396,7 @@ export default defineComponent({
     const showNewProject = ref<boolean>(false);
     const showPreview = ref<boolean>(false);
     const formRef3 = ref();
+    const tableLoading = ref<boolean>(false);
     const state = reactive({
       taskList: [],
       candidates: [],
@@ -373,7 +413,7 @@ export default defineComponent({
       comment: "",
     });
 
-const createNewFormState = () => ({
+    const createNewFormState = () => ({
       name: "",
       number: "",
       type: "",
@@ -381,10 +421,11 @@ const createNewFormState = () => ({
       taskId: "",
       processId: "",
       nextAssignee: "",
-    })
+    });
 
-
-    const newFormState: UnwrapRef<newFormState> = reactive(createNewFormState());
+    const newFormState: UnwrapRef<newFormState> = reactive(
+      createNewFormState()
+    );
     const formRef = ref();
     const dynamicForm: UnwrapRef<{
       records: PeopleAndProductRecord[];
@@ -426,9 +467,17 @@ const createNewFormState = () => ({
     console.log("typeOptions");
     console.dir(typeOptions);
 
-    const fetchData = async () => {
-      const data = await getR2AllList().then(
-        (response) => response.data.data.unfinished
+    const fetchData = async (
+      name: string,
+      number: string,
+      type: string,
+      year: string
+    ) => {
+      const data = await getR2AllList(name, number, type, year).then(
+        (response) => {
+          tableLoading.value = false;
+          return response.data.data.unfinished;
+        }
       );
 
       state.taskList = data;
@@ -455,9 +504,7 @@ const createNewFormState = () => ({
     };
     onMounted(() => {
       fetchCandidates();
-      watchEffect(() => {
-        fetchData();
-      });
+      fetchData("", "", "", "2022");
     });
 
     // 点击表单添加按钮
@@ -542,7 +589,7 @@ const createNewFormState = () => ({
             if (response.data.status === "ok") {
               visible.value = false;
               message.success("数据上传成功");
-              fetchData();
+              fetchData("", "", "", "2022");
             } else {
               message.error("程序异常");
             }
@@ -640,7 +687,7 @@ const createNewFormState = () => ({
         .then((response) => {
           message.success("退回成功");
           confirmLoading2.value = false;
-          fetchData();
+          fetchData("", "", "", "2022");
 
           showRollback.value = false;
         })
@@ -713,9 +760,9 @@ const createNewFormState = () => ({
               state.newTaskId = "";
 
               // 清空表单数据
-             Object.assign(newFormState, createNewFormState())
+              Object.assign(newFormState, createNewFormState());
 
-              fetchData();
+              fetchData("", "", "", "2022");
             })
             .catch((err) => {
               console.log(err);
@@ -735,8 +782,8 @@ const createNewFormState = () => ({
     };
 
     const beforeUpload = (file) => {
-      console.log("newFormState.fileList")
-      console.dir(newFormState.fileList)
+      console.log("newFormState.fileList");
+      console.dir(newFormState.fileList);
       newFormState.fileList = [...newFormState.fileList, file];
       return false;
     };
@@ -778,6 +825,48 @@ const createNewFormState = () => ({
       localStorageStore.setCache(state.processId, dynamicForm.records);
       visible.value = false;
     };
+
+    const createFilterFormState = () => ({
+      name: "",
+      number: "",
+      type: "",
+      year: "2022",
+    });
+    const typeOptions2 = TYPE_OPTIONS;
+
+    const filterFormState: UnwrapRef<filterFormState> = reactive(
+      createFilterFormState()
+    );
+
+    const searchFilters = () => {
+      // 拿到filterFormState数据，拼接参数, 发送fetchData请求, 设置loading
+      const formData = toRaw(filterFormState);
+      const values = Object.values(formData);
+      console.log("我看看参数");
+      console.log(values);
+      tableLoading.value = true;
+
+      if (values.length == 4) {
+        fetchData(...values);
+      }
+    };
+
+    const options1 = ref<SelectTypes["options"]>([
+      {
+        value: "2022",
+        label: "2022",
+      },
+      {
+        value: "2023",
+        label: "2023",
+      },
+
+      {
+        value: "2024",
+        label: "2024",
+      },
+    ]);
+
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
       state,
@@ -820,6 +909,13 @@ const createNewFormState = () => ({
       showPreview,
       showImg,
       handleCancel,
+
+      filterFormState,
+      tableLoading,
+      searchFilters,
+      typeOptions2,
+      wrapperCol: { span: 14, offset: 4 },
+      options1,
     };
   },
 });
@@ -851,5 +947,27 @@ const createNewFormState = () => ({
 
 .table-wrapper {
   margin-top: 30px;
+}
+
+.filters-wrapper {
+  margin-top: 30px;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+
+  .search-filter-wrapper {
+    .ant-form {
+      display: flex;
+    }
+  }
+  .table-wrapper {
+    padding: 20px;
+  }
+
+  .header-wrapper {
+    font-size: 20px;
+    line-height: 1.5;
+    margin-left: 40px;
+  }
 }
 </style>
