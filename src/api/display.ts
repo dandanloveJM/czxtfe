@@ -14,7 +14,7 @@ export const getR1UnfinishedList = (
   return request({
     url: "http://localhost:8080/R1/displayUnfinishedProjects",
     method: "get",
-    params:{ query: name, year: year, type: type, number:number},
+    params: { query: name, year: year, type: type, number: number },
   });
 };
 
@@ -64,15 +64,20 @@ export const rollbackRequest = (params) => {
   });
 };
 
-export const getR1FinishedList = (query:string, year:number) => {
+export const getR1FinishedList = (
+  query: string,
+  number: string,
+  type: string,
+  year: string
+) => {
   return request({
     url: "http://localhost:8080/R1/displayFinishedProjects",
     method: "get",
-    params: {query: query, year: year}
+    params: { query: query, year: year, type: type, number: number },
   });
 };
 
-export const getAllUserRank = (year:number) => {
+export const getAllUserRank = (year: number) => {
   return request({
     url: "http://localhost:8080/userRank",
     method: "get",
@@ -80,11 +85,11 @@ export const getAllUserRank = (year:number) => {
   });
 };
 
-export const getR2AllList = (query:string, year:number) => {
+export const getR2AllList = (query: string, year: number) => {
   return request({
     url: "http://localhost:8080/R2/Projects",
     method: "get",
-    params: {query: query, year: year}
+    params: { query: query, year: year },
   });
 };
 
@@ -192,7 +197,6 @@ export const a1SetProduct = (params) => {
   });
 };
 
-
 export const a1ModifyProduct = (params) => {
   let data = new FormData();
   for (const key in params) {
@@ -206,4 +210,4 @@ export const a1ModifyProduct = (params) => {
     method: "post",
     data: data,
   });
-}
+};

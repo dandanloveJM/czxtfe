@@ -2,26 +2,34 @@
   <div class="doneTask__container">
     <div class="filters-wrapper">
       <div class="search-filter-wrapper">
-        <a-input-search
-          v-model:value="searchValue"
-          placeholder="搜索项目名称"
-          enter-button="搜索"
-          size="large"
-          @search="onSearch"
-        />
+        <a-form ref="filter-form" :model="filterFormState" layout="inline">
+          <a-form-item name="name" label="项目名称">
+            <a-input v-model:value="filterFormState.name" />
+          </a-form-item>
+          <a-form-item name="type" label="项目类型">
+            <a-select
+              v-model:value="filterFormState.type"
+              show-search
+              :options="typeOptions"
+              style="width: 120px"
+              :filterOption="filterOption"
+            />
+          </a-form-item>
+          <a-form-item name="number" label="项目编号">
+            <a-input v-model:value="filterFormState.number" />
+          </a-form-item>
+          <a-form-item name="year" label="按年度筛选">
+            <a-select
+              v-model:value="filterFormState.year"
+              style="width: 120px"
+              :options="options1"
+            />
+          </a-form-item>
+          <a-form-item :wrapper-col="wrapperCol">
+            <a-button type="primary" @click="searchFilters">搜索</a-button>
+          </a-form-item>
+        </a-form>
       </div>
-      <header class="header-wrapper">
-        <CalendarTwoTone />
-        <span>按年度筛选：</span>
-        <a-select
-          ref="select"
-          v-model:value="value1"
-          style="width: 120px"
-          :options="options1"
-          @change="handleChange"
-        >
-        </a-select>
-      </header>
     </div>
     <div class="table-wrapper">
       <div class="tableWithData" v-if="state.taskList.length > 0">
@@ -67,6 +75,14 @@ import { getR1FinishedList } from "@/api/display";
 import moment from "moment";
 import { SearchOutlined, CalendarTwoTone } from "@ant-design/icons-vue";
 import { SelectTypes } from "ant-design-vue/es/select";
+import { typeMap, TYPE_OPTIONS } from "@/utils/config";
+
+interface filterFormState {
+  name: string;
+  number: string;
+  type: string;
+  year: string;
+}
 
 export default defineComponent({
   name: "el_done",
@@ -81,6 +97,10 @@ export default defineComponent({
       taskList: [],
     });
     const tableLoading = ref<boolean>(false);
+
+    const filterOption = (input: string, option: any) => {
+      return option.label.indexOf(input) >= 0;
+    };
 
     const columns = [
       {
@@ -124,12 +144,30 @@ export default defineComponent({
         key: "product",
       },
     ];
+    const createFilterFormState = () => ({
+      name: "",
+      number: "",
+      type: "",
+      year: "2022",
+    });
+    const typeOptions = TYPE_OPTIONS;
+  
+    const filterFormState: UnwrapRef<filterFormState> = reactive(
+      createFilterFormState()
+    );
 
-    const fetchData = async (query: string, year: number) => {
-      const data = await getR1FinishedList(query, year).then((response) => {
-        tableLoading.value = false;
-        return response.data.data;
-      });
+    const fetchData = async (
+      name: string,
+      number: string,
+      type: string,
+      year: string
+    ) => {
+      const data = await getR1FinishedList(name, number, type, year).then(
+        (response) => {
+          tableLoading.value = false;
+          return response.data.data;
+        }
+      );
       if (data.length === 0) {
         state.taskList = [];
       }
@@ -156,14 +194,10 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      fetchData("", 2022);
+      fetchData("", "", "", "2022");
     });
 
     const searchValue = ref<string>("");
-    const onSearch = (searchValue: string) => {
-      console.log("use value", searchValue);
-      fetchData(searchValue, 2022);
-    };
 
     const options1 = ref<SelectTypes["options"]>([
       {
@@ -181,23 +215,33 @@ export default defineComponent({
       },
     ]);
 
-    const handleChange = (value: string) => {
-      const year = Number(value);
+    const searchFilters = () => {
+      // 拿到filterFormState数据，拼接参数, 发送fetchData请求, 设置loading
+      const formData = toRaw(filterFormState);
+      const values = Object.values(formData);
+      console.log("我看看参数");
+      console.log(values);
       tableLoading.value = true;
-      fetchData("", year);
+      if (values.length == 4) {
+        fetchData(...values);
+      }
     };
-
+    
     return {
       TYPE_MAP,
       state,
       columns,
       changeTime,
       searchValue,
-      onSearch,
+
       tableLoading,
-      value1: ref("2022"),
+
       options1,
-      handleChange,
+      typeOptions,
+      searchFilters,
+      filterFormState,
+      wrapperCol: { span: 14, offset: 4 },
+      filterOption,
     };
   },
 });
@@ -212,7 +256,9 @@ export default defineComponent({
   align-items: center;
 
   .search-filter-wrapper {
-    width: 300px;
+    .ant-form {
+      display: flex;
+    }
   }
   .table-wrapper {
     padding: 20px;
