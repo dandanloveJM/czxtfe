@@ -1,11 +1,45 @@
 <template>
   <div class="issue__container">
+    <div class="filters-wrapper">
+      <div class="search-filter-wrapper">
+        <a-form ref="filter-form" :model="filterFormState" layout="inline">
+          <a-form-item name="name" label="项目名称">
+            <a-input v-model:value="filterFormState.name" />
+          </a-form-item>
+          <a-form-item name="type" label="项目类型">
+            <a-select
+              v-model:value="filterFormState.type"
+              show-search
+              :options="typeOptions"
+              style="width: 120px"
+              :filterOption="filterOption"
+              :allowClear="true"
+            />
+          </a-form-item>
+          <a-form-item name="number" label="项目编号">
+            <a-input v-model:value="filterFormState.number" />
+          </a-form-item>
+          <a-form-item name="year" label="按年度筛选">
+            <a-select
+              v-model:value="filterFormState.year"
+              style="width: 120px"
+              :options="options1"
+            />
+          </a-form-item>
+          <a-form-item :wrapper-col="wrapperCol">
+            <a-button type="primary" @click="searchFilters">搜索</a-button>
+          </a-form-item>
+        </a-form>
+      </div>
+    </div>
+
     <div class="table-wrapper">
       <div class="tableWithData" v-if="state.taskList.length > 0">
         <a-table
           :columns="columns"
           :data-source="state.taskList"
           :rowKey="(record) => record.processId"
+          :loading="tableLoading"
         >
           <template #updatedAt="{ record }">
             <span>{{ changeTime(record.updatedAt) }}</span>
@@ -205,6 +239,14 @@ import {
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 import moment from "moment";
 import { debounce } from "lodash-es";
+
+interface filterFormState {
+  name: string;
+  number: string;
+  type: string;
+  year: string;
+}
+
 const columns = [
   {
     title: "任务名",
@@ -312,6 +354,7 @@ export default defineComponent({
     const formRef3 = ref();
     const showCheck = ref<boolean>(false);
     const showPreview = ref<boolean>(false);
+    const tableLoading = ref<boolean>(false);
     const state = reactive({
       taskList: [],
       candidates: [],
@@ -412,12 +455,23 @@ export default defineComponent({
     console.log("typeOptions");
     console.dir(typeOptions);
 
-    const fetchData = async () => {
-      const data = await getR4AllList().then(
-        (response) => response.data.data.unfinished
+    const fetchData = async (
+      name: string,
+      number: string,
+      type: string,
+      year: string
+    ) => {
+      const data = await getR4AllList(name, number, type, year).then(
+        (response) => {
+          tableLoading.value = false;
+          return response.data.data;
+        }
       );
-
-      state.taskList = data;
+      if (data.hasOwnProperty("empty") || data.unfinished.length === 0) {
+        state.taskList = [];
+      } else {
+        state.taskList = data.unfinished;
+      }
     };
 
     const fetchCandidates = async () => {
@@ -441,9 +495,7 @@ export default defineComponent({
     };
     onMounted(() => {
       fetchCandidates();
-      watchEffect(() => {
-        fetchData();
-      });
+      fetchData("", "", "", "2022");
     });
 
     // 点击表单添加按钮
@@ -489,7 +541,6 @@ export default defineComponent({
       state.historyData = [];
     };
 
-  
     const check = (record) => {
       showCheck.value = true;
 
@@ -524,7 +575,7 @@ export default defineComponent({
       rollbackRequest(params)
         .then((response) => {
           message.success("退回成功");
-          fetchData();
+          fetchData("", "", "", "2022");
 
           showCheck.value = false;
           state.checkProcessId = "";
@@ -547,7 +598,7 @@ export default defineComponent({
       r4Approve(params)
         .then((response) => {
           message.success("审核通过成功");
-          fetchData();
+          fetchData("", "", "", "2022");
 
           showCheck.value = false;
           state.checkProcessId = "";
@@ -566,6 +617,47 @@ export default defineComponent({
       showPreview.value = true;
       state.previewURL = srcURL;
     };
+
+    const createFilterFormState = () => ({
+      name: "",
+      number: "",
+      type: "",
+      year: "2022",
+    });
+
+    const filterFormState: UnwrapRef<filterFormState> = reactive(
+      createFilterFormState()
+    );
+
+    const searchFilters = () => {
+      // 拿到filterFormState数据，拼接参数, 发送fetchData请求, 设置loading
+      const formData = toRaw(filterFormState);
+      const values = Object.values(formData);
+      console.log("我看看参数");
+      console.log(values);
+      tableLoading.value = true;
+
+      if (values.length == 4) {
+        fetchData(...values);
+      }
+    };
+
+    const options1 = ref<SelectTypes["options"]>([
+      {
+        value: "2022",
+        label: "2022",
+      },
+      {
+        value: "2023",
+        label: "2023",
+      },
+
+      {
+        value: "2024",
+        label: "2024",
+      },
+    ]);
+
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
       state,
@@ -605,6 +697,14 @@ export default defineComponent({
       columnsWithoutOperation,
       activeKey: ref("1"),
       labelColOfCheck: { style: { fontSize: "18px" } },
+
+      filterFormState,
+      tableLoading,
+      searchFilters,
+      typeOptions,
+      wrapperCol: { span: 14, offset: 4 },
+      options1,
+      filterOption,
     };
   },
 });
@@ -677,5 +777,31 @@ export default defineComponent({
 
 .ant-form-item-label > label {
   font-size: 18px;
+}
+
+.filters-wrapper {
+  margin-top: 30px;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+
+  .search-filter-wrapper {
+    .ant-form {
+      display: flex;
+    }
+  }
+  .table-wrapper {
+    padding: 20px;
+  }
+
+  .header-wrapper {
+    font-size: 20px;
+    line-height: 1.5;
+    margin-left: 40px;
+  }
+}
+
+.issue__container {
+  padding: 0 20px;
 }
 </style>

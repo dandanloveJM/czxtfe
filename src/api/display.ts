@@ -163,10 +163,16 @@ export const r4Approve = (params) => {
   });
 };
 
-export const getR4AllList = () => {
+export const getR4AllList = (
+  query: string,
+  number: string,
+  type: string,
+  year: string
+) => {
   return request({
     url: "http://localhost:8080/R4/Projects",
     method: "get",
+    params: { query: query, year: year, type: type, number: number },
   });
 };
 
