@@ -192,10 +192,16 @@ export const getTeamBonus = (param) => {
   });
 };
 
-export const getA1Data = () => {
+export const getA1Data = (
+  query: string,
+  number: string,
+  type: string,
+  year: string
+) => {
   return request({
     url: "http://localhost:8080/A1/Projects",
     method: "get",
+    params: { query: query, year: year, type: type, number: number },
   });
 };
 

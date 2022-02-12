@@ -1,11 +1,45 @@
 <template>
   <div class="doneTask__container">
+    <div class="filters-wrapper">
+      <div class="search-filter-wrapper">
+        <a-form ref="filter-form" :model="filterFormState" layout="inline">
+          <a-form-item name="name" label="项目名称">
+            <a-input v-model:value="filterFormState.name" />
+          </a-form-item>
+          <a-form-item name="type" label="项目类型">
+            <a-select
+              v-model:value="filterFormState.type"
+              show-search
+              :options="typeOptions"
+              style="width: 120px"
+              :filterOption="filterOption"
+              :allowClear="true"
+            />
+          </a-form-item>
+          <a-form-item name="number" label="项目编号">
+            <a-input v-model:value="filterFormState.number" />
+          </a-form-item>
+          <a-form-item name="year" label="按年度筛选">
+            <a-select
+              v-model:value="filterFormState.year"
+              style="width: 120px"
+              :options="options1"
+            />
+          </a-form-item>
+          <a-form-item :wrapper-col="wrapperCol">
+            <a-button type="primary" @click="searchFilters">搜索</a-button>
+          </a-form-item>
+        </a-form>
+      </div>
+    </div>
+
     <div class="table-wrapper">
       <div class="tableWithData" v-if="state.taskList.length > 0">
         <a-table
           :columns="columns"
           :data-source="state.taskList"
           :rowKey="(record) => record.processId"
+          :loading="tableLoading"
         >
           <template #type="{ record }">
             <span>{{ TYPE_MAP[record.type] }}</span>
@@ -17,14 +51,14 @@
             <span>{{ record.totalPercentage + "%" }}</span>
           </template>
           <template #products="{ record }">
-            <a @click="() => showProducts(record.products)"
-              >点击查看团队成员产值详情</a
-            >
+            <a-button @click="() => showProducts(record.products)">
+              查看产值
+            </a-button>
           </template>
           <template #action="{ record }">
-            <a @click="() => modifyProducts(record.processId)"
-              >修改总产值及完成比例</a
-            >
+            <a-button @click="() => modifyProducts(record.processId)">
+              修改总产值及比例
+            </a-button>
           </template>
         </a-table>
       </div>
@@ -81,15 +115,23 @@ import {
   toRaw,
   watchEffect,
 } from "vue";
-import { typeMap } from "@/utils/config";
+import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 import { getA1Data, a1ModifyProduct } from "@/api/display";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 import moment from "moment";
+import { SelectTypes } from "ant-design-vue/es/select";
 
 interface A1FormState {
   total: number;
   ratio: number;
+}
+
+interface filterFormState {
+  name: string;
+  number: string;
+  type: string;
+  year: string;
 }
 
 export default defineComponent({
@@ -113,6 +155,7 @@ export default defineComponent({
       total: 0,
       ratio: 100,
     });
+    const tableLoading = ref<boolean>(false);
 
     const columns = [
       {
@@ -175,21 +218,27 @@ export default defineComponent({
       },
     ];
 
-    const fetchData = async () => {
-      const data = await getA1Data().then(
-        (response) => response.data.data.finished
+    const fetchData = async (
+      name: string,
+      number: string,
+      type: string,
+      year: string
+    ) => {
+      const data = await getA1Data(name, number, type, year).then(
+        (response) => {
+          tableLoading.value = false;
+          return response.data.data;
+        }
       );
-      if (data.length === 0) {
+      if (data.hasOwnProperty("empty")) {
         state.taskList = [];
+      } else {
+        state.taskList = data.finished;
       }
-
-      state.taskList = data;
     };
 
     onMounted(() => {
-      watchEffect(() => {
-        fetchData();
-      });
+      fetchData("", "", "", "2022");
     });
 
     const showProducts = (products) => {
@@ -203,7 +252,7 @@ export default defineComponent({
       state.products = [];
     };
 
-    const modifyProducts = (processId) => {
+    const modifyProducts = (processId: string) => {
       showModify.value = true;
       state.currentProcessId = processId;
     };
@@ -218,7 +267,7 @@ export default defineComponent({
       a1ModifyProduct(params)
         .then((response) => {
           message.success("产值及比例修改成功");
-          fetchData();
+          fetchData("", "", "", "2022");
 
           showModify.value = false;
           state.currentProcessId = "";
@@ -231,6 +280,50 @@ export default defineComponent({
 
     const changeTime = (time) => {
       return moment(time).add(8, "hours").format("lll");
+    };
+    const createFilterFormState = () => ({
+      name: "",
+      number: "",
+      type: "",
+      year: "2022",
+    });
+    const typeOptions = TYPE_OPTIONS;
+
+    const filterFormState: UnwrapRef<filterFormState> = reactive(
+      createFilterFormState()
+    );
+
+    const searchFilters = () => {
+      // 拿到filterFormState数据，拼接参数, 发送fetchData请求, 设置loading
+      const formData = toRaw(filterFormState);
+      const values = Object.values(formData);
+      console.log("我看看参数");
+      console.log(values);
+      tableLoading.value = true;
+
+      if (values.length == 4) {
+        fetchData(...values);
+      }
+    };
+
+    const options1 = ref<SelectTypes["options"]>([
+      {
+        value: "2022",
+        label: "2022",
+      },
+      {
+        value: "2023",
+        label: "2023",
+      },
+
+      {
+        value: "2024",
+        label: "2024",
+      },
+    ]);
+
+    const filterOption = (input: string, option: any) => {
+      return option.label.indexOf(input) >= 0;
     };
 
     return {
@@ -247,8 +340,41 @@ export default defineComponent({
       a1FormState,
       a1FormRef,
       changeTime,
+
+      filterFormState,
+      tableLoading,
+      searchFilters,
+      typeOptions,
+      wrapperCol: { span: 14, offset: 4 },
+      options1,
+      filterOption,
     };
   },
 });
 </script>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.filters-wrapper {
+  margin-top: 30px;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+
+  .search-filter-wrapper {
+    .ant-form {
+      display: flex;
+    }
+  }
+  .table-wrapper {
+    padding: 20px;
+  }
+
+  .header-wrapper {
+    font-size: 20px;
+    line-height: 1.5;
+    margin-left: 40px;
+  }
+}
+.doneTask__container {
+  padding: 0 20px;
+}
+</style>
