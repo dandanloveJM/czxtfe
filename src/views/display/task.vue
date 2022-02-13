@@ -506,7 +506,7 @@ export default defineComponent({
             if (response.data.status === "ok") {
               visible.value = false;
               message.success("数据上传成功");
-              fetchData("", 2022);
+              fetchData("", "","","2022");
             } else {
               message.error("程序异常");
             }
@@ -600,7 +600,7 @@ export default defineComponent({
         .then((response) => {
           message.success("退回成功");
           confirmLoading2.value = false;
-          fetchData("", 2022);
+          fetchData("","","", "2022");
 
           showRollback.value = false;
         })
@@ -658,11 +658,7 @@ export default defineComponent({
       visible.value = false;
     };
 
-    const searchValue = ref<string>("");
-    const onSearch = (searchValue: string) => {
-      console.log("use value", searchValue);
-      fetchData(searchValue, 2022);
-    };
+  
 
     const options1 = ref<SelectTypes["options"]>([
       {
@@ -689,7 +685,7 @@ export default defineComponent({
       console.log("我看看参数");
       console.log(values);
       tableLoading.value = true;
-      fetchData(...values)
+      fetchData(values[0], values[1], values[2], values[3])
     };
 
     return {
@@ -722,9 +718,7 @@ export default defineComponent({
       showPreview,
       showImg,
       handleCancel,
-
-      searchValue,
-      onSearch,
+   
       tableLoading,
       year1: ref("2022"),
       options1,

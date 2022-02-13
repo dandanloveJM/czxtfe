@@ -302,7 +302,7 @@ export default defineComponent({
       tableLoading.value = true;
 
       if (values.length == 4) {
-        fetchData(...values);
+        fetchData(values[0], values[1], values[2], values[3]);
       }
     };
 

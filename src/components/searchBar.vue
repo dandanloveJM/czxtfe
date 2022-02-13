@@ -30,6 +30,7 @@
 </template>
 <script lang="ts">
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
+import { SelectTypes } from "ant-design-vue/es/select";
 import {
   defineComponent,
   ref,

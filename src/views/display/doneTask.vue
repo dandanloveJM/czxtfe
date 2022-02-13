@@ -1,3 +1,4 @@
+// @ts-nocheck
 <template>
   <div class="doneTask__container">
     <div class="filters-wrapper">
@@ -71,7 +72,6 @@ import {
   toRaw,
   watchEffect,
 } from "vue";
-import { typeMap } from "@/utils/config";
 import { getR1FinishedList } from "@/api/display";
 import moment from "moment";
 import { SearchOutlined, CalendarTwoTone } from "@ant-design/icons-vue";
@@ -152,7 +152,7 @@ export default defineComponent({
       year: "2022",
     });
     const typeOptions = TYPE_OPTIONS;
-  
+
     const filterFormState: UnwrapRef<filterFormState> = reactive(
       createFilterFormState()
     );
@@ -223,11 +223,12 @@ export default defineComponent({
       console.log("我看看参数");
       console.log(values);
       tableLoading.value = true;
+
       if (values.length == 4) {
-        fetchData(...values);
+        fetchData(values[0], values[1], values[2], values[3]);
       }
     };
-    
+
     return {
       TYPE_MAP,
       state,

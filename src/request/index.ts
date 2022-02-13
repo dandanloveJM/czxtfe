@@ -70,6 +70,7 @@ request.interceptors.response.use((response: AxiosResponse): AxiosResponse | Pro
     return Promise.reject(response)
   } else if (response.status===403){
     router.push({path:'/403'})
+    return Promise.reject(response)
   }
   else {
     return Promise.reject(response)

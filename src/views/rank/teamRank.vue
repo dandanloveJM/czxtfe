@@ -46,6 +46,7 @@ import {
 import { teamMap } from "@/utils/config";
 import { getTeamRank } from "@/api/display";
 import { CalendarTwoTone } from "@ant-design/icons-vue";
+import { SelectTypes } from "ant-design-vue/es/select";
 
 export default defineComponent({
   name: "el_user_rank",

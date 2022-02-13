@@ -230,7 +230,6 @@ import {
   ValidateErrorEntity,
 } from "ant-design-vue/es/form/interface";
 import { UploadOutlined } from "@ant-design/icons-vue";
-import { SelectTypes } from "ant-design-vue/es/select";
 import aIcon from "@/components/aicon/aicon.vue";
 import {
   MinusCircleOutlined,
@@ -337,6 +336,11 @@ interface FileItem {
 interface FileInfo {
   file: FileItem;
   fileList: FileItem[];
+}
+
+interface A1FormState {
+  total: number;
+  ratio: number;
 }
 export default defineComponent({
   name: "issue",
@@ -699,7 +703,7 @@ export default defineComponent({
       tableLoading.value = true;
 
       if (values.length == 4) {
-        fetchData(...values);
+        fetchData(values[0], values[1], values[2], values[3]);
       }
     };
 
