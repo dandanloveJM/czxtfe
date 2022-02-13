@@ -535,12 +535,10 @@ export default defineComponent({
           return response.data.data;
         }
       );
-      if (data.length === 0) {
-        if (data.hasOwnProperty("empty") || data.unfinished.length === 0) {
-          state.taskList = [];
-        } else {
-          state.taskList = data.unfinished;
-        }
+      if (data.hasOwnProperty("empty")) {
+        state.taskList = [];
+      } else {
+        state.taskList = data.unfinished;
       }
     };
 

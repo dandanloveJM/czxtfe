@@ -234,3 +234,19 @@ export const a1ModifyProduct = (params) => {
     data: data,
   });
 };
+
+
+export const teamPieCharts = () => {
+  return request({
+    url: "http://localhost:8080/teamPieChart",
+    method: "get",
+  });
+}
+
+
+export const getBarChart = () => {
+  return request({
+    url: "http://localhost:8080/barChart",
+    method: "get",
+  });
+}
