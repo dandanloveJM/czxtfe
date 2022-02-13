@@ -67,7 +67,7 @@ import {
   watchEffect,
 } from "vue";
 import { teamMap } from "@/utils/config";
-import { teamPieCharts, getBarChart } from "@/api/display";
+import { teamPieCharts, getBarChart, getTeamRank } from "@/api/display";
 import { CalendarTwoTone } from "@ant-design/icons-vue";
 import * as echarts from "echarts";
 
@@ -100,6 +100,20 @@ export default defineComponent({
       const data = await teamPieCharts().then((response) => {
         return response.data.data;
       });
+
+      const rankData = await getTeamRank("2022").then((response) => {
+        return response.data.data;
+      });
+
+      const localRankMap = {
+       
+      };
+      for(const item of rankData){
+        const key = item.teamRank
+        const value = item.productSum
+        localRankMap[key] = value
+      }
+
       state.pieChartParams = data;
 
       const pies = toRaw(state.pieChartParams);
@@ -114,9 +128,16 @@ export default defineComponent({
             temp["value"] = item.sum;
             return temp;
           });
-          console.log("-----pieParams");
-          console.dir(pieParams);
-          drawPie(localMap[key][0], localMap[key][1], pieParams);
+          const total_sum = pieParams.reduce((perviousValue, current) => {
+            return perviousValue + current.value;
+          }, 0);
+          console.log("-----total_sum");
+          console.dir();
+          drawPie(
+            localMap[key][0],
+            localMap[key][1] + "总产值\n" + localRankMap[key],
+            pieParams
+          );
         }
       }
     };
