@@ -657,6 +657,7 @@ export default defineComponent({
       const params = {};
       const a1FormState2 = toRaw(a1FormState);
       showCheck.value = false;
+      showModify.value = false;
       params["processId"] = state.checkProcessId;
       params["taskId"] = state.checkTaskId;
       params["total"] = a1FormState2.total;
@@ -669,7 +670,7 @@ export default defineComponent({
           message.success("设置产值及比例成功");
           fetchData("", "", "", "2022");
 
-          showModify.value = false;
+          
           state.currentProcessId = "";
           state.currentTaskId = "";
         })

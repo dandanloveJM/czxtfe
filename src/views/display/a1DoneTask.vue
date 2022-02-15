@@ -266,13 +266,13 @@ export default defineComponent({
       params["ratio"] = a1FormState2.ratio;
 
       Object.assign(a1FormState, { total: 0, ratio: 100 });
+      showModify.value = false;
 
       a1ModifyProduct(params)
         .then((response) => {
           message.success("产值及比例修改成功");
           fetchData("", "", "", "2022");
 
-          showModify.value = false;
           state.currentProcessId = "";
         })
         .catch((err) => {
