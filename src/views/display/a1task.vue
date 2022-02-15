@@ -77,16 +77,16 @@
       </div>
     </div>
 
-    <Modal
+    <a-modal
       title="查看附件原图"
       v-model:visible="showPreview"
       width="1200"
       :footer="null"
     >
       <img :src="state.previewURL" style="max-width: 1100px" />
-    </Modal>
+    </a-modal>
 
-    <Modal
+    <a-modal
       ref="history"
       title="查看当前审批流程"
       v-model:visible="showHistory"
@@ -103,9 +103,9 @@
           <span>{{ record.comment ? record.comment : "无" }}</span>
         </template>
       </a-table>
-    </Modal>
+    </a-modal>
 
-    <Modal title="审核流程" v-model:visible="showCheck" :footer="null">
+    <a-modal title="审核流程" v-model:visible="showCheck" :footer="null">
       <a-tabs v-model:activeKey="activeKey">
         <a-tab-pane key="1">
           <template #tab>
@@ -190,9 +190,9 @@
           </a-button>
         </div>
       </div>
-    </Modal>
+    </a-modal>
 
-    <Modal
+    <a-modal
       title="设置项目的总产值及完成比例"
       v-model:visible="showModify"
       @ok="resetOk"
@@ -212,7 +212,7 @@
           /><span>填写0-100的正整数</span>
         </a-form-item>
       </a-form>
-    </Modal>
+    </a-modal>
   </div>
 </template>
 <script lang="ts">

@@ -153,6 +153,10 @@ const tabs = {
     delOther (state: TabState, index: number) {
       router.push(state.tabList[index]['fullPath'])
       state.tabList = [state.tabList[index]]
+    },
+
+    clearAllTabs(state: TabState){
+      state.tabList=[]
     }
   }
 

@@ -76,19 +76,20 @@
       </div>
     </div>
 
-    <Modal
+    <a-modal
       title="查看附件原图"
       v-model:visible="showPreview"
       width="1200"
       :footer="null"
     >
       <img :src="state.previewURL" style="max-width: 1100px" />
-    </Modal>
-    <Modal
+    </a-modal>
+    <a-modal
       ref="history"
       title="查看当前审批流程"
       v-model:visible="showHistory"
       @ok="historyOk"
+      width="1000px"
     >
       <a-spin v-if="historyLoading" />
       <a-table
@@ -101,7 +102,7 @@
           <span>{{ record.comment ? record.comment : "无" }}</span>
         </template>
       </a-table>
-    </Modal>
+    </a-modal>
 
     <Modal title="审核流程" v-model:visible="showCheck" :footer="null">
       <a-tabs v-model:activeKey="activeKey">

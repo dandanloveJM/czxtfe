@@ -86,14 +86,14 @@
         <a-empty />
       </div>
     </div>
-    <Modal
+    <a-modal
       title="查看附件原图"
       v-model:visible="showPreview"
-      width="1200"
+      width="1200px"
       :footer="null"
     >
       <img :src="state.previewURL" style="max-width: 1100px" />
-    </Modal>
+    </a-modal>
 
     <a-modal
       ref="addModal"

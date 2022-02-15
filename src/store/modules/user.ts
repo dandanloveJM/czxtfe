@@ -135,6 +135,8 @@ const user = {
       return new Promise((resolve, reject) => {
         logout().then(e => {
           context.commit('clearState')
+
+          
           resolve(e)
         }).catch(err => {
           message.error(err.message || err.data.message)

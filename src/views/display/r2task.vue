@@ -352,7 +352,7 @@ interface newFormState {
   name: string;
   number: string;
   type: string;
-  fileList: [];
+  fileList: FileItem[];
   taskId: string;
   processId: string;
   nextAssignee: string;
@@ -364,6 +364,15 @@ interface FileItem {
   status?: string;
   response?: Response;
   url: string;
+}
+
+interface FileItem {
+  uid: string;
+  name?: string;
+  status?: string;
+  preview?: string;
+  originFileObj?: any;
+  file: string | Blob;
 }
 
 interface FileInfo {
@@ -531,7 +540,7 @@ export default defineComponent({
       visible.value = false;
     };
 
-    const checkForDuplicates = (array) => {
+    const checkForDuplicates = (array:any[]) => {
       return new Set(array).size !== array.length;
     };
 
@@ -703,7 +712,7 @@ export default defineComponent({
         });
     };
 
-    const reuploadProjects = (processId, taskId) => {
+    const reuploadProjects = (processId:string, taskId:string) => {
       showNewProject.value = true;
       state.newProcessId = processId;
       state.newTaskId = taskId;
@@ -779,7 +788,7 @@ export default defineComponent({
         });
     };
 
-    const handleRemove = (file) => {
+    const handleRemove = (file: FileItem) => {
       const index = newFormState.fileList.indexOf(file);
       const newFileList = newFormState.fileList.slice();
       newFileList.splice(index, 1);
@@ -852,7 +861,7 @@ export default defineComponent({
       tableLoading.value = true;
 
       if (values.length == 4) {
-        fetchData(...values);
+        fetchData(values[0], values[1], values[2], values[3]);
       }
     };
 
