@@ -77,11 +77,11 @@ export const getR1FinishedList = (
   });
 };
 
-export const getAllUserRank = (year: number) => {
+export const getAllUserRank = (year: number, team:string) => {
   return request({
     url: "http://localhost:8080/userRank",
     method: "get",
-    params: { year: year },
+    params: { year: year, team: team},
   });
 };
 

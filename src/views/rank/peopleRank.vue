@@ -1,19 +1,31 @@
 <template>
   <div class="doneTask__container">
+    <div class="filters-wrapper">
+      <div class="search-filter-wrapper">
+        <a-form ref="filter-form" :model="filterFormState" layout="inline">
+          <a-form-item name="team" label="筛选团队">
+            <a-select
+              v-model:value="filterFormState.team"
+              :options="teamOptions"
+              style="width: 120px"
+              :allowClear="true"
+            />
+          </a-form-item>
+          <a-form-item name="year" label="按年度筛选">
+            <a-select
+              v-model:value="filterFormState.year"
+              style="width: 120px"
+              :options="options1"
+            />
+          </a-form-item>
+          <a-form-item :wrapper-col="wrapperCol">
+            <a-button type="primary" @click="searchFilters">搜索</a-button>
+          </a-form-item>
+        </a-form>
+      </div>
+    </div>
+
     <div class="table-wrapper">
-      <header class="header-wrapper">
-        <CalendarTwoTone />
-        <span>按年度筛选：</span>
-        <a-select
-          ref="select"
-          v-model:value="value1"
-          style="width: 120px"
-          :options="options1"
-          @change="handleChange"
-        >
-        </a-select>
-      </header>
-     
       <div class="tableWithData" v-if="state.taskList.length > 0">
         <a-table
           :columns="columns"
@@ -40,11 +52,16 @@ import {
   toRaw,
   watchEffect,
 } from "vue";
-import { typeMap } from "@/utils/config";
+import { typeMap, teamMap, TEAMS_OPTIONS } from "@/utils/config";
 import { getAllUserRank } from "@/api/display";
 import { debounce } from "lodash-es";
 import { CalendarTwoTone } from "@ant-design/icons-vue";
 import { SelectTypes } from "ant-design-vue/es/select";
+
+interface filterFormState {
+  team: string;
+  year: string;
+}
 
 export default defineComponent({
   name: "el_user_rank",
@@ -77,8 +94,8 @@ export default defineComponent({
       },
     ];
 
-    const fetchData = async (year: number) => {
-      const data = await getAllUserRank(year).then((response) => {
+    const fetchData = async (year: string, team: string) => {
+      const data = await getAllUserRank(year, team).then((response) => {
         tableLoading.value = false;
         return response.data.data;
       });
@@ -90,7 +107,7 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      fetchData(2022);
+      fetchData(2022, "");
       // watchEffect(() => {
       //   fetchData(2022);
       // });
@@ -116,8 +133,40 @@ export default defineComponent({
       const year = Number(value);
       console.log(value);
       tableLoading.value = true;
-      fetchData(year);
+      // fetchData(year);
     };
+
+    const teamOptions = TEAMS_OPTIONS;
+
+    const filterOption = (input: string, option: any) => {
+      return option.label.indexOf(input) >= 0;
+    };
+
+    const createFilterFormState = () => ({
+      team: "",
+      year: "2022",
+    });
+
+    const filterFormState: UnwrapRef<filterFormState> = reactive(
+      createFilterFormState()
+    );
+
+    const searchFilters = () => {
+      // 拿到filterFormState数据，拼接参数, 发送fetchData请求, 设置loading
+      const formData = toRaw(filterFormState);
+      const values = Object.values(formData);
+      console.log("我看看参数");
+      console.log(values);
+      tableLoading.value = true;
+      if (values[0] == undefined) {
+        values[0] = "";
+      }
+
+      if (values.length == 2) {
+        fetchData(values[1], values[0]);
+      }
+    };
+
     return {
       state,
       columns,
@@ -125,17 +174,20 @@ export default defineComponent({
       options1,
       handleChange,
       tableLoading,
+      teamOptions,
+      filterOption,
+      filterFormState,
+      searchFilters,
+      wrapperCol: { span: 14, offset: 4 },
     };
   },
 });
 </script>
 <style lang="scss" scoped>
-.table-wrapper {
+.doneTask__container {
   padding: 20px;
-  .header-wrapper {
-    font-size: 20px;
-    line-height: 1.5;
-    margin-bottom: 30px;
-  }
+}
+.table-wrapper {
+  margin-top: 20px;
 }
 </style>

@@ -63,3 +63,25 @@ export const typeMap = {
     "F1":"方法一室",
     "F2":"方法二室"
   }
+
+  export const TEAMS_OPTIONS = [
+    {
+      value:'Z1',
+      label: '支持一室'
+    },
+    {
+      value:'Z2',
+      label: '支持二室'
+    },
+    {
+      value:'F1',
+      label: '方法一室'
+    },
+    {
+      value:'F2',
+      label: '方法二室'
+    },
+
+  ]
+   
+  
