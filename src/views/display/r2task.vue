@@ -217,7 +217,7 @@
         <a-form-item name="number" label="项目编号">
           <a-input v-model:value="newFormState.number" />
         </a-form-item>
-        <a-form-item name="nextAssignee" label="指定谁填写产值比例">
+        <a-form-item name="nextAssignee" label="指定项目长">
           <a-select
             v-model:value="newFormState.nextAssignee"
             show-search
@@ -741,7 +741,7 @@ export default defineComponent({
         .validate()
         .then(() => {
           if (formData["nextAssignee"] === "") {
-            message.error("必须指定用户填写产值比例");
+            message.error("必须指定项目长");
             return;
           }
 

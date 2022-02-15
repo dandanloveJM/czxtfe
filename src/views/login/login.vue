@@ -5,7 +5,7 @@
       <a-col :xs="24" :sm="24" :md="12" :lg="10" :xl="6">
         <div class="login-container-form">
           <div class="login-container-hello">您好!</div>
-          <div class="login-container-title">欢迎使用产值管理系统</div>
+          <div class="login-container-title">欢迎使用PST产值管理系统</div>
           <a-form ref="formRef" :model="form" :rules="rules" @keyup.enter="handleSubmit">
             <a-form-item name="username">
               <a-input v-model:value="form.username" autocomplete="off" placeholder="请输入账号">
