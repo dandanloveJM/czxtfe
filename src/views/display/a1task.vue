@@ -105,7 +105,7 @@
       </a-table>
     </a-modal>
 
-    <a-modal title="审核流程" v-model:visible="showCheck" :footer="null">
+    <a-modal title="审核流程" v-model:visible="showCheck" width="1000px" :footer="null">
       <a-tabs v-model:activeKey="activeKey">
         <a-tab-pane key="1">
           <template #tab>
@@ -196,7 +196,8 @@
       title="设置项目的总产值及完成比例"
       v-model:visible="showModify"
       @ok="resetOk"
-      width="600"
+      width="600px"
+      @cancel="cancelSetValue"
     >
       <a-form ref="a1FormRef" :model="a1FormState">
         <a-form-item name="total" label="项目总产值">
@@ -661,6 +662,8 @@ export default defineComponent({
       params["total"] = a1FormState2.total;
       params["ratio"] = a1FormState2.ratio;
 
+      Object.assign(a1FormState, { total: 0, ratio: 100 });
+
       a1SetProduct(params)
         .then((response) => {
           message.success("设置产值及比例成功");
@@ -727,6 +730,9 @@ export default defineComponent({
       return option.label.indexOf(input) >= 0;
     };
 
+    const cancelSetValue = () => {
+      Object.assign(a1FormState, { total: 0, ratio: 100 });
+    };
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
       state,
@@ -778,6 +784,7 @@ export default defineComponent({
       wrapperCol: { span: 14, offset: 4 },
       options1,
       filterOption,
+      cancelSetValue,
     };
   },
 });

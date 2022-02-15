@@ -86,6 +86,7 @@
       title="修改项目的总产值及完成比例"
       v-model:visible="showModify"
       @ok="resetOk"
+      @cancel="cancelSetValue"
     >
       <a-form ref="a1FormRef" :model="a1FormState">
         <a-form-item name="total" label="项目总产值">
@@ -264,6 +265,8 @@ export default defineComponent({
       params["total"] = a1FormState2.total;
       params["ratio"] = a1FormState2.ratio;
 
+      Object.assign(a1FormState, { total: 0, ratio: 100 });
+
       a1ModifyProduct(params)
         .then((response) => {
           message.success("产值及比例修改成功");
@@ -326,6 +329,10 @@ export default defineComponent({
       return option.label.indexOf(input) >= 0;
     };
 
+    const cancelSetValue = () => {
+      Object.assign(a1FormState, { total: 0, ratio: 100 });
+    };
+
     return {
       TYPE_MAP,
       state,
@@ -348,6 +355,7 @@ export default defineComponent({
       wrapperCol: { span: 14, offset: 4 },
       options1,
       filterOption,
+      cancelSetValue,
     };
   },
 });
