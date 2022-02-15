@@ -1,8 +1,8 @@
 <template>
   <a-tabs
     v-model:activeKey="activeKey"
-    type="editable-card" 
-    :tabBarGutter="6" 
+    type="editable-card"
+    :tabBarGutter="6"
     @tabClick="jump"
     @edit="deltab"
     hide-add
@@ -33,54 +33,57 @@
   </div>
 </template>
 <script lang="ts">
-import { mapState, useStore } from 'vuex'
-import { TabItem } from '@/store/modules/tabs'
-import { defineComponent, watch, onBeforeMount, ref } from 'vue'
-import { useRoute, useRouter, RouteLocationNormalizedLoaded } from 'vue-router'
+import { mapState, useStore } from "vuex";
+import { TabItem } from "@/store/modules/tabs";
+import { defineComponent, watch, onBeforeMount, ref, onUnmounted } from "vue";
+import { useRoute, useRouter, RouteLocationNormalizedLoaded } from "vue-router";
 export default defineComponent({
-  name: 'layoutTabs',
+  name: "layoutTabs",
   computed: {
     ...mapState({
       tabList: (state: any) => state.tabs.tabList as TabItem[],
-      includeList: (state: any) => state.keepAlive.includeList
-    })
-  }, 
-  setup () {
-
+      includeList: (state: any) => state.keepAlive.includeList,
+    }),
+  },
+  setup() {
     // 激活的tab
-    let activeKey = ref<string>()
+    let activeKey = ref<string>();
 
-    const store = useStore()
-    const route = useRoute()
-    const router = useRouter()
-    
+    const store = useStore();
+    const route = useRoute();
+    const router = useRouter();
+
     // 添加tab方法
     const addTab = (data: RouteLocationNormalizedLoaded) => {
-      store.commit('tabs/steList', {
+      store.commit("tabs/steList", {
         fullPath: data.fullPath,
         name: data.name,
-        title: data.meta.title
-      })
-    }
+        title: data.meta.title,
+      });
+    };
 
     // 设置路由缓存(白)名单方法
     const setKeepAlive = (data: RouteLocationNormalizedLoaded) => {
       if (data.meta.keepAlive) {
-        store.commit('keepAlive/setKeepAlive', data.name as string)
+        store.commit("keepAlive/setKeepAlive", data.name as string);
       }
-    }
+    };
 
-    watch(route, to => {
-      addTab(to)
-      setKeepAlive(to)
-      activeKey.value = to.fullPath
-    })
+    watch(route, (to) => {
+      addTab(to);
+      setKeepAlive(to);
+      activeKey.value = to.fullPath;
+    });
 
     onBeforeMount(() => {
-      addTab(route)
-      setKeepAlive(route)
-      activeKey.value = route.fullPath
-    })
+      addTab(route);
+      setKeepAlive(route);
+      activeKey.value = route.fullPath;
+    });
+
+    onUnmounted(() => {
+      store.commit("tabs/clearAllTabs");
+    });
 
     /**
      * @desc：tab点击
@@ -88,9 +91,9 @@ export default defineComponent({
      */
     const jump = (targetKey: string) => {
       if (route.fullPath !== targetKey) {
-        router.push(targetKey)
-      } 
-    }
+        router.push(targetKey);
+      }
+    };
 
     /**
      * @desc：删除tab
@@ -98,10 +101,10 @@ export default defineComponent({
      * @param { string } action 事件类型
      */
     const deltab = (targetKey: string, action: string) => {
-      if (action === 'remove') {
-        store.commit('tabs/delList', targetKey)
+      if (action === "remove") {
+        store.commit("tabs/delList", targetKey);
       }
-    }
+    };
 
     /**
      * @desc: 条件删除
@@ -110,22 +113,28 @@ export default defineComponent({
      */
     const condition = (tab: TabItem, index: number, item: any) => {
       switch (item.key) {
-        case 'current': store.commit('tabs/delList', tab.fullPath); break;
-        case 'right': store.commit('tabs/delRight', index); break;
-        case 'left': store.commit('tabs/delLeft', index); break;
-        case 'other': store.commit('tabs/delOther', index); break;
+        case "current":
+          store.commit("tabs/delList", tab.fullPath);
+          break;
+        case "right":
+          store.commit("tabs/delRight", index);
+          break;
+        case "left":
+          store.commit("tabs/delLeft", index);
+          break;
+        case "other":
+          store.commit("tabs/delOther", index);
+          break;
       }
-    }
+    };
 
-    return { activeKey, jump, deltab, condition }
-    
-  }
-
-})
+    return { activeKey, jump, deltab, condition };
+  },
+});
 </script>
 <style lang="scss" scoped>
- .main__container {
-  background-color: #FFF;
+.main__container {
+  background-color: #fff;
   min-height: 280px;
   overflow: hidden;
 }
