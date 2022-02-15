@@ -50,6 +50,15 @@
           <template #totalPercentage="{ record }">
             <span>{{ record.totalPercentage + "%" }}</span>
           </template>
+          <template #attachment="{ record }">
+            <img
+              :src="record.attachment"
+              style="width: 200px"
+              title="点击显示详情"
+              @click="() => showImg(record.attachment)"
+            />
+            <!-- <a :href="record.attachment">点击查看附件</a> -->
+          </template>
           <template #products="{ record }">
             <a-button @click="() => showProducts(record.products)">
               查看产值
@@ -103,6 +112,15 @@
         </a-form-item>
       </a-form>
     </Modal>
+
+    <a-modal
+      title="查看附件原图"
+      v-model:visible="showPreview"
+      width="1200px"
+      :footer="null"
+    >
+      <img :src="state.previewURL" style="max-width: 1100px" />
+    </a-modal>
   </div>
 </template>
 <script lang="ts">
@@ -148,9 +166,11 @@ export default defineComponent({
       taskList: [],
       products: [],
       currentProcessId: "",
+      previewURL: "",
     });
     const visible = ref<boolean>(false);
     const showModify = ref<boolean>(false);
+    const showPreview = ref<boolean>(false);
     const a1FormRef = ref();
     const a1FormState: UnwrapRef<A1FormState> = reactive({
       total: 0,
@@ -188,6 +208,11 @@ export default defineComponent({
         title: "完成比例",
         slots: { customRender: "totalPercentage" },
         key: "totalPercentage",
+      },
+      {
+        title: "查看附件(点击可放大)",
+        slots: { customRender: "attachment" },
+        key: "attachment",
       },
       {
         title: "查看团队成员产值情况",
@@ -333,6 +358,11 @@ export default defineComponent({
       Object.assign(a1FormState, { total: 0, ratio: 100 });
     };
 
+    const showImg = (srcURL) => {
+      showPreview.value = true;
+      state.previewURL = srcURL;
+    };
+
     return {
       TYPE_MAP,
       state,
@@ -356,6 +386,8 @@ export default defineComponent({
       options1,
       filterOption,
       cancelSetValue,
+      showImg,
+      showPreview,
     };
   },
 });
