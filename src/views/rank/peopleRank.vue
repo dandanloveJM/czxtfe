@@ -107,7 +107,7 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      fetchData(2022, "");
+      fetchData("2022", "");
       // watchEffect(() => {
       //   fetchData(2022);
       // });

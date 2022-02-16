@@ -106,7 +106,7 @@ export default defineComponent({
 
         }).catch(err => {
           console.dir(err)
-          message.error(err.message || err.data.message)
+          message.error(err.message || err.data.msg)
         })
       })
     }

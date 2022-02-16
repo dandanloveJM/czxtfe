@@ -77,11 +77,11 @@ export const getR1FinishedList = (
   });
 };
 
-export const getAllUserRank = (year: number, team:string) => {
+export const getAllUserRank = (year: string, team: string) => {
   return request({
     url: "http://localhost:8080/userRank",
     method: "get",
-    params: { year: year, team: team},
+    params: { year: year, team: team },
   });
 };
 
@@ -235,18 +235,27 @@ export const a1ModifyProduct = (params) => {
   });
 };
 
-
 export const teamPieCharts = () => {
   return request({
     url: "http://localhost:8080/teamPieChart",
     method: "get",
   });
-}
-
+};
 
 export const getBarChart = () => {
   return request({
     url: "http://localhost:8080/barChart",
     method: "get",
   });
-}
+};
+
+export const deleteProject = (processId) => {
+  let data = new FormData();
+  data.append("processId", processId);
+
+  return request({
+    url: "http://localhost:8080/deleteProject",
+    method: "post",
+    data: data,
+  });
+};

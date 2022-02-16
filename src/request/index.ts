@@ -64,7 +64,6 @@ request.interceptors.response.use((response: AxiosResponse): AxiosResponse | Pro
     
   } else if (response.data.msg === "expire") {
     // 登录失效
-    console.log("我也知道它过期了")
     localCache.clearCache()
     router.push({ path: '/login', query: { redirect: router.currentRoute.value.fullPath } })
     return Promise.reject(response)

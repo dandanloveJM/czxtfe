@@ -67,6 +67,17 @@
                 流程查看
               </a-button>
             </span>
+            <a-divider type="vertical" />
+
+            <span>
+              <a-button
+                primary
+                danger
+                @click="() => deleteTask(record.processId)"
+              >
+                删除项目
+              </a-button>
+            </span>
           </template>
           <template #type="{ record }">
             <span>{{ typeMap[record.type] }}</span>
@@ -263,12 +274,16 @@ import {
   UnwrapRef,
   toRaw,
   watchEffect,
+  createVNode,
 } from "vue";
 import {
   RuleObject,
   ValidateErrorEntity,
 } from "ant-design-vue/es/form/interface";
-import { UploadOutlined } from "@ant-design/icons-vue";
+import {
+  UploadOutlined,
+  ExclamationCircleOutlined,
+} from "@ant-design/icons-vue";
 import { SelectTypes } from "ant-design-vue/es/select";
 import aIcon from "@/components/aicon/aicon.vue";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons-vue";
@@ -282,6 +297,7 @@ import {
   rollbackRequest,
   startProcess,
   generateNewProject,
+  deleteProject,
 } from "@/api/display";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 import moment from "moment";
@@ -387,6 +403,7 @@ export default defineComponent({
     PlusOutlined,
     MinusCircleOutlined,
     UploadOutlined,
+    ExclamationCircleOutlined,
   },
   data() {
     return {
@@ -540,7 +557,7 @@ export default defineComponent({
       visible.value = false;
     };
 
-    const checkForDuplicates = (array:any[]) => {
+    const checkForDuplicates = (array: any[]) => {
       return new Set(array).size !== array.length;
     };
 
@@ -712,7 +729,7 @@ export default defineComponent({
         });
     };
 
-    const reuploadProjects = (processId:string, taskId:string) => {
+    const reuploadProjects = (processId: string, taskId: string) => {
       showNewProject.value = true;
       state.newProcessId = processId;
       state.newTaskId = taskId;
@@ -881,6 +898,27 @@ export default defineComponent({
       },
     ]);
 
+    const deleteTask = (processId: string) => {
+      antModal.confirm({
+        title: "您确认删除此项目吗？",
+        icon: createVNode(ExclamationCircleOutlined),
+        onOk() {
+          deleteProject(processId)
+            .then((response) => {
+              message.success("删除成功");
+              fetchData("", "", "", "2022");
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+        class: "test",
+      });
+    };
+
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
       state,
@@ -930,6 +968,7 @@ export default defineComponent({
       typeOptions2,
       wrapperCol: { span: 14, offset: 4 },
       options1,
+      deleteTask,
     };
   },
 });
