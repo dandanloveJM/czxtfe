@@ -48,7 +48,8 @@
             <span>{{ changeTime(record.updatedAt) }}</span>
           </template>
           <template #totalPercentage="{ record }">
-            <span>{{ record.totalPercentage + "%" }}</span>
+            <a-tag v-if="record.totalPercentage < 100" color="warning">{{ record.totalPercentage + "%" }}</a-tag>
+            <span v-else>{{ record.totalPercentage + "%" }}</span>
           </template>
           <template #attachment="{ record }">
             <img
