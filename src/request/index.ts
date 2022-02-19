@@ -13,6 +13,8 @@ import localCache from '@/utils/localCache'
 // 全局设置带cookie!
 axios.defaults.withCredentials = true
 
+
+
 export const request = axios.create({
   baseURL: import.meta.env.VITE_REQUEST_BASE_URL as string,
   // baseURL: "http://localhost:8080",

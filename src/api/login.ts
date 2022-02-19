@@ -12,8 +12,7 @@ type ConfigType<T=ResponseData> = Promise<AxiosResponse<T>>
  */
 export const login = (data: LoginFrom): ConfigType<LoginSuccess> => {
   return request({
-    url: 'http://localhost:8080/auth/login',
-    // url: 'login',
+    url: 'auth/login',
     method: 'post',
     data
   })
@@ -25,7 +24,7 @@ export const login = (data: LoginFrom): ConfigType<LoginSuccess> => {
  */
 export const info = (): ConfigType<UserInfo> => {
   return requestWithCookie({
-    url: 'http://localhost:8080/userInfo',
+    url: 'userInfo',
     method: 'get',
     withCredentials: true
   })
@@ -36,8 +35,7 @@ export const info = (): ConfigType<UserInfo> => {
  */
 export const menu = (): ConfigType<RouterData> => {
   return request({
-    // url: '/menu',
-    url: 'http://localhost:8080/user/menu',
+    url: 'user/menu',
     method: 'get',
   })
 }
@@ -48,7 +46,7 @@ export const menu = (): ConfigType<RouterData> => {
  export const logout = (): ConfigType => {
   return request({
     // url: '/logout',
-    url: 'http://localhost:8080/auth/logout',
+    url: 'auth/logout',
     method: 'get'
   })
 }

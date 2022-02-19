@@ -105,13 +105,11 @@ export default defineComponent({
         return response.data.data;
       });
 
-      const localRankMap = {
-       
-      };
-      for(const item of rankData){
-        const key = item.teamRank
-        const value = item.productSum
-        localRankMap[key] = value
+      const localRankMap = {};
+      for (const item of rankData) {
+        const key = item.teamRank;
+        const value = item.productSum;
+        localRankMap[key] = value;
       }
 
       state.pieChartParams = data;
@@ -143,7 +141,11 @@ export default defineComponent({
     };
 
     const echartInit = (sum, count) => {
-      var myChart = echarts.init(document.getElementById("main"));
+      if (document.getElementById("main").hasAttribute("_echarts_instance_")) {
+        document.getElementById("main").removeAttribute("_echarts_instance_");
+      }
+
+      const myChart = echarts.init(document.getElementById("main"));
       // 指定图表的配置项和数据
       const colors = ["#5470C6", "#91CC75"];
       const option = {

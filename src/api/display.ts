@@ -12,7 +12,7 @@ export const getR1UnfinishedList = (
   year: string
 ): ConfigType<R1UnfinishedList> => {
   return request({
-    url: "http://localhost:8080/R1/displayUnfinishedProjects",
+    url: "R1/displayUnfinishedProjects",
     method: "get",
     params: { query: name, year: year, type: type, number: number },
   });
@@ -20,7 +20,7 @@ export const getR1UnfinishedList = (
 
 export const getAllR1R2R3Users = (): ConfigType<AllR1R2R3Users> => {
   return request({
-    url: "http://localhost:8080/allCandidates",
+    url: "allCandidates",
     method: "get",
   });
 };
