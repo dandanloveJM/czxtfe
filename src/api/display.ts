@@ -36,7 +36,7 @@ export const fillOutputValue = (params): ConfigType<AllR1R2R3Users> => {
   }
 
   return request({
-    url: "http://localhost:8080/uploadOutputPercent",
+    url: "uploadOutputPercent",
     method: "post",
     data: data,
   });
@@ -44,7 +44,7 @@ export const fillOutputValue = (params): ConfigType<AllR1R2R3Users> => {
 
 export const checkHistoryRequest = (param) => {
   return request({
-    url: "http://localhost:8080/history/list",
+    url: "history/list",
     method: "get",
     params: { processId: param },
   });
@@ -58,7 +58,7 @@ export const rollbackRequest = (params) => {
     }
   }
   return request({
-    url: "http://localhost:8080/reject",
+    url: "reject",
     method: "post",
     data: data,
   });
@@ -71,15 +71,72 @@ export const getR1FinishedList = (
   year: string
 ) => {
   return request({
-    url: "http://localhost:8080/R1/displayFinishedProjects",
+    url: "R1/displayFinishedProjects",
     method: "get",
     params: { query: query, year: year, type: type, number: number },
   });
 };
 
+export const getR2UnfinishedList = (
+  query: string,
+  number: string,
+  type: string,
+  year: string
+) => {
+  return request({
+    url: "R2/unfinishedProjects",
+    method: "get",
+    params: { query: query, year: year, type: type, number: number },
+  });
+};
+
+
+export const getR2FinishedList = (
+  query: string,
+  number: string,
+  type: string,
+  year: string
+) => {
+  return request({
+    url: "R2/finishedProjects",
+    method: "get",
+    params: { query: query, year: year, type: type, number: number },
+  });
+};
+
+
+
+export const getR3UnfinishedList = (
+  query: string,
+  number: string,
+  type: string,
+  year: string
+) => {
+  return request({
+    url: "R3/unfinishedProjects",
+    method: "get",
+    params: { query: query, year: year, type: type, number: number },
+  });
+};
+
+export const getR3FinishedList = (
+  query: string,
+  number: string,
+  type: string,
+  year: string
+) => {
+  return request({
+    url: "R3/finishedProjects",
+    method: "get",
+    params: { query: query, year: year, type: type, number: number },
+  });
+};
+
+
+
 export const getAllUserRank = (year: string, team: string) => {
   return request({
-    url: "http://localhost:8080/userRank",
+    url: "userRank",
     method: "get",
     params: { year: year, team: team },
   });
@@ -92,7 +149,7 @@ export const getR2AllList = (
   year: string
 ) => {
   return request({
-    url: "http://localhost:8080/R2/Projects",
+    url: "R2/Projects",
     method: "get",
     params: { query: query, year: year, type: type, number: number },
   });
@@ -100,7 +157,7 @@ export const getR2AllList = (
 
 export const startProcess = () => {
   return request({
-    url: "http://localhost:8080/start",
+    url: "start",
     method: "get",
   });
 };
@@ -114,7 +171,7 @@ export const generateNewProject = (params) => {
   }
 
   return requestWithMultipart({
-    url: "http://localhost:8080/uploadTaskInfo",
+    url: "uploadTaskInfo",
     method: "post",
     data: data,
   });
@@ -127,7 +184,7 @@ export const getR3AllList = (
   year: string
 ) => {
   return request({
-    url: "http://localhost:8080/R3/Projects",
+    url: "R3/Projects",
     method: "get",
     params: { query: query, year: year, type: type, number: number },
   });
@@ -142,7 +199,7 @@ export const r3Approve = (params) => {
   }
 
   return requestWithMultipart({
-    url: "http://localhost:8080/r3/approveTask",
+    url: "r3/approveTask",
     method: "post",
     data: data,
   });
@@ -157,7 +214,7 @@ export const r4Approve = (params) => {
   }
 
   return requestWithMultipart({
-    url: "http://localhost:8080/r4/approveTask",
+    url: "r4/approveTask",
     method: "post",
     data: data,
   });
@@ -170,7 +227,7 @@ export const getR4AllList = (
   year: string
 ) => {
   return request({
-    url: "http://localhost:8080/R4/Projects",
+    url: "R4/Projects",
     method: "get",
     params: { query: query, year: year, type: type, number: number },
   });
@@ -178,7 +235,7 @@ export const getR4AllList = (
 
 export const getTeamRank = (param) => {
   return request({
-    url: "http://localhost:8080/teamRank",
+    url: "teamRank",
     method: "get",
     params: { year: param },
   });
@@ -186,7 +243,7 @@ export const getTeamRank = (param) => {
 
 export const getTeamBonus = (param) => {
   return request({
-    url: "http://localhost:8080/teamBonus",
+    url: "teamBonus",
     method: "get",
     params: { year: param },
   });
@@ -199,7 +256,7 @@ export const getA1Data = (
   year: string
 ) => {
   return request({
-    url: "http://localhost:8080/A1/Projects",
+    url: "A1/Projects",
     method: "get",
     params: { query: query, year: year, type: type, number: number },
   });
@@ -214,7 +271,7 @@ export const a1SetProduct = (params) => {
   }
 
   return request({
-    url: "http://localhost:8080/fillValue",
+    url: "fillValue",
     method: "post",
     data: data,
   });
@@ -229,7 +286,7 @@ export const a1ModifyProduct = (params) => {
   }
 
   return request({
-    url: "http://localhost:8080/resetValue",
+    url: "resetValue",
     method: "post",
     data: data,
   });
@@ -237,14 +294,14 @@ export const a1ModifyProduct = (params) => {
 
 export const teamPieCharts = () => {
   return request({
-    url: "http://localhost:8080/teamPieChart",
+    url: "teamPieChart",
     method: "get",
   });
 };
 
 export const getBarChart = () => {
   return request({
-    url: "http://localhost:8080/barChart",
+    url: "barChart",
     method: "get",
   });
 };
@@ -254,7 +311,7 @@ export const deleteProject = (processId) => {
   data.append("processId", processId);
 
   return request({
-    url: "http://localhost:8080/deleteProject",
+    url: "deleteProject",
     method: "post",
     data: data,
   });

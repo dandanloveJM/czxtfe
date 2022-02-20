@@ -107,7 +107,7 @@ import {
   watchEffect,
 } from "vue";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
-import { getR2AllList } from "@/api/display";
+import { getR2FinishedList } from "@/api/display";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 import moment from "moment";
@@ -204,17 +204,14 @@ export default defineComponent({
       type: string,
       year: string
     ) => {
-      const data = await getR2AllList(name, number, type, year).then(
+      const data = await getR2FinishedList(name, number, type, year).then(
         (response) => {
           tableLoading.value = false;
           return response.data.data;
         }
       );
-      if (data.hasOwnProperty("empty") || data.finished.length === 0) {
-        state.taskList = [];
-      } else {
-        state.taskList = data.finished;
-      }
+      state.taskList = data
+     
     };
 
     onMounted(() => {

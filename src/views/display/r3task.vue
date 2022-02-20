@@ -294,7 +294,7 @@ import {
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 import {
-  getR3AllList,
+  getR3UnfinishedList,
   getAllR1R2R3Users,
   fillOutputValue,
   checkHistoryRequest,
@@ -529,17 +529,14 @@ export default defineComponent({
       type: string,
       year: string
     ) => {
-      const data = await getR3AllList(name, number, type, year).then(
+      const data = await getR3UnfinishedList(name, number, type, year).then(
         (response) => {
           tableLoading.value = false;
           return response.data.data;
         }
       );
-      if (data.hasOwnProperty("empty")) {
-        state.taskList = [];
-      } else {
-        state.taskList = data.unfinished;
-      }
+      state.taskList = data;
+     
     };
 
     const fetchCandidates = async () => {

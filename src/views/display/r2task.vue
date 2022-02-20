@@ -290,7 +290,7 @@ import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 import {
-  getR2AllList,
+  getR2UnfinishedList,
   getAllR1R2R3Users,
   fillOutputValue,
   checkHistoryRequest,
@@ -500,18 +500,16 @@ export default defineComponent({
       type: string,
       year: string
     ) => {
-      const data = await getR2AllList(name, number, type, year).then(
+      const data = await getR2UnfinishedList(name, number, type, year).then(
         (response) => {
           tableLoading.value = false;
           return response.data.data;
         }
       );
 
-      if (data.hasOwnProperty("empty") || data.finished.length === 0) {
-        state.taskList = [];
-      }
+      
 
-      state.taskList = data.unfinished;
+      state.taskList = data;
     };
 
     const fetchCandidates = async () => {
@@ -525,6 +523,8 @@ export default defineComponent({
         return tmp;
       });
       state.candidates = options;
+      console.log('options')
+      console.log(options)
       const idNameMap = candidates.reduce((accumulator, currentValue) => {
         let id = currentValue["id"];
         let name = currentValue["displayName"];
@@ -654,6 +654,10 @@ export default defineComponent({
     };
 
     const filterOption = (input: string, option: any) => {
+      console.log('filterOption input')
+      console.log(input)
+      console.log('filterOption.label')
+      console.log(option.label)
       return option.label.indexOf(input) >= 0;
     };
 

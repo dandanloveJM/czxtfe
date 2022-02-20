@@ -62,6 +62,11 @@
             />
             <!-- <a :href="record.attachment">点击查看附件</a> -->
           </template>
+          <template #products="{ record }">
+            <a-button @click="() => showProducts(record.products)"
+              >查看产值</a-button
+            >
+          </template>
         </a-table>
       </div>
       <div class="emptyTable" v-else>
@@ -76,6 +81,22 @@
       :footer="null"
     >
       <img :src="state.previewURL" style="max-width: 1100px" />
+    </a-modal>
+    <a-modal
+      title="查看产值"
+      v-model:visible="visible"
+      @ok="productsOk"
+      width="1000px"
+    >
+      <a-table
+        :columns="productColumns"
+        :data-source="state.products"
+        :rowKey="(record) => record.id"
+      >
+        <template #percentage="{ record }">
+          <span>{{ record.percentage + "%" }}</span>
+        </template>
+      </a-table>
     </a-modal>
   </div>
 </template>
@@ -115,9 +136,11 @@ export default defineComponent({
     const state = reactive({
       taskList: [],
       previewURL: "",
+      products: [],
     });
     const tableLoading = ref<boolean>(false);
     const showPreview = ref<boolean>(false);
+    const visible = ref<boolean>(false);
 
     const filterOption = (input: string, option: any) => {
       return option.label.indexOf(input) >= 0;
@@ -155,9 +178,9 @@ export default defineComponent({
         key: "totalPercentage",
       },
       {
-        title: "我的比例",
-        slots: { customRender: "percentage" },
-        key: "percentage",
+        title: "项目长",
+        dataIndex: "ownerName",
+        key: "ownerName",
       },
       {
         title: "查看附件(点击可放大)",
@@ -165,11 +188,30 @@ export default defineComponent({
         key: "attachment",
       },
       {
-        title: "我的产值",
+        title: "查看产值",
+        slots: { customRender: "products" },
+        key: "products",
+      },
+    ];
+
+    const productColumns = [
+      {
+        title: "团队成员",
+        dataIndex: "displayName",
+        key: "displayName",
+      },
+      {
+        title: "承担比例",
+        slots: { customRender: "percentage" },
+        key: "percentage",
+      },
+      {
+        title: "承担产值",
         dataIndex: "product",
         key: "product",
       },
     ];
+
     const createFilterFormState = () => ({
       name: "",
       number: "",
@@ -194,25 +236,7 @@ export default defineComponent({
           return response.data.data;
         }
       );
-      if (data.length === 0) {
-        state.taskList = [];
-      }
-
-      const doneTaskList = data.map((item) => {
-        let temp = {};
-        temp["processId"] = item.processId;
-        temp["name"] = item.project.name;
-        temp["number"] = item.project.number;
-        temp["type"] = item.project.type;
-        temp["updatedAt"] = item.updatedAt;
-        temp["totalProduct"] = item.project.totalProduct;
-        temp["totalPercentage"] = item.project.totalPercentage;
-        temp["percentage"] = item.percentage;
-        temp["product"] = item.product;
-        return temp;
-      });
-
-      state.taskList = doneTaskList;
+      state.taskList = data;
     };
 
     const changeTime = (time) => {
@@ -259,6 +283,16 @@ export default defineComponent({
       state.previewURL = srcURL;
     };
 
+    const showProducts = (products) => {
+      // 1.打开Modal 2.存数据
+      visible.value = true;
+      state.products = products;
+    };
+    const productsOk = () => {
+      // 1.关闭modal, 2. 清空state.products
+      visible.value = false;
+      state.products = [];
+    };
     return {
       TYPE_MAP,
       state,
@@ -276,6 +310,11 @@ export default defineComponent({
       filterOption,
       showImg,
       showPreview,
+
+      visible,
+      showProducts,
+      productsOk,
+      productColumns,
     };
   },
 });
