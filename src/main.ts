@@ -39,9 +39,9 @@ app.directive("drag-modal", (el, bindings, vnode) => {
 
     console.log("bindings");
     console.log(bindings);
-    let modal = document.querySelector(".ant-modal");
+    let modal = document.querySelector<HTMLElement>(".ant-modal");
 
-    let header = document.querySelector(".ant-modal-header");
+    let header = document.querySelector<HTMLElement>(".ant-modal-header");
 
     let left = 0;
     let top = 0;
