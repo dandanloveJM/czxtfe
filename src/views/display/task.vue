@@ -31,7 +31,6 @@
               v-model:value="filterFormState.year"
               style="width: 120px"
               :options="options1"
-            
             />
           </a-form-item>
           <a-form-item :wrapper-col="wrapperCol">
@@ -73,7 +72,9 @@
             <span>{{ typeMap[record.type] }}</span>
           </template>
           <template #attachment="{ record }">
-             <a-button  @click="() => showImg(record.attachment)">查看附件</a-button>
+            <a-button @click="() => showImg(record.attachment)"
+              >查看附件</a-button
+            >
           </template>
         </a-table>
       </div>
@@ -137,6 +138,8 @@
               v-model:value="record.productValue"
               :formatter="(value) => `${value}%`"
               :parser="(value) => value.replace('%', '')"
+              :max="100"
+              :min="0"
             />
           </a-form-item>
           <a-button
@@ -148,6 +151,12 @@
           >
             删除
           </a-button>
+        </div>
+        <div class="product_sum_calculator">
+          <div style="min-width: 45%"></div>
+          <div style="min-width: 35%">
+            <CalculatorTwoTone />当前产值比例总和: {{ adviceProductSum }}
+          </div>
         </div>
         <a-form-item>
           <a-button
@@ -206,6 +215,7 @@ import {
   UnwrapRef,
   toRaw,
   watchEffect,
+  computed,
 } from "vue";
 import {
   RuleObject,
@@ -217,6 +227,7 @@ import {
   PlusOutlined,
   SearchOutlined,
   CalendarTwoTone,
+  CalculatorTwoTone,
 } from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
@@ -303,6 +314,7 @@ export default defineComponent({
     MinusCircleOutlined,
     SearchOutlined,
     CalendarTwoTone,
+    CalculatorTwoTone,
   },
   data() {
     return {
@@ -385,11 +397,18 @@ export default defineComponent({
       },
     ];
 
-    const fetchData = async (name: string, number: string, type:string, year:string) => {
-      const data = await getR1UnfinishedList(name, number, type, year).then((response) => {
-        tableLoading.value = false;
-        return response.data.data;
-      });
+    const fetchData = async (
+      name: string,
+      number: string,
+      type: string,
+      year: string
+    ) => {
+      const data = await getR1UnfinishedList(name, number, type, year).then(
+        (response) => {
+          tableLoading.value = false;
+          return response.data.data;
+        }
+      );
 
       state.taskList = data;
     };
@@ -415,7 +434,7 @@ export default defineComponent({
     };
     onMounted(() => {
       fetchCandidates();
-      fetchData("","","", "2022");
+      fetchData("", "", "", "2022");
     });
 
     // 点击表单添加按钮
@@ -501,7 +520,7 @@ export default defineComponent({
             if (response.data.status === "ok") {
               visible.value = false;
               message.success("数据上传成功");
-              fetchData("", "","","2022");
+              fetchData("", "", "", "2022");
             } else {
               message.error("程序异常");
             }
@@ -595,7 +614,7 @@ export default defineComponent({
         .then((response) => {
           message.success("退回成功");
           confirmLoading2.value = false;
-          fetchData("","","", "2022");
+          fetchData("", "", "", "2022");
 
           showRollback.value = false;
         })
@@ -653,8 +672,6 @@ export default defineComponent({
       visible.value = false;
     };
 
-  
-
     const options1 = ref<SelectTypes["options"]>([
       {
         value: "2022",
@@ -671,8 +688,6 @@ export default defineComponent({
       },
     ]);
 
-   
-
     const searchFilters = () => {
       // 拿到filterFormState数据，拼接参数, 发送fetchData请求, 设置loading
       const formData = toRaw(filterFormState);
@@ -680,8 +695,17 @@ export default defineComponent({
       console.log("我看看参数");
       console.log(values);
       tableLoading.value = true;
-      fetchData(values[0], values[1], values[2], values[3])
+      fetchData(values[0], values[1], values[2], values[3]);
     };
+
+    const adviceProductSum = computed(() => {
+      const value = dynamicForm.records.reduce((accumulator, currentItem) => {
+        return accumulator + currentItem.productValue;
+      }, 0);
+      console.log("value22");
+      console.log(value);
+      return value;
+    });
 
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
@@ -713,16 +737,16 @@ export default defineComponent({
       showPreview,
       showImg,
       handleCancel,
-   
+
       tableLoading,
       year1: ref("2022"),
       options1,
-   
 
       typeOptions,
       searchFilters,
       filterFormState,
       wrapperCol: { span: 14, offset: 4 },
+      adviceProductSum,
     };
   },
 });
@@ -771,5 +795,11 @@ export default defineComponent({
     line-height: 1.5;
     margin-left: 40px;
   }
+}
+
+.product_sum_calculator {
+  display: flex;
+  justify-content: center;
+  font-size: 18px;
 }
 </style>
