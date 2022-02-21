@@ -73,7 +73,7 @@
           </template>
           <template #attachment="{ record }">
             <a-button @click="() => showImg(record.attachment)"
-              >查看附件</a-button
+              >查看任务书</a-button
             >
           </template>
         </a-table>

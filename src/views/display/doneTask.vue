@@ -55,7 +55,7 @@
             <span>{{ record.percentage + "%" }}</span>
           </template>
           <template #attachment="{ record }">
-            <a-button @click="() => showImg(record.attachment)">查看附件</a-button>
+            <a-button @click="() => showImg(record.attachment)">查看任务书</a-button>
             <!-- <a :href="record.attachment">点击查看附件</a> -->
           </template>
           <template #products="{ record }">

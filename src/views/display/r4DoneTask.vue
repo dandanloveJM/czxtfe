@@ -55,7 +55,7 @@
           </template>
           <template #attachment="{ record }">
             <a-button @click="() => showImg(record.attachment)"
-              >查看附件</a-button
+              >查看任务书</a-button
             >
           </template>
           <template #products="{ record }">
@@ -169,6 +169,7 @@ export default defineComponent({
         title: "完成比例",
         slots: { customRender: "totalPercentage" },
         key: "totalPercentage",
+
         sorter: (a, b) => a.totalPercentage - b.totalPercentage,
       },
       {
