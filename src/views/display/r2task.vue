@@ -245,7 +245,7 @@
           >
             <a-button>
               <upload-outlined></upload-outlined>
-              点击上传附件，只能传jpeg或png
+              点击上传附件，只能传jpeg或jpg或png
             </a-button>
           </a-upload>
         </a-form-item>
@@ -811,18 +811,7 @@ export default defineComponent({
     };
 
     const beforeUpload = (file) => {
-      console.log("newFormState.fileList");
-      console.dir(newFormState.fileList);
-
-      const isJpgOrPng =
-        file.type === "image/jpeg" || file.type === "image/png";
-      if (!isJpgOrPng) {
-        // message.error("只能上传jpeg或者png");
-      } else {
-        newFormState.fileList = [...newFormState.fileList, file];
-      }
-
-      return isJpgOrPng;
+      return false;
     };
 
     const fileUploadChange = (param) => {
