@@ -8,7 +8,7 @@ import store from "./store";
 import { globalAxios } from "./request";
 // import '@/utils/dragModal'
 import { nextTick } from "vue";
-import { start } from "repl";
+
 
 const app = createApp(App);
 
@@ -23,6 +23,7 @@ app.use(store);
 
 // 使用路由
 app.use(router);
+
 
 app.directive("drag-modal", (el, bindings, vnode) => {
   nextTick(() => {

@@ -69,30 +69,38 @@
         <a-empty />
       </div>
     </div>
-    <Modal
-      title="查看团队成员产值详情"
-      v-model:visible="visible"
-      @ok="productsOk"
-    >
-      <a-table
-        :columns="productColumns"
-        :data-source="state.products"
-        :rowKey="(record) => record.id"
-      >
-        <template #percentage="{ record }">
-          <span>{{ record.percentage + "%" }}</span>
-        </template>
-      </a-table>
-    </Modal>
 
-    <a-modal
-      title="查看附件原图"
-      v-model:visible="showPreview"
-      width="1200px"
-      :footer="null"
-    >
-      <img :src="state.previewURL" style="max-width: 1100px" />
-    </a-modal>
+    <div v-drag-modal>
+      <a-modal
+        title="查看团队成员产值详情"
+        v-model:visible="visible"
+        @ok="productsOk"
+        width="1000px"
+        :destroyOnClose="true"
+      >
+        <a-table
+          :columns="productColumns"
+          :data-source="state.products"
+          :rowKey="(record) => record.id"
+        >
+          <template #percentage="{ record }">
+            <span>{{ record.percentage + "%" }}</span>
+          </template>
+        </a-table>
+      </a-modal>
+    </div>
+
+    <div v-drag-modal>
+      <a-modal
+        title="查看附件原图"
+        v-model:visible="showPreview"
+        width="1200px"
+        :destroyOnClose="true"
+        :footer="null"
+      >
+        <img :src="state.previewURL" style="max-width: 1100px" />
+      </a-modal>
+    </div>
   </div>
 </template>
 <script lang="ts">

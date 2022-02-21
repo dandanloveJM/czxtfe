@@ -48,12 +48,15 @@
           </template>
 
           <template #totalPercentage="{ record }">
-            <a-tag v-if="record.totalPercentage < 100" color="warning">{{ record.totalPercentage + "%" }}</a-tag>
+            <a-tag v-if="record.totalPercentage < 100" color="warning">{{
+              record.totalPercentage + "%"
+            }}</a-tag>
             <span v-else>{{ record.totalPercentage + "%" }}</span>
           </template>
           <template #attachment="{ record }">
-             <a-button  @click="() => showImg(record.attachment)">查看任务书</a-button>
-        
+            <a-button @click="() => showImg(record.attachment)"
+              >查看任务书</a-button
+            >
           </template>
           <template #products="{ record }">
             <a-button @click="() => showProducts(record.products)"
@@ -66,29 +69,38 @@
         <a-empty />
       </div>
     </div>
-    <Modal
-      title="查看团队成员产值详情"
-      v-model:visible="visible"
-      @ok="productsOk"
-    >
-      <a-table
-        :columns="productColumns"
-        :data-source="state.products"
-        :rowKey="(record) => record.id"
+
+    <div v-drag-modal>
+      <a-modal
+        title="查看团队成员产值详情"
+        v-model:visible="visible"
+        @ok="productsOk"
+        width="1000px"
+        :destroyOnClose="true"
       >
-        <template #percentage="{ record }">
-          <span>{{ record.percentage + "%" }}</span>
-        </template>
-      </a-table>
-    </Modal>
-    <a-modal
-      title="查看附件原图"
-      v-model:visible="showPreview"
-      width="1200px"
-      :footer="null"
-    >
-      <img :src="state.previewURL" style="max-width: 1100px" />
-    </a-modal>
+        <a-table
+          :columns="productColumns"
+          :data-source="state.products"
+          :rowKey="(record) => record.id"
+        >
+          <template #percentage="{ record }">
+            <span>{{ record.percentage + "%" }}</span>
+          </template>
+        </a-table>
+      </a-modal>
+    </div>
+
+    <div v-drag-modal>
+      <a-modal
+        title="查看附件原图"
+        v-model:visible="showPreview"
+        width="1200px"
+        :footer="null"
+        :destroyOnClose="true"
+      >
+        <img :src="state.previewURL" style="max-width: 1100px" />
+      </a-modal>
+    </div>
   </div>
 </template>
 <script lang="ts">
@@ -159,8 +171,7 @@ export default defineComponent({
         dataIndex: "totalProduct",
         key: "totalProduct",
         // defaultSortOrder: "descend",
-        sorter: (a, b) =>
-          a.totalProduct - b.totalProduct,
+        sorter: (a, b) => a.totalProduct - b.totalProduct,
       },
 
       {
@@ -168,8 +179,7 @@ export default defineComponent({
         slots: { customRender: "totalPercentage" },
         key: "totalPercentage",
         // defaultSortOrder: "descend",
-        sorter: (a, b) =>
-          a.totalPercentage - b.totalPercentage,
+        sorter: (a, b) => a.totalPercentage - b.totalPercentage,
       },
       {
         title: "查看附件",
@@ -213,8 +223,7 @@ export default defineComponent({
           return response.data.data;
         }
       );
-      state.taskList = data
-     
+      state.taskList = data;
     };
 
     onMounted(() => {

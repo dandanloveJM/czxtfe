@@ -61,7 +61,9 @@
             <span>{{ typeMap[record.type] }}</span>
           </template>
           <template #attachment="{ record }">
-            <a-button @click="() => showImg(record.attachment)">查看任务书</a-button>
+            <a-button @click="() => showImg(record.attachment)"
+              >查看任务书</a-button
+            >
           </template>
         </a-table>
       </div>
@@ -70,129 +72,146 @@
       </div>
     </div>
 
-    <a-modal
-      title="查看附件原图"
-      v-model:visible="showPreview"
-      width="1200"
-      :footer="null"
-    >
-      <img :src="state.previewURL" style="max-width: 1100px" />
-    </a-modal>
-    <a-modal
-      ref="history"
-      title="查看当前审批流程"
-      v-model:visible="showHistory"
-      @ok="historyOk"
-      width="1000px"
-    >
-      <a-spin v-if="historyLoading" />
-      <a-table
-        v-else
-        :dataSource="state.historyData"
-        :columns="historyColumns"
-        :rowKey="(record) => record.processId"
+    <div v-drag-modal>
+      <a-modal
+        title="查看附件原图"
+        v-model:visible="showPreview"
+        width="1200px"
+        :destroyOnClose="true"
+        :footer="null"
       >
-        <template #comment="{ record }">
-          <span>{{ record.comment ? record.comment : "无" }}</span>
-        </template>
-      </a-table>
-    </a-modal>
+        <img :src="state.previewURL" style="max-width: 1100px" />
+      </a-modal>
+    </div>
 
-    <Modal title="审核流程" v-model:visible="showCheck" :footer="null">
-      <a-tabs v-model:activeKey="activeKey">
-        <a-tab-pane key="1">
-          <template #tab>
-            <span class="tab-title-header">
-              <AppstoreTwoTone />
-              项目详情
-            </span>
+    <div v-drag-modal>
+      <a-modal
+        ref="history"
+        title="查看当前审批流程"
+        v-model:visible="showHistory"
+        @ok="historyOk"
+        width="1000px"
+        :destroyOnClose="true"
+      >
+        <a-spin v-if="historyLoading" />
+        <a-table
+          v-else
+          :dataSource="state.historyData"
+          :columns="historyColumns"
+          :rowKey="(record) => record.processId"
+        >
+          <template #comment="{ record }">
+            <span>{{ record.comment ? record.comment : "无" }}</span>
           </template>
-          <a-table
-            :columns="columnsWithoutOperation"
-            :data-source="[state.checkRecord]"
-            :rowKey="(record) => record.processId"
-            :pagination="false"
-          >
-            <template #updatedAt="{ record }">
-              <span>{{ changeTime(record.updatedAt) }}</span>
-            </template>
+        </a-table>
+      </a-modal>
+    </div>
 
-            <template #type="{ record }">
-              <span>{{ typeMap[record.type] }}</span>
+    <div v-drag-modal>
+      <a-modal
+        title="审核流程"
+        v-model:visible="showCheck"
+        width="1000px"
+        :destroyOnClose="true"
+        :footer="null"
+      >
+        <a-tabs v-model:activeKey="activeKey">
+          <a-tab-pane key="1">
+            <template #tab>
+              <span class="tab-title-header">
+                <AppstoreTwoTone />
+                项目详情
+              </span>
             </template>
-            <template #attachment="{ record }">
-              <img
-                :src="record.attachment"
-                style="width: 200px"
-                title="点击显示详情"
-                @click="() => showImg(record.attachment)"
-              />
-              <!-- <a :href="record.attachment">点击查看附件</a> -->
+            <a-table
+              :columns="columnsWithoutOperation"
+              :data-source="[state.checkRecord]"
+              :rowKey="(record) => record.processId"
+              :pagination="false"
+            >
+              <template #updatedAt="{ record }">
+                <span>{{ changeTime(record.updatedAt) }}</span>
+              </template>
+
+              <template #type="{ record }">
+                <span>{{ typeMap[record.type] }}</span>
+              </template>
+              <template #attachment="{ record }">
+                <img
+                  :src="record.attachment"
+                  style="width: 200px"
+                  title="点击显示详情"
+                  @click="() => showImg(record.attachment)"
+                />
+                <!-- <a :href="record.attachment">点击查看附件</a> -->
+              </template>
+            </a-table>
+          </a-tab-pane>
+          <a-tab-pane key="2">
+            <template #tab>
+              <span class="tab-title-header">
+                <CrownTwoTone />
+                产值比例
+              </span>
             </template>
-          </a-table>
-        </a-tab-pane>
-        <a-tab-pane key="2">
-          <template #tab>
-            <span class="tab-title-header">
-              <CrownTwoTone />
-              产值比例
-            </span>
-          </template>
-          <a-table
-            :columns="productColumns"
-            :data-source="state.products"
-            :rowKey="(record) => record.id"
-            :pagination="false"
-          >
-            <template #percentage="{ record }">
-              <span>{{ record.percentage + "%" }}</span>
-            </template>
-          </a-table>
-        </a-tab-pane>
-      </a-tabs>
+            <a-table
+              :columns="productColumns"
+              :data-source="state.products"
+              :rowKey="(record) => record.id"
+              :pagination="false"
+            >
+              <template #percentage="{ record }">
+                <span>{{ record.percentage + "%" }}</span>
+              </template>
+            </a-table>
+          </a-tab-pane>
+        </a-tabs>
 
-      <header class="header-title-wrapper header-title-wrapper-with-margin-top">
-        <EditTwoTone />
-        <span class="header-title">流程审批</span>
-      </header>
+        <header
+          class="header-title-wrapper header-title-wrapper-with-margin-top"
+        >
+          <EditTwoTone />
+          <span class="header-title">流程审批</span>
+        </header>
 
-      <a-form ref="formRef2" :model="commentForm">
-        <a-form-item name="comment" label="审批意见">
-          <a-input v-model:value="commentForm.comment" />
-        </a-form-item>
-      </a-form>
+        <a-form ref="formRef2" :model="commentForm">
+          <a-form-item name="comment" label="审批意见">
+            <a-input v-model:value="commentForm.comment" />
+          </a-form-item>
+        </a-form>
 
-      <div class="button-wrapper">
-        <div class="reject-button">
-          <a-button
-            type="primary"
-            danger
-            size="large"
-            @click="() => rollbackTo('R3check')"
-            >退回，室主任重新审核</a-button
-          >
-          <a-button
-            type="primary"
-            danger
-            size="large"
-            @click="() => rollbackTo('fillNumbers')"
-            >退回，重新填写产值比例</a-button
-          >
-          <a-button
-            type="primary"
-            danger
-            size="large"
-            @click="() => rollbackTo('uploadTask')"
-            >退回，重新上传任务</a-button
-          >
+        <div class="button-wrapper">
+          <div class="reject-button">
+            <a-button
+              type="primary"
+              danger
+              size="large"
+              @click="() => rollbackTo('R3check')"
+              >退回，室主任重新审核</a-button
+            >
+            <a-button
+              type="primary"
+              danger
+              size="large"
+              @click="() => rollbackTo('fillNumbers')"
+              >退回，重新填写产值比例</a-button
+            >
+            <a-button
+              type="primary"
+              danger
+              size="large"
+              @click="() => rollbackTo('uploadTask')"
+              >退回，重新上传任务</a-button
+            >
+          </div>
+          <div class="agree">
+            <a-button @click="() => agreeTo()" type="primary" size="large"
+              >审核通过</a-button
+            >
+          </div>
         </div>
-        <div class="agree">
-          <a-button @click="() => agreeTo()" type="primary" size="large"
-            >审核通过</a-button
-          >
-        </div>
-      </div>
-    </Modal>
+      </a-modal>
+    </div>
   </div>
 </template>
 <script lang="ts">
@@ -698,7 +717,6 @@ export default defineComponent({
       searchFilters,
       wrapperCol: { span: 14, offset: 4 },
       options1,
-    
     };
   },
 });

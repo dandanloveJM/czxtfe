@@ -77,144 +77,159 @@
       </div>
     </div>
 
-    <a-modal
-      title="查看附件原图"
-      v-model:visible="showPreview"
-      width="1200"
-      :footer="null"
-    >
-      <img :src="state.previewURL" style="max-width: 1100px" />
-    </a-modal>
-
-    <a-modal
-      ref="history"
-      title="查看当前审批流程"
-      v-model:visible="showHistory"
-      @ok="historyOk"
-    >
-      <a-spin v-if="historyLoading" />
-      <a-table
-        v-else
-        :dataSource="state.historyData"
-        :columns="historyColumns"
-        :rowKey="(record) => record.processId"
+    <div v-drag-modal>
+      <a-modal
+        title="查看附件原图"
+        v-model:visible="showPreview"
+        width="1200px"
+        :destroyOnClose="true"
+        :footer="null"
       >
-        <template #comment="{ record }">
-          <span>{{ record.comment ? record.comment : "无" }}</span>
-        </template>
-      </a-table>
-    </a-modal>
+        <img :src="state.previewURL" style="max-width: 1100px" />
+      </a-modal>
+    </div>
 
-    <a-modal
-      title="审核流程"
-      v-model:visible="showCheck"
-      width="1000px"
-      :footer="null"
-    >
-      <a-tabs v-model:activeKey="activeKey">
-        <a-tab-pane key="1">
-          <template #tab>
-            <span class="tab-title-header">
-              <AppstoreTwoTone />
-              项目详情
-            </span>
+    <div v-drag-modal>
+      <a-modal
+        ref="history"
+        title="查看当前审批流程"
+        v-model:visible="showHistory"
+        @ok="historyOk"
+        width="1000px"
+        :destroyOnClose="true"
+      >
+        <a-spin v-if="historyLoading" />
+        <a-table
+          v-else
+          :dataSource="state.historyData"
+          :columns="historyColumns"
+          :rowKey="(record) => record.processId"
+        >
+          <template #comment="{ record }">
+            <span>{{ record.comment ? record.comment : "无" }}</span>
           </template>
-          <a-table
-            :columns="columnsWithoutOperation"
-            :data-source="state.checkRecord"
-            :rowKey="(record) => record.processId"
-            :pagination="false"
-          >
-            <template #updatedAt="{ record }">
-              <span>{{ changeTime(record.updatedAt) }}</span>
-            </template>
+        </a-table>
+      </a-modal>
+    </div>
 
-            <template #type="{ record }">
-              <span>{{ typeMap[record.type] }}</span>
+    <div v-drag-modal>
+      <a-modal
+        title="审核流程"
+        v-model:visible="showCheck"
+        width="1000px"
+        :footer="null"
+        :destroyOnClose="true"
+      >
+        <a-tabs v-model:activeKey="activeKey">
+          <a-tab-pane key="1">
+            <template #tab>
+              <span class="tab-title-header">
+                <AppstoreTwoTone />
+                项目详情
+              </span>
             </template>
-            <template #attachment="{ record }">
-              <a-button @click="() => showImg(record.attachment)">
-                查看任务书
-              </a-button>
+            <a-table
+              :columns="columnsWithoutOperation"
+              :data-source="state.checkRecord"
+              :rowKey="(record) => record.processId"
+              :pagination="false"
+            >
+              <template #updatedAt="{ record }">
+                <span>{{ changeTime(record.updatedAt) }}</span>
+              </template>
+
+              <template #type="{ record }">
+                <span>{{ typeMap[record.type] }}</span>
+              </template>
+              <template #attachment="{ record }">
+                <a-button @click="() => showImg(record.attachment)">
+                  查看任务书
+                </a-button>
+              </template>
+            </a-table>
+          </a-tab-pane>
+          <a-tab-pane key="2">
+            <template #tab>
+              <span class="tab-title-header">
+                <CrownTwoTone />
+                产值比例
+              </span>
             </template>
-          </a-table>
-        </a-tab-pane>
-        <a-tab-pane key="2">
-          <template #tab>
-            <span class="tab-title-header">
-              <CrownTwoTone />
-              产值比例
-            </span>
-          </template>
-          <a-table
-            :columns="productColumns"
-            :data-source="state.products"
-            :rowKey="(record) => record.id"
-            :pagination="false"
-          >
-            <template #percentage="{ record }">
-              <span>{{ record.percentage + "%" }}</span>
-            </template>
-          </a-table>
-        </a-tab-pane>
-      </a-tabs>
+            <a-table
+              :columns="productColumns"
+              :data-source="state.products"
+              :rowKey="(record) => record.id"
+              :pagination="false"
+            >
+              <template #percentage="{ record }">
+                <span>{{ record.percentage + "%" }}</span>
+              </template>
+            </a-table>
+          </a-tab-pane>
+        </a-tabs>
 
-      <header class="header-title-wrapper header-title-wrapper-with-margin-top">
-        <EditTwoTone />
-        <span class="header-title">流程审批与赋予产值</span>
-      </header>
+        <header
+          class="header-title-wrapper header-title-wrapper-with-margin-top"
+        >
+          <EditTwoTone />
+          <span class="header-title">流程审批与赋予产值</span>
+        </header>
 
-      <a-form ref="formRef2" :model="commentForm">
-        <a-form-item name="comment" label="审批意见">
-          <a-input v-model:value="commentForm.comment" />
-        </a-form-item>
-      </a-form>
+        <a-form ref="formRef2" :model="commentForm">
+          <a-form-item name="comment" label="审批意见">
+            <a-input v-model:value="commentForm.comment" />
+          </a-form-item>
+        </a-form>
 
-      <div class="button-wrapper">
-        <div class="reject-button">
-          <a-button @click="() => rollbackTo('R4check')" danger
-            >退回至分管领导
-          </a-button>
-          <a-button @click="() => rollbackTo('R3check')" danger
-            >退回至室主任
-          </a-button>
-          <a-button @click="() => rollbackTo('fillNumbers')" danger
-            >退回，重新填写产值比例
-          </a-button>
-          <a-button @click="() => rollbackTo('uploadTask')" danger
-            >退回，重新上传任务
-          </a-button>
+        <div class="button-wrapper">
+          <div class="reject-button">
+            <a-button @click="() => rollbackTo('R4check')" danger
+              >退回至分管领导
+            </a-button>
+            <a-button @click="() => rollbackTo('R3check')" danger
+              >退回至室主任
+            </a-button>
+            <a-button @click="() => rollbackTo('fillNumbers')" danger
+              >退回，重新填写产值比例
+            </a-button>
+            <a-button @click="() => rollbackTo('uploadTask')" danger
+              >退回，重新上传任务
+            </a-button>
+          </div>
+          <div class="agree">
+            <a-button @click="() => setValue()" type="primary"
+              >赋予产值
+            </a-button>
+          </div>
         </div>
-        <div class="agree">
-          <a-button @click="() => setValue()" type="primary"
-            >赋予产值
-          </a-button>
-        </div>
-      </div>
-    </a-modal>
+      </a-modal>
+    </div>
 
-    <a-modal
-      title="设置项目的总产值及完成比例"
-      v-model:visible="showModify"
-      @ok="resetOk"
-      width="600px"
-      @cancel="cancelSetValue"
-    >
-      <a-form ref="a1FormRef" :model="a1FormState">
-        <a-form-item name="total" label="项目总产值">
-          <a-input-number v-model:value="a1FormState.total" />
-        </a-form-item>
-        <a-form-item name="ratio" label="完成比例">
-          <a-input-number
-            v-model:value="a1FormState.ratio"
-            :min="0"
-            :max="100"
-            :formatter="(value) => `${value}%`"
-            :parser="(value) => value.replace('%', '')"
-          /><span>填写0-100的正整数</span>
-        </a-form-item>
-      </a-form>
-    </a-modal>
+    <div v-drag-modal>
+      <a-modal
+        title="设置项目的总产值及完成比例"
+        v-model:visible="showModify"
+        @ok="resetOk"
+        width="600px"
+        :destroyOnClose="true"
+        @cancel="cancelSetValue"
+      >
+        <a-form ref="a1FormRef" :model="a1FormState">
+          <a-form-item name="total" label="项目总产值">
+            <a-input-number v-model:value="a1FormState.total" />
+          </a-form-item>
+          <a-form-item name="ratio" label="完成比例">
+            <a-input-number
+              v-model:value="a1FormState.ratio"
+              :min="0"
+              :max="100"
+              :formatter="(value) => `${value}%`"
+              :parser="(value) => value.replace('%', '')"
+            /><span>填写0-100的正整数</span>
+          </a-form-item>
+        </a-form>
+      </a-modal>
+    </div>
   </div>
 </template>
 <script lang="ts">

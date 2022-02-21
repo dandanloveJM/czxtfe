@@ -79,190 +79,220 @@
         <a-empty />
       </div>
     </div>
-    <Modal
-      title="查看附件原图"
-      v-model:visible="showPreview"
-      width="1200"
-      :footer="null"
-    >
-      <img :src="state.previewURL" style="max-width: 1100px" />
-    </Modal>
-    <a-modal
-      ref="addModal"
-      title="填写产值比例建议"
-      v-model:visible="visible"
-      :confirm-loading="confirmLoading"
-      @ok="onSubmitForm"
-      @cancel="onCancel"
-      width="1000px"
-    >
-      <template #footer>
-        <a-button key="back" @click="handleCancel">暂存并关闭</a-button>
-        <a-button
-          key="submit"
-          type="primary"
-          :loading="confirmLoading"
-          @click="onSubmitForm"
-          >确认并发送
-        </a-button>
-      </template>
-      <a-form ref="formRef" :model="dynamicForm" :label-col="labelCol">
-        <div
-          class="line-wrapper"
-          v-for="(record, index) in dynamicForm.records"
-          :key="index"
-        >
-          <a-form-item
-            :label="record.peopleLabel"
-            style="min-width: 45%"
-            name="peopleValue"
-          >
-            <a-select
-              v-model:value="record.peopleValue"
-              show-search
-              :options="state.candidates"
-              :filterOption="filterOption"
-            />
-          </a-form-item>
-          <a-form-item
-            name="productValue"
-            ref="productValue"
-            :label="record.productLabel"
-            style="min-width: 35%"
-          >
-            <a-input-number
-              v-model:value="record.productValue"
-              :formatter="(value) => `${value}%`"
-              :parser="(value) => value.replace('%', '')"
-              :max="100"
-              :min="0"
-            />
-          </a-form-item>
+
+    <div v-drag-modal>
+      <a-modal
+        title="查看附件原图"
+        v-model:visible="showPreview"
+        width="1200px"
+        :footer="null"
+        :destroyOnClose="true"
+      >
+        <img :src="state.previewURL" style="max-width: 1100px" />
+      </a-modal>
+    </div>
+
+    <div v-drag-modal>
+      <a-modal
+        ref="addModal"
+        title="填写产值比例建议"
+        v-model:visible="visible"
+        :confirm-loading="confirmLoading"
+        @ok="onSubmitForm"
+        @cancel="onCancel"
+        width="1000px"
+        :destroyOnClose="true"
+      >
+        <template #footer>
+          <a-button key="back" @click="handleCancel">暂存并关闭</a-button>
           <a-button
-            danger
-            v-if="dynamicForm.records.length > 1"
-            class="dynamic-delete-button"
-            :disabled="dynamicForm.records.length === 1"
-            @click="removeRecord(record)"
-          >
-            删除
+            key="submit"
+            type="primary"
+            :loading="confirmLoading"
+            @click="onSubmitForm"
+            >确认并发送
           </a-button>
-        </div>
-        <div class="product_sum_calculator">
-          <div style="min-width: 45%"></div>
-          <div style="min-width: 35%">
-            <CalculatorTwoTone />当前产值比例总和: {{ adviceProductSum }}
+        </template>
+        <a-form ref="formRef" :model="dynamicForm" :label-col="labelCol">
+          <div
+            class="line-wrapper"
+            v-for="(record, index) in dynamicForm.records"
+            :key="index"
+          >
+            <a-form-item
+              :label="record.peopleLabel"
+              style="min-width: 45%"
+              name="peopleValue"
+            >
+              <a-select
+                v-model:value="record.peopleValue"
+                show-search
+                :options="state.candidates"
+                :filterOption="filterOption"
+              />
+            </a-form-item>
+            <a-form-item
+              name="productValue"
+              ref="productValue"
+              :label="record.productLabel"
+              style="min-width: 35%"
+            >
+              <a-input-number
+                v-model:value="record.productValue"
+                :formatter="(value) => `${value}%`"
+                :parser="(value) => value.replace('%', '')"
+                :max="100"
+                :min="0"
+              />
+            </a-form-item>
+            <a-button
+              danger
+              v-if="dynamicForm.records.length > 1"
+              class="dynamic-delete-button"
+              :disabled="dynamicForm.records.length === 1"
+              @click="removeRecord(record)"
+            >
+              删除
+            </a-button>
+          </div>
+          <div class="product_sum_calculator">
+            <div style="min-width: 45%"></div>
+            <div style="min-width: 35%">
+              <CalculatorTwoTone />当前产值比例总和: {{ adviceProductSum }}
+            </div>
+          </div>
+          <a-form-item>
+            <a-button
+              type="dashed"
+              class="add-record-button"
+              @click="addRecord"
+              size="large"
+            >
+              <PlusOutlined />
+              点击增加项目成员
+            </a-button>
+          </a-form-item>
+        </a-form>
+      </a-modal>
+    </div>
+
+    <div v-drag-modal>
+      <a-modal
+        ref="history"
+        title="查看当前审批流程"
+        v-model:visible="showHistory"
+        @ok="historyOk"
+        width="1000px"
+        :destroyOnClose="true"
+      >
+        <a-spin v-if="historyLoading" />
+        <a-table
+          v-else
+          :dataSource="state.historyData"
+          :columns="historyColumns"
+          :rowKey="(record) => record.processId"
+        >
+          <template #comment="{ record }">
+            <span>{{ record.comment ? record.comment : "无" }}</span>
+          </template>
+        </a-table>
+      </a-modal>
+    </div>
+
+    <div v-drag-modal>
+      <a-modal
+        title="审核流程"
+        v-model:visible="showCheck"
+        width="1200px"
+        :destroyOnClose="true"
+        :footer="null"
+      >
+        <a-tabs v-model:activeKey="activeKey">
+          <a-tab-pane key="1">
+            <template #tab>
+              <span class="tab-title-header">
+                <AppstoreTwoTone />
+                项目详情
+              </span>
+            </template>
+            <a-table
+              :columns="columnsWithoutOperation"
+              :data-source="[state.checkRecord]"
+              :rowKey="(record) => record.processId"
+              :pagination="false"
+            >
+              <template #updatedAt="{ record }">
+                <span>{{ changeTime(record.updatedAt) }}</span>
+              </template>
+
+              <template #type="{ record }">
+                <span>{{ typeMap[record.type] }}</span>
+              </template>
+              <template #attachment="{ record }">
+                <a-button @click="() => showImg(record.attachment)"
+                  >查看任务书</a-button
+                >
+              </template>
+            </a-table>
+          </a-tab-pane>
+          <a-tab-pane key="2">
+            <template #tab>
+              <span class="tab-title-header">
+                <CrownTwoTone />
+                产值比例
+              </span>
+            </template>
+            <a-table
+              :columns="productColumns"
+              :data-source="state.products"
+              :rowKey="(record) => record.id"
+              :pagination="false"
+            >
+              <template #percentage="{ record }">
+                <span>{{ record.percentage + "%" }}</span>
+              </template>
+            </a-table>
+          </a-tab-pane>
+        </a-tabs>
+
+        <header
+          class="header-title-wrapper header-title-wrapper-with-margin-top"
+        >
+          <EditTwoTone />
+          <span class="header-title">流程审批</span>
+        </header>
+
+        <a-form ref="formRef2" :model="commentForm">
+          <div class="check-form-label">
+            <a-form-item name="comment" label="审批意见" class="label-style">
+              <a-input v-model:value="commentForm.comment" />
+            </a-form-item>
+          </div>
+        </a-form>
+
+        <div class="button-wrapper">
+          <div class="reject-button">
+            <a-button
+              danger
+              size="large"
+              @click="() => rollbackTo('fillNumbers')"
+              >退回，重新填写产值比例</a-button
+            >
+            <a-button
+              danger
+              size="large"
+              @click="() => rollbackTo('uploadTask')"
+              >退回，重新上传任务</a-button
+            >
+          </div>
+          <div class="agree">
+            <a-button @click="() => agreeTo()" type="primary" size="large"
+              >审核通过</a-button
+            >
           </div>
         </div>
-        <a-form-item>
-          <a-button
-            type="dashed"
-            class="add-record-button"
-            @click="addRecord"
-            size="large"
-          >
-            <PlusOutlined />
-            点击增加项目成员
-          </a-button>
-        </a-form-item>
-      </a-form>
-    </a-modal>
-
-    <Modal
-      ref="history"
-      title="查看当前审批流程"
-      v-model:visible="showHistory"
-      @ok="historyOk"
-    >
-      <a-spin v-if="historyLoading" />
-      <a-table
-        v-else
-        :dataSource="state.historyData"
-        :columns="historyColumns"
-        :rowKey="(record) => record.processId"
-      >
-        <template #comment="{ record }">
-          <span>{{ record.comment ? record.comment : "无" }}</span>
-        </template>
-      </a-table>
-    </Modal>
-
-    <Modal title="审核流程" v-model:visible="showCheck" :footer="null">
-      <a-tabs v-model:activeKey="activeKey">
-        <a-tab-pane key="1">
-          <template #tab>
-            <span class="tab-title-header">
-              <AppstoreTwoTone />
-              项目详情
-            </span>
-          </template>
-          <a-table
-            :columns="columnsWithoutOperation"
-            :data-source="[state.checkRecord]"
-            :rowKey="(record) => record.processId"
-            :pagination="false"
-          >
-            <template #updatedAt="{ record }">
-              <span>{{ changeTime(record.updatedAt) }}</span>
-            </template>
-
-            <template #type="{ record }">
-              <span>{{ typeMap[record.type] }}</span>
-            </template>
-            <template #attachment="{ record }">
-              <a-button  @click="() => showImg(record.attachment)">查看任务书</a-button>
-            </template>
-          </a-table>
-        </a-tab-pane>
-        <a-tab-pane key="2">
-          <template #tab>
-            <span class="tab-title-header">
-              <CrownTwoTone />
-              产值比例
-            </span>
-          </template>
-          <a-table
-            :columns="productColumns"
-            :data-source="state.products"
-            :rowKey="(record) => record.id"
-            :pagination="false"
-          >
-            <template #percentage="{ record }">
-              <span>{{ record.percentage + "%" }}</span>
-            </template>
-          </a-table>
-        </a-tab-pane>
-      </a-tabs>
-
-      <header class="header-title-wrapper header-title-wrapper-with-margin-top">
-        <EditTwoTone />
-        <span class="header-title">流程审批</span>
-      </header>
-
-      <a-form ref="formRef2" :model="commentForm">
-        <div class="check-form-label">
-          <a-form-item name="comment" label="审批意见" class="label-style">
-            <a-input v-model:value="commentForm.comment" />
-          </a-form-item>
-        </div>
-      </a-form>
-
-      <div class="button-wrapper">
-        <div class="reject-button">
-          <a-button danger size="large" @click="() => rollbackTo('fillNumbers')"
-            >退回，重新填写产值比例</a-button
-          >
-          <a-button danger size="large" @click="() => rollbackTo('uploadTask')"
-            >退回，重新上传任务</a-button
-          >
-        </div>
-        <div class="agree">
-          <a-button @click="() => agreeTo()" type="primary" size="large"
-            >审核通过</a-button
-          >
-        </div>
-      </div>
-    </Modal>
+      </a-modal>
+    </div>
   </div>
 </template>
 <script lang="ts">
