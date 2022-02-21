@@ -58,7 +58,9 @@
             >
           </template>
           <template #attachment="{ record }">
-            <a-button  @click="() => showImg(record.attachment)">查看任务书</a-button>
+            <a-button @click="() => showImg(record.attachment)"
+              >查看任务书</a-button
+            >
           </template>
         </a-table>
       </div>
@@ -66,21 +68,26 @@
         <a-empty />
       </div>
     </div>
-    <Modal
-      title="查看团队成员产值详情"
-      v-model:visible="visible"
-      @ok="productsOk"
-    >
-      <a-table
-        :columns="productColumns"
-        :data-source="state.products"
-        :rowKey="(record) => record.id"
+    <div v-drag-modal>
+      <a-modal
+        title="查看团队成员产值详情"
+        v-model:visible="visible"
+        @ok="productsOk"
+        width="1000px"
+        :destroyOnClose="true"
+
       >
-        <template #percentage="{ record }">
-          <span>{{ record.percentage + "%" }}</span>
-        </template>
-      </a-table>
-    </Modal>
+        <a-table
+          :columns="productColumns"
+          :data-source="state.products"
+          :rowKey="(record) => record.id"
+        >
+          <template #percentage="{ record }">
+            <span>{{ record.percentage + "%" }}</span>
+          </template>
+        </a-table>
+      </a-modal>
+    </div>
 
     <Modal
       title="查看附件原图"

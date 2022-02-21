@@ -48,14 +48,18 @@
             <span>{{ changeTime(record.updatedAt) }}</span>
           </template>
           <template #totalPercentage="{ record }">
-            <a-tag v-if="record.totalPercentage < 100" color="warning">{{ record.totalPercentage + "%" }}</a-tag>
+            <a-tag v-if="record.totalPercentage < 100" color="warning">{{
+              record.totalPercentage + "%"
+            }}</a-tag>
             <span v-else>{{ record.totalPercentage + "%" }}</span>
           </template>
           <template #percentage="{ record }">
             <span>{{ record.percentage + "%" }}</span>
           </template>
           <template #attachment="{ record }">
-            <a-button @click="() => showImg(record.attachment)">查看任务书</a-button>
+            <a-button @click="() => showImg(record.attachment)"
+              >查看任务书</a-button
+            >
             <!-- <a :href="record.attachment">点击查看附件</a> -->
           </template>
           <template #products="{ record }">
@@ -69,31 +73,37 @@
         <a-empty />
       </div>
     </div>
-
-    <a-modal
-      title="查看附件原图"
-      v-model:visible="showPreview"
-      width="1200px"
-      :footer="null"
-    >
-      <img :src="state.previewURL" style="max-width: 1100px" />
-    </a-modal>
-    <a-modal
-      title="查看产值"
-      v-model:visible="visible"
-      @ok="productsOk"
-      width="1000px"
-    >
-      <a-table
-        :columns="productColumns"
-        :data-source="state.products"
-        :rowKey="(record) => record.id"
+    <div v-drag-modal>
+      <a-modal
+        title="查看附件原图"
+        v-model:visible="showPreview"
+        width="1200px"
+        :destroyOnClose="true"
+        :footer="null"
       >
-        <template #percentage="{ record }">
-          <span>{{ record.percentage + "%" }}</span>
-        </template>
-      </a-table>
-    </a-modal>
+        <img :src="state.previewURL" style="max-width: 1100px" />
+      </a-modal>
+    </div>
+
+    <div v-drag-modal>
+      <a-modal
+        title="查看产值"
+        v-model:visible="visible"
+        @ok="productsOk"
+        :destroyOnClose="true"
+        width="1000px"
+      >
+        <a-table
+          :columns="productColumns"
+          :data-source="state.products"
+          :rowKey="(record) => record.id"
+        >
+          <template #percentage="{ record }">
+            <span>{{ record.percentage + "%" }}</span>
+          </template>
+        </a-table>
+      </a-modal>
+    </div>
   </div>
 </template>
 <script lang="ts">
@@ -167,17 +177,15 @@ export default defineComponent({
         title: "任务总产值",
         dataIndex: "totalProduct",
         key: "totalProduct",
-        
-        sorter: (a, b) =>
-          a.totalProduct - b.totalProduct,
+
+        sorter: (a, b) => a.totalProduct - b.totalProduct,
       },
       {
         title: "完成比例",
         slots: { customRender: "totalPercentage" },
         key: "totalPercentage",
         // defaultSortOrder: "descend",
-        sorter: (a, b) =>
-          a.totalPercentage - b.totalPercentage,
+        sorter: (a, b) => a.totalPercentage - b.totalPercentage,
       },
       {
         title: "项目长",
