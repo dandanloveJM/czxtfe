@@ -159,12 +159,12 @@
           </a-button>
         </div>
         <div class="product_sum_calculator">
-          <div style="min-width: 45%"> </div>
+          <div style="min-width: 45%"></div>
           <div style="min-width: 35%">
-            <CalculatorTwoTone />当前产值比例总和: {{ adviceProductSum }}</div>
-
+            <CalculatorTwoTone />当前产值比例总和: {{ adviceProductSum }}
           </div>
-          
+        </div>
+
         <a-form-item>
           <a-button
             type="dashed"
@@ -212,62 +212,66 @@
       </a-form>
     </Modal>
 
-    <Modal
-      ref="createProject"
-      title="创建新任务"
-      v-model:visible="showNewProject"
-      @ok="createProjectOk"
-    >
-      <a-form ref="formRef3" :model="newFormState" :rules="projectRules">
-        <a-form-item name="name" label="项目名称">
-          <a-input v-model:value="newFormState.name" />
-        </a-form-item>
-        <a-form-item name="type" label="项目类型">
-          <a-select
-            v-model:value="newFormState.type"
-            show-search
-            :options="typeOptions"
-            :filterOption="filterOption"
-          />
-        </a-form-item>
-        <a-form-item name="number" label="项目编号">
-          <a-input v-model:value="newFormState.number" />
-        </a-form-item>
-        <a-form-item name="nextAssignee" label="指定项目长">
-          <a-select
-            v-model:value="newFormState.nextAssignee"
-            show-search
-            :options="state.candidates"
-            :filterOption="filterOption"
-          />
-        </a-form-item>
-        <a-form-item name="file" label="上传附件">
-          <a-upload
-            :file-list="newFormState.fileList"
-            :remove="handleRemove"
-            :before-upload="beforeUpload"
-            @change="fileUploadChange"
+    <div v-drag-modal>
+      <a-modal
+        ref="createProject"
+        title="创建新任务"
+        v-model:visible="showNewProject"
+        :destroyOnClose="true"
+        @ok="createProjectOk"
+        width="1000px"
+      >
+        <a-form ref="formRef3" :model="newFormState" :rules="projectRules">
+          <a-form-item name="name" label="项目名称">
+            <a-input v-model:value="newFormState.name" />
+          </a-form-item>
+          <a-form-item name="type" label="项目类型">
+            <a-select
+              v-model:value="newFormState.type"
+              show-search
+              :options="typeOptions"
+              :filterOption="filterOption"
+            />
+          </a-form-item>
+          <a-form-item name="number" label="项目编号">
+            <a-input v-model:value="newFormState.number" />
+          </a-form-item>
+          <a-form-item name="nextAssignee" label="指定项目长">
+            <a-select
+              v-model:value="newFormState.nextAssignee"
+              show-search
+              :options="state.candidates"
+              :filterOption="filterOption"
+            />
+          </a-form-item>
+          <a-form-item name="file" label="上传附件">
+            <a-upload
+              :file-list="newFormState.fileList"
+              :remove="handleRemove"
+              :before-upload="beforeUpload"
+              @change="fileUploadChange"
+            >
+              <a-button>
+                <upload-outlined></upload-outlined>
+                点击上传附件，只能传jpeg或jpg或png
+              </a-button>
+            </a-upload>
+          </a-form-item>
+          <a-button style="margin-left: 10px" @click="resetProjectForm"
+            >重置数据</a-button
           >
-            <a-button>
-              <upload-outlined></upload-outlined>
-              点击上传附件，只能传jpeg或jpg或png
-            </a-button>
-          </a-upload>
-        </a-form-item>
-        <a-button style="margin-left: 10px" @click="resetProjectForm"
-          >重置数据</a-button
-        >
-      </a-form>
-    </Modal>
+        </a-form>
+      </a-modal>
+    </div>
 
-    <Modal
+    <a-modal
       title="查看附件原图"
       v-model:visible="showPreview"
-      width="1200"
+      width="1200px"
       :footer="null"
     >
       <img :src="state.previewURL" style="max-width: 1100px" />
-    </Modal>
+    </a-modal>
   </div>
 </template>
 <script lang="ts">
