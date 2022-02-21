@@ -97,120 +97,131 @@
       </div>
     </div>
 
-    <a-modal
-      ref="addModal"
-      title="填写产值比例建议"
-      v-model:visible="visible"
-      :confirm-loading="confirmLoading"
-      @ok="onSubmitForm"
-      @cancel="onCancel"
-      width="1000px"
-    >
-      <template #footer>
-        <a-button key="back" @click="handleCancel">暂存并关闭</a-button>
-        <a-button
-          key="submit"
-          type="primary"
-          :loading="confirmLoading"
-          @click="onSubmitForm"
-          >确认并发送
-        </a-button>
-      </template>
-      <a-form ref="formRef" :model="dynamicForm" :label-col="labelCol">
-        <div
-          class="line-wrapper"
-          v-for="(record, index) in dynamicForm.records"
-          :key="index"
-        >
-          <a-form-item
-            :label="record.peopleLabel"
-            style="min-width: 45%"
-            name="peopleValue"
-          >
-            <a-select
-              v-model:value="record.peopleValue"
-              show-search
-              :options="state.candidates"
-              :filterOption="filterOption"
-            />
-          </a-form-item>
-          <a-form-item
-            name="productValue"
-            ref="productValue"
-            :label="record.productLabel"
-            style="min-width: 35%"
-          >
-            <a-input-number
-              v-model:value="record.productValue"
-              :formatter="(value) => `${value}%`"
-              :parser="(value) => value.replace('%', '')"
-              :max="100"
-              :min="0"
-            />
-          </a-form-item>
-          <a-button
-            danger
-            v-if="dynamicForm.records.length > 1"
-            class="dynamic-delete-button"
-            :disabled="dynamicForm.records.length === 1"
-            @click="removeRecord(record)"
-          >
-            删除
-          </a-button>
-        </div>
-        <div class="product_sum_calculator">
-          <div style="min-width: 45%"></div>
-          <div style="min-width: 35%">
-            <CalculatorTwoTone />当前产值比例总和: {{ adviceProductSum }}
-          </div>
-        </div>
-
-        <a-form-item>
-          <a-button
-            type="dashed"
-            class="add-record-button"
-            @click="addRecord"
-            size="large"
-          >
-            <PlusOutlined />
-            点击增加项目成员
-          </a-button>
-        </a-form-item>
-      </a-form>
-    </a-modal>
-
-    <Modal
-      ref="history"
-      title="查看当前审批流程"
-      v-model:visible="showHistory"
-      @ok="historyOk"
-    >
-      <a-spin v-if="historyLoading" />
-      <a-table
-        v-else
-        :dataSource="state.historyData"
-        :columns="historyColumns"
-        :rowKey="(record) => record.processId"
+    <div v-drag-modal>
+      <a-modal
+        ref="addModal"
+        title="填写产值比例建议"
+        v-model:visible="visible"
+        :confirm-loading="confirmLoading"
+        @ok="onSubmitForm"
+        @cancel="onCancel"
+        :destroyOnClose="true"
+        width="1000px"
       >
-        <template #comment="{ record }">
-          <span>{{ record.comment ? record.comment : "无" }}</span>
+        <template #footer>
+          <a-button key="back" @click="handleCancel">暂存并关闭</a-button>
+          <a-button
+            key="submit"
+            type="primary"
+            :loading="confirmLoading"
+            @click="onSubmitForm"
+            >确认并发送
+          </a-button>
         </template>
-      </a-table>
-    </Modal>
+        <a-form ref="formRef" :model="dynamicForm" :label-col="labelCol">
+          <div
+            class="line-wrapper"
+            v-for="(record, index) in dynamicForm.records"
+            :key="index"
+          >
+            <a-form-item
+              :label="record.peopleLabel"
+              style="min-width: 45%"
+              name="peopleValue"
+            >
+              <a-select
+                v-model:value="record.peopleValue"
+                show-search
+                :options="state.candidates"
+                :filterOption="filterOption"
+              />
+            </a-form-item>
+            <a-form-item
+              name="productValue"
+              ref="productValue"
+              :label="record.productLabel"
+              style="min-width: 35%"
+            >
+              <a-input-number
+                v-model:value="record.productValue"
+                :formatter="(value) => `${value}%`"
+                :parser="(value) => value.replace('%', '')"
+                :max="100"
+                :min="0"
+              />
+            </a-form-item>
+            <a-button
+              danger
+              v-if="dynamicForm.records.length > 1"
+              class="dynamic-delete-button"
+              :disabled="dynamicForm.records.length === 1"
+              @click="removeRecord(record)"
+            >
+              删除
+            </a-button>
+          </div>
+          <div class="product_sum_calculator">
+            <div style="min-width: 45%"></div>
+            <div style="min-width: 35%">
+              <CalculatorTwoTone />当前产值比例总和: {{ adviceProductSum }}
+            </div>
+          </div>
 
-    <Modal
-      ref="reject"
-      title="退回到上一流程"
-      v-model:visible="showRollback"
-      @ok="rollbackOk"
-      :confirm-loading="confirmLoading2"
-    >
-      <a-form ref="formRef2" :model="commentForm">
-        <a-form-item name="comment" label="审批意见及退回原因">
-          <a-input v-model:value="commentForm.comment" />
-        </a-form-item>
-      </a-form>
-    </Modal>
+          <a-form-item>
+            <a-button
+              type="dashed"
+              class="add-record-button"
+              @click="addRecord"
+              size="large"
+            >
+              <PlusOutlined />
+              点击增加项目成员
+            </a-button>
+          </a-form-item>
+        </a-form>
+      </a-modal>
+    </div>
+
+    <div v-drag-modal>
+      <a-modal
+        ref="history"
+        title="查看当前审批流程"
+        v-model:visible="showHistory"
+        @ok="historyOk"
+        :destroyOnClose="true"
+        width="1000px"
+      >
+        <a-spin v-if="historyLoading" />
+        <a-table
+          v-else
+          :dataSource="state.historyData"
+          :columns="historyColumns"
+          :rowKey="(record) => record.processId"
+        >
+          <template #comment="{ record }">
+            <span>{{ record.comment ? record.comment : "无" }}</span>
+          </template>
+        </a-table>
+      </a-modal>
+    </div>
+
+    <div v-drag-modal>
+      <a-modal
+        ref="reject"
+        title="退回到上一流程"
+        v-model:visible="showRollback"
+        @ok="rollbackOk"
+        :destroyOnClose="true"
+        :confirm-loading="confirmLoading2"
+        width="800px"
+      >
+        <a-form ref="formRef2" :model="commentForm">
+          <a-form-item name="comment" label="审批意见及退回原因">
+            <a-input v-model:value="commentForm.comment" />
+          </a-form-item>
+        </a-form>
+      </a-modal>
+    </div>
 
     <div v-drag-modal>
       <a-modal
@@ -264,14 +275,17 @@
       </a-modal>
     </div>
 
-    <a-modal
-      title="查看附件原图"
-      v-model:visible="showPreview"
-      width="1200px"
-      :footer="null"
-    >
-      <img :src="state.previewURL" style="max-width: 1100px" />
-    </a-modal>
+    <div v-drag-modal>
+      <a-modal
+        title="查看附件原图"
+        v-model:visible="showPreview"
+        width="1200px"
+        :destroyOnClose="true"
+        :footer="null"
+      >
+        <img :src="state.previewURL" style="max-width: 1100px" />
+      </a-modal>
+    </div>
   </div>
 </template>
 <script lang="ts">

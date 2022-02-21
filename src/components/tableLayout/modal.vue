@@ -6,6 +6,7 @@
     :confirm-loading="modalLoading"
     @ok="modalOk"
     @cancel="modalCancel"
+    :destroyOnClose="true"
   >
     <slot />
   </a-modal>
