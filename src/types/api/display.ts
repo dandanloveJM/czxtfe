@@ -5,5 +5,6 @@ export interface R1UnfinishedList extends ResponseData {
 }
 
 export interface AllR1R2R3Users extends ResponseData {
-  data: []
+  data: [],
+  msg:'',
 }

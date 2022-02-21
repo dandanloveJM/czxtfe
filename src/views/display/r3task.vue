@@ -134,6 +134,8 @@
               v-model:value="record.productValue"
               :formatter="(value) => `${value}%`"
               :parser="(value) => value.replace('%', '')"
+              :max="100"
+              :min="0"
             />
           </a-form-item>
           <a-button
@@ -145,6 +147,12 @@
           >
             删除
           </a-button>
+        </div>
+        <div class="product_sum_calculator">
+          <div style="min-width: 45%"></div>
+          <div style="min-width: 35%">
+            <CalculatorTwoTone />当前产值比例总和: {{ adviceProductSum }}
+          </div>
         </div>
         <a-form-item>
           <a-button
@@ -272,6 +280,7 @@ import {
   UnwrapRef,
   toRaw,
   watchEffect,
+  computed,
 } from "vue";
 import {
   RuleObject,
@@ -286,6 +295,7 @@ import {
   AppstoreTwoTone,
   CrownTwoTone,
   EditTwoTone,
+  CalculatorTwoTone,
 } from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
@@ -397,6 +407,7 @@ export default defineComponent({
     CrownTwoTone,
     AppstoreTwoTone,
     EditTwoTone,
+    CalculatorTwoTone,
   },
   data() {
     return {
@@ -641,7 +652,7 @@ export default defineComponent({
               message.success("数据上传成功");
               fetchData("", "", "", "2022");
             } else {
-              message.error("程序异常");
+              message.error(response.data.msg);
             }
           })
           .catch((err) => {
@@ -835,8 +846,7 @@ export default defineComponent({
       // 拿到filterFormState数据，拼接参数, 发送fetchData请求, 设置loading
       const formData = toRaw(filterFormState);
       const values = Object.values(formData);
-      console.log("我看看参数");
-      console.log(values);
+
       tableLoading.value = true;
 
       if (values.length == 4) {
@@ -859,6 +869,15 @@ export default defineComponent({
         label: "2024",
       },
     ]);
+
+    const adviceProductSum = computed(() => {
+      const value = dynamicForm.records.reduce((accumulator, currentItem) => {
+        return accumulator + currentItem.productValue;
+      }, 0);
+      console.log("value22");
+      console.log(value);
+      return value;
+    });
 
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
@@ -908,6 +927,7 @@ export default defineComponent({
 
       wrapperCol: { span: 14, offset: 4 },
       options1,
+      adviceProductSum,
     };
   },
 });
@@ -1002,5 +1022,10 @@ export default defineComponent({
     line-height: 1.5;
     margin-left: 40px;
   }
+}
+.product_sum_calculator {
+  display: flex;
+  justify-content: center;
+  font-size: 18px;
 }
 </style>
