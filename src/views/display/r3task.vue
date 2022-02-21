@@ -69,13 +69,9 @@
             <span>{{ typeMap[record.type] }}</span>
           </template>
           <template #attachment="{ record }">
-            <img
-              :src="record.attachment"
-              style="width: 200px"
-              title="点击显示详情"
-              @click="() => showImg(record.attachment)"
-            />
-            <!-- <a :href="record.attachment">点击查看附件</a> -->
+            <a-button @click="() => showImg(record.attachment)"
+              >查看附件</a-button
+            >
           </template>
         </a-table>
       </div>
@@ -341,7 +337,7 @@ const columns = [
     key: "ownerName",
   },
   {
-    title: "附件(点击可放大)",
+    title: "附件",
     slots: { customRender: "attachment" },
     key: "attachment",
   },
@@ -513,7 +509,7 @@ export default defineComponent({
         key: "ownerName",
       },
       {
-        title: "附件(点击可放大)",
+        title: "附件",
         slots: { customRender: "attachment" },
         key: "attachment",
       },
@@ -536,7 +532,6 @@ export default defineComponent({
         }
       );
       state.taskList = data;
-     
     };
 
     const fetchCandidates = async () => {
@@ -910,10 +905,9 @@ export default defineComponent({
       filterFormState,
       tableLoading,
       searchFilters,
-    
+
       wrapperCol: { span: 14, offset: 4 },
       options1,
-
     };
   },
 });

@@ -105,7 +105,12 @@
       </a-table>
     </a-modal>
 
-    <a-modal title="审核流程" v-model:visible="showCheck" width="1000px" :footer="null">
+    <a-modal
+      title="审核流程"
+      v-model:visible="showCheck"
+      width="1000px"
+      :footer="null"
+    >
       <a-tabs v-model:activeKey="activeKey">
         <a-tab-pane key="1">
           <template #tab>
@@ -128,13 +133,9 @@
               <span>{{ typeMap[record.type] }}</span>
             </template>
             <template #attachment="{ record }">
-              <img
-                :src="record.attachment"
-                style="width: 200px"
-                title="点击显示详情"
-                @click="() => showImg(record.attachment)"
-              />
-              <!-- <a :href="record.attachment">点击查看附件</a> -->
+              <a-button @click="() => showImg(record.attachment)">
+                查看附件
+              </a-button>
             </template>
           </a-table>
         </a-tab-pane>
@@ -289,7 +290,7 @@ const columns = [
     key: "ownerName",
   },
   {
-    title: "附件(点击可放大)",
+    title: "附件",
     slots: { customRender: "attachment" },
     key: "attachment",
   },
@@ -475,7 +476,7 @@ export default defineComponent({
         key: "ownerName",
       },
       {
-        title: "附件(点击可放大)",
+        title: "附件",
         slots: { customRender: "attachment" },
         key: "attachment",
       },
@@ -670,7 +671,6 @@ export default defineComponent({
           message.success("设置产值及比例成功");
           fetchData("", "", "", "2022");
 
-          
           state.currentProcessId = "";
           state.currentTaskId = "";
         })

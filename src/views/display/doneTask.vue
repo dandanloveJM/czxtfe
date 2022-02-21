@@ -185,7 +185,7 @@ export default defineComponent({
         key: "ownerName",
       },
       {
-        title: "查看附件(点击可放大)",
+        title: "查看附件",
         slots: { customRender: "attachment" },
         key: "attachment",
       },

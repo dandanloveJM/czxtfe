@@ -86,13 +86,8 @@
             <span>{{ changeTime(record.updatedAt) }}</span>
           </template>
           <template #attachment="{ record }">
-            <img
-              :src="record.attachment"
-              style="width: 200px"
-              title="点击显示详情"
-              @click="() => showImg(record.attachment)"
-            />
-            <!-- <a :href="record.attachment">点击查看附件</a> -->
+            <a-button  @click="() => showImg(record.attachment)">查看附件</a-button>
+           
           </template>
         </a-table>
       </div>
@@ -337,7 +332,7 @@ const columns = [
     key: "ownerName",
   },
   {
-    title: "附件(点击可放大)",
+    title: "附件",
     slots: { customRender: "attachment" },
     key: "attachment",
   },

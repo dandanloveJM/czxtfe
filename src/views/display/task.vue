@@ -73,12 +73,7 @@
             <span>{{ typeMap[record.type] }}</span>
           </template>
           <template #attachment="{ record }">
-            <img
-              :src="record.attachment"
-              style="width: 200px"
-              title="点击显示详情"
-              @click="() => showImg(record.attachment)"
-            />
+             <a-button  @click="() => showImg(record.attachment)">查看附件</a-button>
           </template>
         </a-table>
       </div>
