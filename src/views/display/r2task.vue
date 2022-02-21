@@ -86,8 +86,9 @@
             <span>{{ changeTime(record.updatedAt) }}</span>
           </template>
           <template #attachment="{ record }">
-            <a-button  @click="() => showImg(record.attachment)">查看附件</a-button>
-           
+            <a-button @click="() => showImg(record.attachment)"
+              >查看附件</a-button
+            >
           </template>
         </a-table>
       </div>
@@ -143,6 +144,8 @@
               v-model:value="record.productValue"
               :formatter="(value) => `${value}%`"
               :parser="(value) => value.replace('%', '')"
+              :max="100"
+              :min="0"
             />
           </a-form-item>
           <a-button
@@ -155,6 +158,13 @@
             删除
           </a-button>
         </div>
+        <div class="product_sum_calculator">
+          <div style="min-width: 45%"> </div>
+          <div style="min-width: 35%">
+            <CalculatorTwoTone />当前产值比例总和: {{ adviceProductSum }}</div>
+
+          </div>
+          
         <a-form-item>
           <a-button
             type="dashed"
@@ -270,6 +280,7 @@ import {
   toRaw,
   watchEffect,
   createVNode,
+  computed,
 } from "vue";
 import {
   RuleObject,
@@ -281,7 +292,11 @@ import {
 } from "@ant-design/icons-vue";
 import { SelectTypes } from "ant-design-vue/es/select";
 import aIcon from "@/components/aicon/aicon.vue";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons-vue";
+import {
+  MinusCircleOutlined,
+  PlusOutlined,
+  CalculatorTwoTone,
+} from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 import {
@@ -399,6 +414,7 @@ export default defineComponent({
     MinusCircleOutlined,
     UploadOutlined,
     ExclamationCircleOutlined,
+    CalculatorTwoTone,
   },
   data() {
     return {
@@ -460,6 +476,15 @@ export default defineComponent({
           productValue: 100,
         },
       ],
+    });
+
+    const adviceProductSum = computed(() => {
+      const value = dynamicForm.records.reduce((accumulator, currentItem) => {
+        return accumulator + currentItem.productValue;
+      }, 0);
+      console.log("value22");
+      console.log(value);
+      return value;
     });
 
     const historyColumns = [
@@ -760,7 +785,6 @@ export default defineComponent({
             message.error("必须上传附件");
             return;
           }
-          showNewProject.value = false;
 
           const params = {};
           params["processId"] = state.newProcessId;
@@ -777,18 +801,26 @@ export default defineComponent({
           console.dir(params);
 
           generateNewProject(params)
-            .then(() => {
-              message.success("创建项目成功");
+            .then((response) => {
+              console.log("response");
+              console.log(response);
+              if (response.data.status === "fail") {
+                message.error(response.data.msg);
+              } else {
+                showNewProject.value = false;
+                message.success("创建项目成功");
 
-              state.newProcessId = "";
-              state.newTaskId = "";
+                state.newProcessId = "";
+                state.newTaskId = "";
 
-              // 清空表单数据
-              Object.assign(newFormState, createNewFormState());
+                // 清空表单数据
+                Object.assign(newFormState, createNewFormState());
 
-              fetchData("", "", "", "2022");
+                fetchData("", "", "", "2022");
+              }
             })
             .catch((err) => {
+              console.log("err");
               console.log(err);
               message.error("创建项目失败");
             });
@@ -967,6 +999,8 @@ export default defineComponent({
       wrapperCol: { span: 14, offset: 4 },
       options1,
       deleteTask,
+
+      adviceProductSum,
     };
   },
 });
@@ -1020,5 +1054,11 @@ export default defineComponent({
     line-height: 1.5;
     margin-left: 40px;
   }
+}
+
+.product_sum_calculator {
+  display: flex;
+  justify-content: center;
+  font-size: 18px;
 }
 </style>

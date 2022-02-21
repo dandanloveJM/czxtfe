@@ -61,6 +61,7 @@ request.interceptors.request.use((config: AxiosRequestConfig): AxiosRequestConfi
  */
 request.interceptors.response.use((response: AxiosResponse): AxiosResponse | Promise<AxiosResponse> => {
   if (response.data.status === "ok") {
+    console.log('ok')
     console.dir(response);
     return response
     
