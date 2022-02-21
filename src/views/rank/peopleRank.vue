@@ -32,6 +32,7 @@
           :data-source="state.taskList"
           :rowKey="(record) => record.id"
           :loading="tableLoading"
+          :pagination="false"
         >
         </a-table>
       </div>
@@ -91,6 +92,11 @@ export default defineComponent({
         title: "产值",
         dataIndex: "productSum",
         key: "productSum",
+      },
+      {
+        title: "部门",
+        dataIndex: "team",
+        key: "team",
       },
     ];
 

@@ -73,9 +73,14 @@ export default defineComponent({
         key: "teamRank",
       },
       {
-        title: "30%产值待分配",
-        dataIndex: "productSum",
-        key: "productSum",
+        title: "20%产值待分配",
+        dataIndex: "sumForR4",
+        key: "sumForR4",
+      },
+      {
+        title: "10%产值待分配",
+        dataIndex: "sumForR5",
+        key: "sumForR5",
       },
     ];
 
