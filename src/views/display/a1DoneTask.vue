@@ -202,14 +202,14 @@ export default defineComponent({
         title: "任务总产值",
         dataIndex: "totalProduct",
         key: "totalProduct",
-        defaultSortOrder: "descend",
+        // defaultSortOrder: "descend",
         sorter: (a, b) => a.totalProduct - b.totalProduct,
       },
       {
         title: "完成比例",
         slots: { customRender: "totalPercentage" },
         key: "totalPercentage",
-        defaultSortOrder: "descend",
+        // defaultSortOrder: "descend",
         sorter: (a, b) => a.totalPercentage - b.totalPercentage,
       },
       {
