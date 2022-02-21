@@ -48,18 +48,14 @@
             <span>{{ changeTime(record.updatedAt) }}</span>
           </template>
           <template #totalPercentage="{ record }">
-            <span>{{ record.totalPercentage + "%" }}</span>
+            <a-tag v-if="record.totalPercentage < 100" color="warning">{{ record.totalPercentage + "%" }}</a-tag>
+            <span v-else>{{ record.totalPercentage + "%" }}</span>
           </template>
           <template #percentage="{ record }">
             <span>{{ record.percentage + "%" }}</span>
           </template>
           <template #attachment="{ record }">
-            <img
-              :src="record.attachment"
-              style="width: 200px"
-              title="点击显示详情"
-              @click="() => showImg(record.attachment)"
-            />
+            <a-button @click="() => showImg(record.attachment)">查看附件</a-button>
             <!-- <a :href="record.attachment">点击查看附件</a> -->
           </template>
           <template #products="{ record }">
@@ -171,11 +167,17 @@ export default defineComponent({
         title: "任务总产值",
         dataIndex: "totalProduct",
         key: "totalProduct",
+        defaultSortOrder: "descend",
+        sorter: (a, b) =>
+          a.totalProduct - b.totalProduct,
       },
       {
         title: "完成比例",
         slots: { customRender: "totalPercentage" },
         key: "totalPercentage",
+        defaultSortOrder: "descend",
+        sorter: (a, b) =>
+          a.totalPercentage - b.totalPercentage,
       },
       {
         title: "项目长",
