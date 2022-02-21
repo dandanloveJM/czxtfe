@@ -245,7 +245,7 @@
           >
             <a-button>
               <upload-outlined></upload-outlined>
-              点击上传附件
+              点击上传附件，只能传jpeg或png
             </a-button>
           </a-upload>
         </a-form-item>
@@ -507,8 +507,6 @@ export default defineComponent({
         }
       );
 
-      
-
       state.taskList = data;
     };
 
@@ -523,8 +521,8 @@ export default defineComponent({
         return tmp;
       });
       state.candidates = options;
-      console.log('options')
-      console.log(options)
+      console.log("options");
+      console.log(options);
       const idNameMap = candidates.reduce((accumulator, currentValue) => {
         let id = currentValue["id"];
         let name = currentValue["displayName"];
@@ -654,10 +652,6 @@ export default defineComponent({
     };
 
     const filterOption = (input: string, option: any) => {
-      console.log('filterOption input')
-      console.log(input)
-      console.log('filterOption.label')
-      console.log(option.label)
       return option.label.indexOf(input) >= 0;
     };
 
@@ -819,13 +813,29 @@ export default defineComponent({
     const beforeUpload = (file) => {
       console.log("newFormState.fileList");
       console.dir(newFormState.fileList);
-      newFormState.fileList = [...newFormState.fileList, file];
-      return false;
+
+      const isJpgOrPng =
+        file.type === "image/jpeg" || file.type === "image/png";
+      if (!isJpgOrPng) {
+        // message.error("只能上传jpeg或者png");
+      } else {
+        newFormState.fileList = [...newFormState.fileList, file];
+      }
+
+      return isJpgOrPng;
     };
 
     const fileUploadChange = (param) => {
-      const changedFileList = param.fileList.slice(-1);
-      newFormState.fileList = changedFileList;
+      console.log("fileUploadChange");
+      console.dir(param);
+      const isJpgOrPng =
+        param.file.type === "image/jpeg" || param.file.type === "image/png";
+      if (!isJpgOrPng) {
+        message.error("只能上传jpeg或者png");
+      } else {
+        const changedFileList = param.fileList.slice(-1);
+        newFormState.fileList = changedFileList;
+      }
     };
 
     const projectRules = {
