@@ -50,3 +50,19 @@ export const menu = (): ConfigType<RouterData> => {
     method: 'get'
   })
 }
+
+export const changePassword = (params) => {
+  let data = new FormData();
+  console.log('params')
+  console.log(params)
+  for (const key in params) {
+    if (params.hasOwnProperty(key)) {
+      data.append(key, params[key]);
+    }
+  }
+  return request({
+    url: "resetPassword",
+    method: "post",
+    data: data,
+  });
+};
