@@ -30,7 +30,7 @@
         <a-table
           :columns="columns"
           :data-source="state.taskList"
-          :rowKey="(record) => record.id"
+          :rowKey="(record) => record.displayName"
           :loading="tableLoading"
           :pagination="false"
         >

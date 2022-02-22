@@ -43,19 +43,11 @@ app.directive("drag-modal", (el, bindings, vnode) => {
 
     let header = document.querySelector<HTMLElement>(".ant-modal-header");
 
-    let left = 0;
-    let top = 0;
-
-    if (!destroyOnClose) {
-      left = modal.left || 0;
-      top = modal.top || 0;
-    }
-
     let isEnd = false;
 
     let domset = {
-      x: document.documentElement.clientWidth / 4, // 默认width 50%
-      y: (document.documentElement.clientHeight * 15) / 100, // 根据 15vh 计算
+      x: document.documentElement.clientWidth / 5, // 默认width 50%
+      y: (document.documentElement.clientHeight * 6) / 100, // 根据 15vh 计算
     };
     modal.style.marginTop = domset.y + "px";
     modal.style.marginLeft = domset.x + "px";
@@ -69,7 +61,7 @@ app.directive("drag-modal", (el, bindings, vnode) => {
     //   header.left = header.offsetLeft;
     //   header.top = header.offsetTop;
 
-      modal.onmousemove = (event) => {
+      window.onmousemove = (event) => {
         console.log("move");
         if (isEnd) {
           return;

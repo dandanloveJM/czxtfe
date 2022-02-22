@@ -137,13 +137,8 @@
                 <span>{{ typeMap[record.type] }}</span>
               </template>
               <template #attachment="{ record }">
-                <img
-                  :src="record.attachment"
-                  style="width: 200px"
-                  title="点击显示详情"
-                  @click="() => showImg(record.attachment)"
-                />
-                <!-- <a :href="record.attachment">点击查看附件</a> -->
+                <a-button  @click="() => showImg(record.attachment)">查看任务书</a-button>
+             
               </template>
             </a-table>
           </a-tab-pane>
@@ -158,7 +153,7 @@
               :columns="productColumns"
               :data-source="state.products"
               :rowKey="(record) => record.id"
-              :pagination="false"
+              :pagination="true"
             >
               <template #percentage="{ record }">
                 <span>{{ record.percentage + "%" }}</span>
@@ -183,21 +178,21 @@
         <div class="button-wrapper">
           <div class="reject-button">
             <a-button
-              type="primary"
+              
               danger
               size="large"
               @click="() => rollbackTo('R3check')"
               >退回，室主任重新审核</a-button
             >
             <a-button
-              type="primary"
+            
               danger
               size="large"
               @click="() => rollbackTo('fillNumbers')"
               >退回，重新填写产值比例</a-button
             >
             <a-button
-              type="primary"
+            
               danger
               size="large"
               @click="() => rollbackTo('uploadTask')"

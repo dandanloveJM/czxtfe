@@ -62,13 +62,7 @@
             <span>{{ typeMap[record.type] }}</span>
           </template>
           <template #attachment="{ record }">
-            <img
-              :src="record.attachment"
-              style="width: 200px"
-              title="点击显示详情"
-              @click="() => showImg(record.attachment)"
-            />
-            <!-- <a :href="record.attachment">点击查看附件</a> -->
+            <a-button @click="() => showImg(record.attachment)">查看任务书</a-button>
           </template>
         </a-table>
       </div>
@@ -159,7 +153,7 @@
               :columns="productColumns"
               :data-source="state.products"
               :rowKey="(record) => record.id"
-              :pagination="false"
+              :pagination="true"
             >
               <template #percentage="{ record }">
                 <span>{{ record.percentage + "%" }}</span>

@@ -481,6 +481,7 @@ export default defineComponent({
         message.error("项目成员不可以相同");
         return;
       }
+  
       records.forEach((element) => {
         if (element.peopleValue === "") {
           message.error("请选择一位项目成员");
@@ -492,6 +493,7 @@ export default defineComponent({
           element.productValue > 100 ||
           !Number.isInteger(element.productValue)
         ) {
+
           isError += 1;
           message.error("产值比例建议填写错误,需要为0到100的正整数");
           return;
@@ -500,12 +502,12 @@ export default defineComponent({
         }
       });
 
+ console.log('sum')
+      console.dir(sum)
       if (sum !== 100) {
         console.log(sum);
         isError += 1;
-        message.error({
-          title: "所有成员的产值比例之和必须刚好是100",
-        });
+        message.error("所有成员的产值比例之和必须刚好是100");
         return;
       }
 
