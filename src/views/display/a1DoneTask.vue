@@ -64,7 +64,7 @@
             </a-button>
           </template>
           <template #action="{ record }">
-            <a-button @click="() => modifyProducts(record.processId)">
+            <a-button @click="() => modifyProducts(record)">
               修改总产值及比例
             </a-button>
           </template>
@@ -293,9 +293,12 @@ export default defineComponent({
       state.products = [];
     };
 
-    const modifyProducts = (processId: string) => {
+    const modifyProducts = (record) => {
       showModify.value = true;
-      state.currentProcessId = processId;
+      state.currentProcessId = record.processId;
+      Object.assign(a1FormState, { total: record.totalProduct, ratio: record.totalPercentage });
+   
+
     };
     const resetOk = () => {
       // 1. 拼接参数 ，发请求，1.关闭modal, 2. 清空state.products
