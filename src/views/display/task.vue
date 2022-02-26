@@ -502,8 +502,7 @@ export default defineComponent({
         }
       });
 
- console.log('sum')
-      console.dir(sum)
+
       if (sum !== 100) {
         console.log(sum);
         isError += 1;

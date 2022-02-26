@@ -73,3 +73,19 @@ export const getAllR4Users = () => {
     method: "get",
   });
 }
+
+export const reallocateProduct = (params) => {
+  let data = new FormData();
+  for (const key in params) {
+    if (params.hasOwnProperty(key)) {
+      data.append(key, params[key]);
+    }
+  }
+
+  return request({
+    url: "reallocate/bonus",
+    method: "post",
+    data: data,
+  });
+
+}
