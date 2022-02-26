@@ -1,5 +1,6 @@
 <template>
   <div class="doneTask__container">
+      <h2>二次分配</h2>
     <div class="table-wrapper">
       <div class="tableWithData" v-if="state.taskList.length > 0">
         <header class="header-wrapper">
@@ -20,7 +21,9 @@
           :rowKey="(record) => record.rankId"
           :loading="tableLoading"
         >
-        
+          <template #teamRank="{ record }">
+            <span>{{ TEAM_MAP[record.teamRank] }}</span>
+          </template>
         </a-table>
       </div>
       <div class="emptyTable" v-else>

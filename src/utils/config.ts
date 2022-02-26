@@ -83,5 +83,7 @@ export const typeMap = {
     },
 
   ]
+
+  
    
   
