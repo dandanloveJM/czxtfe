@@ -107,6 +107,7 @@
         @cancel="onCancel"
         :destroyOnClose="true"
         width="1000px"
+        :maskClosable="false"
       >
         <template #footer>
           <a-button key="back" @click="handleCancel">暂存并关闭</a-button>

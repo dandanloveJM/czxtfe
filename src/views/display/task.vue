@@ -99,6 +99,7 @@
         @cancel="onCancel"
         width="1000px"
         :destroyOnClose="true"
+        :maskClosable="false"
       >
         <template #footer>
           <a-button key="back" @click="handleCancel">暂存并关闭</a-button>
@@ -481,7 +482,7 @@ export default defineComponent({
         message.error("项目成员不可以相同");
         return;
       }
-  
+
       records.forEach((element) => {
         if (element.peopleValue === "") {
           message.error("请选择一位项目成员");
@@ -493,7 +494,6 @@ export default defineComponent({
           element.productValue > 100 ||
           !Number.isInteger(element.productValue)
         ) {
-
           isError += 1;
           message.error("产值比例建议填写错误,需要为0到100的正整数");
           return;
@@ -501,7 +501,6 @@ export default defineComponent({
           sum += element.productValue;
         }
       });
-
 
       if (sum !== 100) {
         console.log(sum);
