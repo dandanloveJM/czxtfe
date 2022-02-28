@@ -133,6 +133,34 @@ export const getR3FinishedList = (
 };
 
 
+export const getR4UnfinishedList = (
+  query: string,
+  number: string,
+  type: string,
+  year: string
+) => {
+  return request({
+    url: "R4/unfinished/projects",
+    method: "get",
+    params: { query: query, year: year, type: type, number: number },
+  });
+};
+
+export const getR4FinishedList = (
+  query: string,
+  number: string,
+  type: string,
+  year: string
+) => {
+  return request({
+    url: "R4/finished/projects",
+    method: "get",
+    params: { query: query, year: year, type: type, number: number },
+  });
+};
+
+
+
 
 export const getAllUserRank = (year: string, team: string) => {
   return request({
