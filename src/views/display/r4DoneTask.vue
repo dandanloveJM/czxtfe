@@ -38,28 +38,29 @@
         <a-table
           :columns="columns"
           :data-source="state.taskList"
-          :rowKey="(record) => record.processId"
+          :rowKey="(record) => record.name"
           :loading="tableLoading"
+           :pagination="false"
         >
           <template #updatedAt="{ record }">
-            <span>{{ changeTime(record.updatedAt) }}</span>
+              <span>{{ TYPE_MAP[record.type] || '' }}</span>
           </template>
           <template #type="{ record }">
-            <span>{{ TYPE_MAP[record.type] }}</span>
+             <span  v-if="record.name != '合计'">{{ changeTime(record.updatedAt)}}</span>
           </template>
           <template #totalPercentage="{ record }">
-            <a-tag v-if="record.totalPercentage < 100" color="warning">{{
-              record.totalPercentage + "%"
+            <a-tag v-if="record.name != '合计' && record.totalPercentage < 100" color="warning">{{
+              (record.totalPercentage + "%") || ''
             }}</a-tag>
-            <span v-else>{{ record.totalPercentage + "%" }}</span>
+             <span v-else-if="record.name != '合计' && record.totalPercentage == 100">{{ record.totalPercentage + "%" }}</span>
           </template>
           <template #attachment="{ record }">
-            <a-button @click="() => showImg(record.attachment)"
+            <a-button v-if="record.name != '合计'" @click="() => showImg(record.attachment)"
               >查看任务书</a-button
             >
           </template>
           <template #products="{ record }">
-            <a-button @click="() => showProducts(record.products)"
+            <a-button v-if="record.name != '合计'" @click="() => showProducts(record.products)"
               >查看产值</a-button
             >
           </template>
@@ -116,7 +117,7 @@ import {
   watchEffect,
 } from "vue";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
-import { getR4AllList } from "@/api/display";
+import { getR4FinishedList } from "@/api/display";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 import moment from "moment";
@@ -217,7 +218,7 @@ export default defineComponent({
       type: string,
       year: string
     ) => {
-      const data = await getR4AllList(name, number, type, year).then(
+      const data = await getR4FinishedList(name, number, type, year).then(
         (response) => {
           tableLoading.value = false;
           return response.data.data;
@@ -226,7 +227,7 @@ export default defineComponent({
       if (data.hasOwnProperty("empty")) {
         state.taskList = [];
       } else {
-        state.taskList = data.finished;
+        state.taskList = data;
       }
     };
 
