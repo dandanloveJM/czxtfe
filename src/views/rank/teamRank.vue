@@ -22,7 +22,7 @@
           :loading="tableLoading"
         >
           <template #team="{ record }">
-            <span>{{ TEAM_MAP[record.team] }}</span>
+            <span>{{ TEAM_MAP[record.team] || record.team }}</span>
           </template>
         </a-table>
       </div>

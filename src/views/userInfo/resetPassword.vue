@@ -1,6 +1,6 @@
 <template>
   <div class="doneTask__container">
-    <div class="tip">新密码必须包含数字、字母、特殊符号，且8位以上</div>
+    <div class="tip">新密码必须包含数字、大写字母、小写字母、特殊符号，且8位以上</div>
     <a-form layout="inline" :model="formState" @finish="handleFinish">
       <a-form-item>
         <a-input v-model:value="formState.password" placeholder="新密码">
@@ -66,7 +66,7 @@ export default defineComponent({
       let password = toRaw(formState).password;
       const valid = regex.test(password);
       if (!valid) {
-        message.error("新密码必须包含数字、字母、特殊符号，且8位以上");
+        message.error("新密码必须包含数字、大写字母、小写字母、特殊符号，且8位以上");
       } else {
           changePassword({'password':password}).then((response) => {
               if(response.data.status === 'fail'){

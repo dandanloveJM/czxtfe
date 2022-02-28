@@ -60,7 +60,7 @@ request.interceptors.request.use((config: AxiosRequestConfig): AxiosRequestConfi
  * @param { Object } response 返回的数据
  */
 request.interceptors.response.use((response: AxiosResponse): AxiosResponse | Promise<AxiosResponse> => {
-  if (response.data.status === "ok") {
+  if (response.status === 200) {
     console.log('ok')
     console.dir(response);
     return response

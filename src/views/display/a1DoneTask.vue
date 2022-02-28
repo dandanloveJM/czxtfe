@@ -87,6 +87,7 @@
           :columns="productColumns"
           :data-source="state.products"
           :rowKey="(record) => record.id"
+          :pagination="false"
         >
           <template #percentage="{ record }">
             <span>{{ record.percentage + "%" }}</span>

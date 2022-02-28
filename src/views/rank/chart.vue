@@ -107,8 +107,8 @@ export default defineComponent({
 
       const localRankMap = {};
       for (const item of rankData) {
-        const key = item.teamRank;
-        const value = item.productSum;
+        const key = item.team;
+        const value = item.allBonus;
         localRankMap[key] = value;
       }
 
@@ -129,8 +129,7 @@ export default defineComponent({
           const total_sum = pieParams.reduce((perviousValue, current) => {
             return perviousValue + current.value;
           }, 0);
-          console.log("-----total_sum");
-          console.dir();
+     
           drawPie(
             localMap[key][0],
             localMap[key][1] + "总产值\n" + localRankMap[key],
