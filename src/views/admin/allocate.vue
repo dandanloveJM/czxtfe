@@ -242,7 +242,7 @@ export default defineComponent({
 
     const handleChange = (value: string) => {
       const year = Number(value);
-      console.log(value);
+     
       tableLoading.value = true;
       fetchData(year);
     };
@@ -331,15 +331,13 @@ export default defineComponent({
       });
 
       if (isError === 0) {
-        console.log("submit!", toRaw(dynamicForm));
+
         message.success("填写成功，正在上传数据中");
         // TODO 构造参数 发送请求
         confirmLoading.value = true;
 
         let params = buildParam(records);
-        console.log("params");
-        console.dir(params);
-
+  
         reallocateProduct(params)
           .then((response) => {
             // 删除本地缓存

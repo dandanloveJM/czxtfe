@@ -61,8 +61,7 @@ request.interceptors.request.use((config: AxiosRequestConfig): AxiosRequestConfi
  */
 request.interceptors.response.use((response: AxiosResponse): AxiosResponse | Promise<AxiosResponse> => {
   if (response.status === 200) {
-    console.log('ok')
-    console.dir(response);
+
     return response
     
   } else if (response.data.msg === "expire") {

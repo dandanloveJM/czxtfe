@@ -27,18 +27,13 @@ app.use(router);
 
 app.directive("drag-modal", (el, bindings, vnode) => {
   nextTick(() => {
-    console.log("vnode");
-    console.log(vnode);
+   
 
     let visible = vnode.children[0].props.visible;
     let destroyOnClose = vnode.children[0].props.destroyOnClose;
 
     if (!visible) return;
-    console.log("el");
-    console.log(el);
-
-    console.log("bindings");
-    console.log(bindings);
+   
     let modal = document.querySelector<HTMLElement>(".ant-modal");
 
     let header = document.querySelector<HTMLElement>(".ant-modal-header");
@@ -55,14 +50,14 @@ app.directive("drag-modal", (el, bindings, vnode) => {
     let move = { x: 0, y: 0 };
     header.onmousedown = (event) => {
       isEnd = false;
-      console.log("mousedown");
+    
       let startX = event.clientX;
       let startY = event.clientY;
     //   header.left = header.offsetLeft;
     //   header.top = header.offsetTop;
 
       window.onmousemove = (event) => {
-        console.log("move");
+      
         if (isEnd) {
           return;
         }
@@ -79,7 +74,7 @@ app.directive("drag-modal", (el, bindings, vnode) => {
 
       header.onmouseup = (event) => {
         isEnd = true;
-        console.log("mouseup");
+     
 
         move.x = event.clientX - startX;
         move.y = event.clientY - startY;
@@ -100,6 +95,5 @@ app.directive("drag-modal", (el, bindings, vnode) => {
 });
 
 const aa = import.meta.env.VITE_BASE_URL;
-console.log("aaa:" + aa);
 
 router.isReady().then(() => app.mount("#app"));

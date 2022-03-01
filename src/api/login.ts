@@ -53,8 +53,7 @@ export const menu = (): ConfigType<RouterData> => {
 
 export const changePassword = (params) => {
   let data = new FormData();
-  console.log('params')
-  console.log(params)
+
   for (const key in params) {
     if (params.hasOwnProperty(key)) {
       data.append(key, params[key]);

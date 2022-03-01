@@ -338,8 +338,7 @@ export default defineComponent({
       // 拿到filterFormState数据，拼接参数, 发送fetchData请求, 设置loading
       const formData = toRaw(filterFormState);
       const values = Object.values(formData);
-      console.log("我看看参数");
-      console.log(values);
+    
       tableLoading.value = true;
 
       if (values.length == 4) {
