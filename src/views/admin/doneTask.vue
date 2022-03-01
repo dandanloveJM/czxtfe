@@ -38,39 +38,40 @@
         <a-table
           :columns="columns"
           :data-source="state.taskList"
-          :rowKey="(record) => record.processId"
+          :rowKey="(record) => record.name"
           :loading="tableLoading"
+          :pagination="false"
         >
           <template #updatedAt="{ record }">
-            <span>{{ changeTime(record.updatedAt) }}</span>
+             <span>{{ TYPE_MAP[record.type] || '' }}</span>
           </template>
           <template #type="{ record }">
-            <span>{{ TYPE_MAP[record.type] }}</span>
+            <span  v-if="record.name != '合计'">{{ changeTime(record.updatedAt)}}</span>
           </template>
           <template #totalPercentage="{ record }">
-            <a-tag v-if="record.totalPercentage < 100" color="warning">{{
-              record.totalPercentage + "%"
+            <a-tag v-if="record.name != '合计' && record.totalPercentage < 100" color="warning">{{
+              (record.totalPercentage + "%") || ''
             }}</a-tag>
-            <span v-else>{{ record.totalPercentage + "%" }}</span>
+             <span v-else-if="record.name != '合计' && record.totalPercentage == 100">{{ record.totalPercentage + "%" }}</span>
           </template>
           <template #attachment="{ record }">
-            <a-button @click="() => showImg(record.attachment)"
+            <a-button v-if="record.name != '合计'" @click="() => showImg(record.attachment)"
               >查看任务书</a-button
             >
           </template>
           <template #products="{ record }">
-            <a-button @click="() => showProducts(record.products)"
+            <a-button v-if="record.name != '合计'" @click="() => showProducts(record.products)"
               >查看产值</a-button
             >
           </template>
           <template #action="{ record }">
-            <span>
+            <span v-if="record.name != '合计'">
               <a-button @click="() => checkHistory(record.processId)">
                 流程查看
               </a-button>
             </span>
             <a-divider type="vertical" />
-            <span>
+            <span v-if="record.name != '合计'">
               <a-button
                 primary
                 danger
