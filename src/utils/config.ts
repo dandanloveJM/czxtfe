@@ -12,6 +12,20 @@ export const typeMap = {
   };
 
 
+  export const pivotTypeMap = {
+    "caijisheji": "采集设计",
+    "keyanxiangmu": "科研项目",
+    "xianchangchuli": "现场处理",
+    "zhiliangpingjia": "质量评价",
+    "ziliaofenxi": "资料分析",
+    "biaocengdiaocha": "表层调查",
+    "celiangzhikong": "测量质控",
+    "jishuzhichi": "技术支持",
+    "xianchangzhichi": "现场支持",
+    "dangjian": "党建工作",
+  };
+
+
   export const TYPE_OPTIONS = [
     {
       value:'1',

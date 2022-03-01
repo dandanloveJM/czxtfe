@@ -344,3 +344,14 @@ export const deleteProject = (processId) => {
     data: data,
   });
 };
+
+
+export const getR2PivotParams = (
+  team:string
+) => {
+  return request({
+    url: "pivot/chart",
+    method: "get",
+    params: { team: team},
+  });
+};
