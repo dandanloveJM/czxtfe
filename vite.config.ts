@@ -12,15 +12,15 @@ export default defineConfig({
   plugins: [
     vue(),
     vueJsx(),
-    // legacy({
-    //   targets: ["defaults", "not IE 11"],
-    // }),
-    {
-      ...legacy({
-        targets: ["defaults", "not IE 11"],
-      }),
-      apply: "build",
-    },
+    legacy({
+      targets: ["defaults", "not IE 11"],
+    })
+    // {
+    //   ...legacy({
+    //     targets: ["defaults", "not IE 11"],
+    //   }),
+    //   apply: "build",
+    // },
   ],
   resolve: {
     alias: {

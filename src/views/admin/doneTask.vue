@@ -42,10 +42,10 @@
           :loading="tableLoading"
           :pagination="false"
         >
-          <template #updatedAt="{ record }">
+          <template #type="{ record }">
              <span>{{ TYPE_MAP[record.type] || '' }}</span>
           </template>
-          <template #type="{ record }">
+          <template #updatedAt="{ record }">
             <span  v-if="record.name != '合计'">{{ changeTime(record.updatedAt)}}</span>
           </template>
           <template #totalPercentage="{ record }">

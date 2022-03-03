@@ -24,8 +24,8 @@
           :rowKey="(record) => record.rankId"
           :loading="tableLoading"
         >
-          <template #teamRank="{ record }">
-            <span>{{ TEAM_MAP[record.teamRank] }}</span>
+          <template #team="{ record }">
+            <span>{{ TEAM_MAP[record.team] }}</span>
           </template>
         </a-table>
       </div>
@@ -172,8 +172,8 @@ export default defineComponent({
       },
       {
         title: "部门",
-        dataIndex: "teamName",
-        key: "teamName",
+         slots: { customRender: "team" },
+        key: "team",
       },
       {
         title: "20%产值待分配",
