@@ -44,6 +44,10 @@
           <template #updatedAt="{ record }">
             <span>{{ changeTime(record.updatedAt) }}</span>
           </template>
+           <template #check="{ record }">
+            <span v-if="record.activityName === 'R4审核'">待审核</span>
+            <span v-else>已审核</span>
+          </template>
           <template #action="{ record }">
             <span v-if="record.activityName === 'R4审核'">
               <a-button @click="() => check(record)">点击审核 </a-button>
@@ -217,12 +221,7 @@ import {
   onMounted,
   UnwrapRef,
   toRaw,
-  watchEffect,
 } from "vue";
-import {
-  RuleObject,
-  ValidateErrorEntity,
-} from "ant-design-vue/es/form/interface";
 import { UploadOutlined } from "@ant-design/icons-vue";
 import { SelectTypes } from "ant-design-vue/es/select";
 import aIcon from "@/components/aicon/aicon.vue";
@@ -234,15 +233,12 @@ import {
   EditTwoTone,
 } from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
-import { message, Modal as antModal } from "ant-design-vue";
+import { message } from "ant-design-vue";
 import {
   getR4UnfinishedList,
   getAllR1R2R3Users,
-  fillOutputValue,
   checkHistoryRequest,
   rollbackRequest,
-  startProcess,
-  generateNewProject,
   r4Approve,
 } from "@/api/display";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
@@ -261,6 +257,7 @@ const columns = [
     title: "任务名",
     dataIndex: "name",
     key: "name",
+    width: 250
   },
   {
     title: "任务书编号",
@@ -286,6 +283,30 @@ const columns = [
     title: "附件",
     slots: { customRender: "attachment" },
     key: "attachment",
+  },
+  {
+    title: "状态",
+    key: "check",
+    slots: { customRender: "check" },
+    filters: [
+      {
+        text: '已审核',
+        value: '已审核',
+      },
+      {
+        text: '待审核',
+        value: '待审核',
+      },
+    
+    ],
+    filterMultiple: false,
+    onFilter: (value: string, record) => {
+      if(record.activityName === 'R4审核'){
+        return value === "待审核"
+      } else {
+        return value === "已审核"
+      }
+    },
   },
   {
     title: "操作",
