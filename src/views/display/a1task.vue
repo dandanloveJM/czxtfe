@@ -27,9 +27,11 @@
             />
           </a-form-item>
           <a-space direction="vertical" :size="12">
-            <a-date-picker v-model:value="filterFormState.month"
-            :disabled-date="disabledDate"
-             picker="month" />
+            <a-date-picker
+              v-model:value="filterFormState.month"
+              :disabled-date="disabledDate"
+              picker="month"
+            />
           </a-space>
           <a-form-item :wrapper-col="wrapperCol">
             <a-button type="primary" @click="searchFilters">搜索</a-button>
@@ -242,8 +244,8 @@ import {
 } from "@/api/display";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 import dayjs from "dayjs";
-import { SelectTypes } from "ant-design-vue/es/select";
 import type { Dayjs } from 'dayjs';
+import SelectTypes from "ant-design-vue/es/select";
 
 interface filterFormState {
   name: string;
@@ -552,7 +554,7 @@ export default defineComponent({
         .then((response) => {
           message.success("退回成功");
           confirmLoading2.value = false;
-          fetchData("", "", "", "2022",null);
+          fetchData("", "", "", "2022", null);
 
           showRollback.value = false;
         })
@@ -600,7 +602,7 @@ export default defineComponent({
       rollbackRequest(params)
         .then((response) => {
           message.success("退回成功");
-          fetchData("", "", "", "2022",null);
+          fetchData("", "", "", "2022", null);
 
           showCheck.value = false;
           state.checkProcessId = "";
@@ -661,7 +663,7 @@ export default defineComponent({
       a1SetProduct(params)
         .then((response) => {
           message.success("设置产值及比例成功");
-          fetchData("", "", "", "2022",null);
+          fetchData("", "", "", "2022", null);
 
           state.currentProcessId = "";
           state.currentTaskId = "";
@@ -691,7 +693,7 @@ export default defineComponent({
       createFilterFormState()
     );
 
-const disabledDate = (current: Dayjs) => {
+    const disabledDate = (current: Dayjs) => {
       // Can not select days before today and today
       return current < dayjs().startOf('year') || current > dayjs().endOf('year')
     };
@@ -699,26 +701,20 @@ const disabledDate = (current: Dayjs) => {
     const searchFilters = () => {
       // 拿到filterFormState数据，拼接参数, 发送fetchData请求, 设置loading
       const formData = toRaw(filterFormState);
-      const values = Object.values(formData);
+
       console.log("我看看参数");
-      console.log(values);
-      if (values[4] !== null) {
-        console.log(values[4].month() + 1)
-      }
+      console.log(formData);
+
 
       tableLoading.value = true;
 
-      if (values.length == 5) {
-        if (values[4] !== null) {
-          fetchData(values[0], values[1], values[2], values[3], values[4].month() + 1);
-        } else {
-          fetchData(values[0], values[1], values[2], values[3], null);
-        }
+      const month = formData.month === null ? null : formData.month.month() + 1;
+      fetchData(formData.name, formData.number, formData.type, formData.year, month);
 
-      }
+
     };
 
-    const options1 = ref<SelectTypes["options"]>([
+    const options1 = ref<typeof SelectTypes["options"]>([
       {
         value: "2022",
         label: "2022",
