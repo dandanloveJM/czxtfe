@@ -794,9 +794,7 @@ export default defineComponent({
 
       rollbackRequest(params)
         .then(() => {
-          message.success({
-            title: "退回成功",
-          });
+          message.success("退回成功");
           fetchData("", "", "", "2022");
 
           showCheck.value = false;
@@ -834,7 +832,7 @@ export default defineComponent({
         });
     };
     const changeTime = (time) => {
-      return dayjs(time).add(8, "hours").format("lll");
+     return dayjs(time).add(8, "hours").format('YYYY年MM月DD日 HH:mm');
     };
     const showImg = (srcURL) => {
       showPreview.value = true;

@@ -628,7 +628,7 @@ export default defineComponent({
         });
     }, 1000);
     const changeTime = (time) => {
-      return dayjs(time).add(8, "hours").format("lll");
+    return dayjs(time).add(8, "hours").format('YYYY年MM月DD日 HH:mm');
     };
 
     const showImg = (srcURL) => {

@@ -26,6 +26,11 @@
               :options="options1"
             />
           </a-form-item>
+          <a-date-picker
+            v-model:value="filterFormState.month"
+            :disabled-date="disabledDate"
+            picker="month"
+          />
           <a-form-item :wrapper-col="wrapperCol">
             <a-button type="primary" @click="searchFilters">搜索</a-button>
           </a-form-item>
@@ -46,28 +51,26 @@
             <span>{{ TYPE_MAP[record.type] || '' }}</span>
           </template>
           <template #updatedAt="{ record }">
-           <span  v-if="record.name != '合计'">{{ changeTime(record.updatedAt)}}</span>
+            <span v-if="record.name != '合计'">{{ changeTime(record.updatedAt) }}</span>
           </template>
           <template #totalPercentage="{ record }">
-            <a-tag v-if="record.name != '合计' && record.totalPercentage < 100" color="warning">{{
-              (record.totalPercentage + "%") || ''
-            }}</a-tag>
-             <span v-else-if="record.name != '合计' && record.totalPercentage == 100">{{ record.totalPercentage + "%" }}</span>
+            <a-tag v-if="record.name != '合计' && record.totalPercentage < 100" color="warning">
+              {{
+                (record.totalPercentage + "%") || ''
+              }}
+            </a-tag>
+            <span
+              v-else-if="record.name != '合计' && record.totalPercentage == 100"
+            >{{ record.totalPercentage + "%" }}</span>
           </template>
-          <template  #attachment="{ record }">
-            <a-button  v-if="record.name != '合计'" @click="() => showImg(record.attachment)"
-              >查看任务书</a-button
-            >
+          <template #attachment="{ record }">
+            <a-button v-if="record.name != '合计'" @click="() => showImg(record.attachment)">查看任务书</a-button>
           </template>
           <template #products="{ record }">
-            <a-button  v-if="record.name != '合计'" @click="() => showProducts(record.products)">
-              查看产值
-            </a-button>
+            <a-button v-if="record.name != '合计'" @click="() => showProducts(record.products)">查看产值</a-button>
           </template>
           <template #action="{ record }">
-            <a-button v-if="record.name != '合计'" @click="() => modifyProducts(record)">
-              修改总产值及比例
-            </a-button>
+            <a-button v-if="record.name != '合计'" @click="() => modifyProducts(record)">修改总产值及比例</a-button>
           </template>
         </a-table>
       </div>
@@ -117,7 +120,8 @@
               :max="100"
               :formatter="(value) => `${value}%`"
               :parser="(value) => value.replace('%', '')"
-            /><span>填写0-100的正整数</span>
+            />
+            <span>填写0-100的正整数</span>
           </a-form-item>
         </a-form>
       </a-modal>
@@ -145,15 +149,14 @@ import {
   onMounted,
   UnwrapRef,
   toRaw,
-  watchEffect,
 } from "vue";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 import { getA1Data, a1ModifyProduct } from "@/api/display";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
-// import moment from "moment";
 import dayjs from "dayjs";
-import { SelectTypes } from "ant-design-vue/es/select";
+import SelectTypes from "ant-design-vue/es/select";
+import type { Dayjs } from 'dayjs';
 
 interface A1FormState {
   total: number;
@@ -165,6 +168,7 @@ interface filterFormState {
   number: string;
   type: string;
   year: string;
+  month: Dayjs;
 }
 
 export default defineComponent({
@@ -266,9 +270,10 @@ export default defineComponent({
       name: string,
       number: string,
       type: string,
-      year: string
+      year: string,
+      month: number
     ) => {
-      const data = await getA1Data(name, number, type, year).then(
+      const data = await getA1Data(name, number, type, year, month).then(
         (response) => {
           tableLoading.value = false;
           return response.data.data;
@@ -282,7 +287,7 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      fetchData("", "", "", "2022");
+      fetchData("", "", "", "2022", null);
     });
 
     const showProducts = (products) => {
@@ -300,7 +305,7 @@ export default defineComponent({
       showModify.value = true;
       state.currentProcessId = record.processId;
       Object.assign(a1FormState, { total: record.totalProduct, ratio: record.totalPercentage });
-   
+
 
     };
     const resetOk = () => {
@@ -317,7 +322,7 @@ export default defineComponent({
       a1ModifyProduct(params)
         .then((response) => {
           message.success("产值及比例修改成功");
-          fetchData("", "", "", "2022");
+          fetchData("", "", "", "2022", null);
 
           state.currentProcessId = "";
         })
@@ -328,13 +333,14 @@ export default defineComponent({
     };
 
     const changeTime = (time) => {
-      return dayjs(time).add(8, "hours").format("lll");
+      return dayjs(time).add(8, "hours").format('YYYY年MM月DD日 HH:mm');
     };
     const createFilterFormState = () => ({
       name: "",
       number: "",
       type: "",
       year: "2022",
+      month: null
     });
     const typeOptions = TYPE_OPTIONS;
 
@@ -342,20 +348,28 @@ export default defineComponent({
       createFilterFormState()
     );
 
+    const disabledDate = (current: Dayjs) => {
+      // Can not select days before today and today
+      return current < dayjs().startOf('year') || current > dayjs().endOf('year')
+    };
+
     const searchFilters = () => {
       // 拿到filterFormState数据，拼接参数, 发送fetchData请求, 设置loading
       const formData = toRaw(filterFormState);
-      const values = Object.values(formData);
+
       console.log("我看看参数");
-      console.log(values);
+      console.log(formData);
+
+
       tableLoading.value = true;
 
-      if (values.length == 4) {
-        fetchData(values[0], values[1], values[2], values[3]);
-      }
+      const month = formData.month === null ? null : formData.month.month() + 1;
+      fetchData(formData.name, formData.number, formData.type, formData.year, month);
+
+
     };
 
-    const options1 = ref<SelectTypes["options"]>([
+    const options1 = ref<typeof SelectTypes["options"]>([
       {
         value: "2022",
         label: "2022",
@@ -409,6 +423,7 @@ export default defineComponent({
       cancelSetValue,
       showImg,
       showPreview,
+      disabledDate
     };
   },
 });
