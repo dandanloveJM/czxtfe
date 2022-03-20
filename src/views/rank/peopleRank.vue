@@ -57,7 +57,7 @@ import { typeMap, teamMap, TEAMS_OPTIONS } from "@/utils/config";
 import { getAllUserRank } from "@/api/display";
 import { debounce } from "lodash-es";
 import { CalendarTwoTone } from "@ant-design/icons-vue";
-import { SelectTypes } from "ant-design-vue/es/select";
+import  SelectTypes  from "ant-design-vue/es/select";
 
 interface filterFormState {
   team: string;
@@ -119,7 +119,7 @@ export default defineComponent({
       // });
     });
 
-    const options1 = ref<SelectTypes["options"]>([
+    const options1 = ref<typeof SelectTypes["options"]>([
       {
         value: "2022",
         label: "2022",

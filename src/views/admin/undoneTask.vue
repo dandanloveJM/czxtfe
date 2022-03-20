@@ -120,16 +120,9 @@ import {
   onMounted,
   UnwrapRef,
   toRaw,
-  watchEffect,
   createVNode,
-  computed,
 } from "vue";
-import {
-  RuleObject,
-  ValidateErrorEntity,
-} from "ant-design-vue/es/form/interface";
 import { UploadOutlined } from "@ant-design/icons-vue";
-import { SelectTypes } from "ant-design-vue/es/select";
 import aIcon from "@/components/aicon/aicon.vue";
 import {
   MinusCircleOutlined,
@@ -146,7 +139,7 @@ import { getAdminAllList } from "@/api/admin";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 // import moment from "moment";
 import dayjs from "dayjs";
-import { debounce } from "lodash-es";
+import  SelectTypes  from "ant-design-vue/es/select";
 
 interface filterFormState {
   name: string;
@@ -488,7 +481,7 @@ export default defineComponent({
       }
     };
 
-    const options1 = ref<SelectTypes["options"]>([
+    const options1 = ref<typeof SelectTypes["options"]>([
       {
         value: "2022",
         label: "2022",

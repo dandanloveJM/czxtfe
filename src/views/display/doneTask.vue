@@ -121,8 +121,8 @@ import { getR1FinishedList } from "@/api/display";
 // import moment from "moment";
 import dayjs from "dayjs";
 import { SearchOutlined, CalendarTwoTone } from "@ant-design/icons-vue";
-import { SelectTypes } from "ant-design-vue/es/select";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
+import  SelectTypes  from "ant-design-vue/es/select";
 
 interface filterFormState {
   name: string;
@@ -260,7 +260,7 @@ export default defineComponent({
 
     const searchValue = ref<string>("");
 
-    const options1 = ref<SelectTypes["options"]>([
+    const options1 = ref<typeof SelectTypes["options"]>([
       {
         value: "2022",
         label: "2022",

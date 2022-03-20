@@ -285,7 +285,7 @@ import {
   computed,
 } from "vue";
 import { UploadOutlined } from "@ant-design/icons-vue";
-import { SelectTypes } from "ant-design-vue/es/select";
+import  SelectTypes  from "ant-design-vue/es/select";
 import aIcon from "@/components/aicon/aicon.vue";
 import {
   MinusCircleOutlined,
@@ -869,7 +869,7 @@ export default defineComponent({
       }
     };
 
-    const options1 = ref<SelectTypes["options"]>([
+    const options1 = ref<typeof SelectTypes["options"]>([
       {
         value: "2022",
         label: "2022",

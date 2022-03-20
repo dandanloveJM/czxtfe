@@ -29,17 +29,14 @@
   </a-form>
 </template>
 <script lang="ts">
-import { typeMap, TYPE_OPTIONS } from "@/utils/config";
-import { SelectTypes } from "ant-design-vue/es/select";
+import { TYPE_OPTIONS } from "@/utils/config";
 import {
   defineComponent,
   ref,
   reactive,
-  onMounted,
   UnwrapRef,
-  toRaw,
-  watchEffect,
 } from "vue";
+import  SelectTypes  from "ant-design-vue/es/select";
 
 interface filterFormState {
   name: string;
@@ -73,7 +70,7 @@ export default defineComponent({
     const sendData = () => {
       props.searchFilters();
     };
-    const options1 = ref<SelectTypes["options"]>([
+    const options1 = ref<typeof SelectTypes["options"]>([
       {
         value: "2022",
         label: "2022",

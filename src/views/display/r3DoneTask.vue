@@ -133,7 +133,7 @@ import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 // import moment from "moment";
 import dayjs from "dayjs";
-import { SelectTypes } from "ant-design-vue/es/select";
+import  SelectTypes  from "ant-design-vue/es/select";
 
 interface filterFormState {
   name: string;
@@ -283,7 +283,7 @@ export default defineComponent({
       }
     };
 
-    const options1 = ref<SelectTypes["options"]>([
+    const options1 = ref<typeof SelectTypes["options"]>([
       {
         value: "2022",
         label: "2022",

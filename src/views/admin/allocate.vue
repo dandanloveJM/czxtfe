@@ -127,15 +127,14 @@ import {
   onMounted,
   UnwrapRef,
   toRaw,
-  watchEffect,
 } from "vue";
 import { teamMap } from "@/utils/config";
 import { getTeamBonus, getAllR1R2R3Users } from "@/api/display";
 import { reallocateProduct } from "@/api/admin";
 import { CalendarTwoTone, PlusOutlined } from "@ant-design/icons-vue";
-import { SelectTypes } from "ant-design-vue/es/select";
-import { message, Modal as antModal } from "ant-design-vue";
+import { message } from "ant-design-vue";
 import localStorageStore from "@/utils/localStorageStore";
+import  SelectTypes  from "ant-design-vue/es/select";
 
 interface PeopleAndProductRecord {
   peopleLabel: string;
@@ -224,7 +223,7 @@ export default defineComponent({
       fetchData(2022);
     });
 
-    const options1 = ref<SelectTypes["options"]>([
+    const options1 = ref<typeof SelectTypes["options"]>([
       {
         value: "2022",
         label: "2022",

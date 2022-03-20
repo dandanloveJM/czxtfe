@@ -252,7 +252,7 @@ import {
 // import moment from "moment";
 import dayjs from "dayjs";
 import localStorageStore from "@/utils/localStorageStore";
-import { SelectTypes } from "ant-design-vue/es/select";
+import  SelectTypes  from "ant-design-vue/es/select";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 
 const columns = [
@@ -682,7 +682,7 @@ export default defineComponent({
       visible.value = false;
     };
 
-    const options1 = ref<SelectTypes["options"]>([
+    const options1 = ref<typeof SelectTypes["options"]>([
       {
         value: "2022",
         label: "2022",

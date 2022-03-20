@@ -122,9 +122,6 @@ import {
   onMounted,
   UnwrapRef,
   toRaw,
-  watchEffect,
-  createVNode,
-  computed,
 } from "vue";
 import {
   ExclamationCircleOutlined,
@@ -142,7 +139,7 @@ import {
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 import { cloneDeep } from "lodash-es";
-import { SelectTypes } from "ant-design-vue/es/select";
+import  SelectTypes  from "ant-design-vue/es/select";
 
 interface filterFormState {
   type: string;
@@ -313,7 +310,7 @@ export default defineComponent({
       return option.label.indexOf(input) >= 0;
     };
 
-    const options1 = ref<SelectTypes["options"]>([
+    const options1 = ref<typeof SelectTypes["options"]>([
       {
         value: "李正佳",
         label: "李正佳",
@@ -359,7 +356,7 @@ export default defineComponent({
       createNewFormState()
     );
 
-    const options2 = ref<SelectTypes["options"]>([
+    const options2 = ref<typeof SelectTypes["options"]>([
       {
         value: "11",
         label: "李正佳",
