@@ -44,30 +44,40 @@
           <template #updatedAt="{ record }">
             <span>{{ changeTime(record.updatedAt) }}</span>
           </template>
-           <template #check="{ record }">
-            <span v-if="record.activityName === 'R4审核'">待审核</span>
-            <span v-else>已审核</span>
+          <template #check="{ record }">
+            <span v-if="record.activityName === 'R4审核'">
+              <a-tag color="warning">
+                <template #icon>
+                  <exclamation-circle-outlined />
+                </template>
+                待审核
+              </a-tag>
+            </span>
+            <span v-else>
+              <a-tag color="success">
+                <template #icon>
+                  <check-circle-outlined />
+                </template>
+                已审核
+              </a-tag>
+            </span>
           </template>
           <template #action="{ record }">
             <span v-if="record.activityName === 'R4审核'">
-              <a-button @click="() => check(record)">点击审核 </a-button>
+              <a-button @click="() => check(record)">点击审核</a-button>
 
               <a-divider type="vertical" />
             </span>
 
             <span>
-              <a-button @click="() => checkHistory(record.processId)">
-                流程查看
-              </a-button>
+              <a-button @click="() => checkHistory(record.processId)">流程查看</a-button>
             </span>
           </template>
           <template #type="{ record }">
             <span>{{ typeMap[record.type] }}</span>
           </template>
           <template #attachment="{ record }">
-            <a-button @click="() => showImg(record.attachment)"
-              >查看任务书</a-button
-            >
+            <a-button @click="() => showImg(record.attachment)">查看任务书</a-button>
           </template>
         </a-table>
       </div>
@@ -123,8 +133,7 @@
           <a-tab-pane key="1">
             <template #tab>
               <span class="tab-title-header">
-                <AppstoreTwoTone />
-                项目详情
+                <AppstoreTwoTone />项目详情
               </span>
             </template>
             <a-table
@@ -141,16 +150,14 @@
                 <span>{{ typeMap[record.type] }}</span>
               </template>
               <template #attachment="{ record }">
-                <a-button  @click="() => showImg(record.attachment)">查看任务书</a-button>
-             
+                <a-button @click="() => showImg(record.attachment)">查看任务书</a-button>
               </template>
             </a-table>
           </a-tab-pane>
           <a-tab-pane key="2">
             <template #tab>
               <span class="tab-title-header">
-                <CrownTwoTone />
-                产值比例
+                <CrownTwoTone />产值比例
               </span>
             </template>
             <a-table
@@ -166,9 +173,7 @@
           </a-tab-pane>
         </a-tabs>
 
-        <header
-          class="header-title-wrapper header-title-wrapper-with-margin-top"
-        >
+        <header class="header-title-wrapper header-title-wrapper-with-margin-top">
           <EditTwoTone />
           <span class="header-title">流程审批</span>
         </header>
@@ -181,32 +186,12 @@
 
         <div class="button-wrapper">
           <div class="reject-button">
-            <a-button
-              
-              danger
-              size="large"
-              @click="() => rollbackTo('R3check')"
-              >退回，室主任重新审核</a-button
-            >
-            <a-button
-            
-              danger
-              size="large"
-              @click="() => rollbackTo('fillNumbers')"
-              >退回，重新填写产值比例</a-button
-            >
-            <a-button
-            
-              danger
-              size="large"
-              @click="() => rollbackTo('uploadTask')"
-              >退回，重新上传任务</a-button
-            >
+            <a-button danger size="large" @click="() => rollbackTo('R3check')">退回，室主任重新审核</a-button>
+            <a-button danger size="large" @click="() => rollbackTo('fillNumbers')">退回，重新填写产值比例</a-button>
+            <a-button danger size="large" @click="() => rollbackTo('uploadTask')">退回，重新上传任务</a-button>
           </div>
           <div class="agree">
-            <a-button @click="() => agreeTo()" type="primary" size="large"
-              >审核通过</a-button
-            >
+            <a-button @click="() => agreeTo()" type="primary" size="large">审核通过</a-button>
           </div>
         </div>
       </a-modal>
@@ -231,6 +216,7 @@ import {
   AppstoreTwoTone,
   CrownTwoTone,
   EditTwoTone,
+  CheckCircleOutlined,
 } from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message } from "ant-design-vue";
@@ -297,11 +283,11 @@ const columns = [
         text: '待审核',
         value: '待审核',
       },
-    
+
     ],
     filterMultiple: false,
     onFilter: (value: string, record) => {
-      if(record.activityName === 'R4审核'){
+      if (record.activityName === 'R4审核') {
         return value === "待审核"
       } else {
         return value === "已审核"
@@ -364,6 +350,7 @@ export default defineComponent({
     CrownTwoTone,
     AppstoreTwoTone,
     EditTwoTone,
+    CheckCircleOutlined
   },
   data() {
     return {
