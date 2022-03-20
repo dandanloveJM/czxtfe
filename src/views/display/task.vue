@@ -249,7 +249,8 @@ import {
   rollbackRequest,
 } from "@/api/display";
 
-import moment from "moment";
+// import moment from "moment";
+import dayjs from "dayjs";
 import localStorageStore from "@/utils/localStorageStore";
 import { SelectTypes } from "ant-design-vue/es/select";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
@@ -669,7 +670,7 @@ export default defineComponent({
     //   ],
     // };
     const changeTime = (time) => {
-      return moment(time).add(8, "hours").format("lll");
+      return dayjs(time).add(8, "hours").format("lll");
     };
     const showImg = (srcURL) => {
       showPreview.value = true;

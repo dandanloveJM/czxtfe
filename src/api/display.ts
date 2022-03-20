@@ -281,12 +281,13 @@ export const getA1Data = (
   query: string,
   number: string,
   type: string,
-  year: string
+  year: string,
+  month: number
 ) => {
   return request({
     url: "A1/Projects",
     method: "get",
-    params: { query: query, year: year, type: type, number: number },
+    params: { query: query, year: year, type: type, number: number, month:month},
   });
 };
 

@@ -228,7 +228,8 @@ import {
   r4Approve,
 } from "@/api/display";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
-import moment from "moment";
+// import moment from "moment";
+import dayjs from "dayjs";
 import { debounce } from "lodash-es";
 
 interface filterFormState {
@@ -627,7 +628,7 @@ export default defineComponent({
         });
     }, 1000);
     const changeTime = (time) => {
-      return moment(time).add(8, "hours").format("lll");
+      return dayjs(time).add(8, "hours").format("lll");
     };
 
     const showImg = (srcURL) => {

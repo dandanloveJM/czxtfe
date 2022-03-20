@@ -116,10 +116,10 @@ import {
   onMounted,
   UnwrapRef,
   toRaw,
-  watchEffect,
 } from "vue";
 import { getR1FinishedList } from "@/api/display";
-import moment from "moment";
+// import moment from "moment";
+import dayjs from "dayjs";
 import { SearchOutlined, CalendarTwoTone } from "@ant-design/icons-vue";
 import { SelectTypes } from "ant-design-vue/es/select";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
@@ -251,7 +251,7 @@ export default defineComponent({
     };
 
     const changeTime = (time) => {
-      return moment(time).add(8, "hours").format("lll");
+      return dayjs(time).add(8, "hours").format("lll");
     };
 
     onMounted(() => {

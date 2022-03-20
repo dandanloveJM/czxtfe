@@ -43,42 +43,34 @@
           :pagination="false"
         >
           <template #type="{ record }">
-             <span>{{ TYPE_MAP[record.type] || '' }}</span>
+            <span>{{ TYPE_MAP[record.type] || '' }}</span>
           </template>
           <template #updatedAt="{ record }">
-            <span  v-if="record.name != '合计'">{{ changeTime(record.updatedAt)}}</span>
+            <span v-if="record.name != '合计'">{{ changeTime(record.updatedAt) }}</span>
           </template>
           <template #totalPercentage="{ record }">
-            <a-tag v-if="record.name != '合计' && record.totalPercentage < 100" color="warning">{{
-              (record.totalPercentage + "%") || ''
-            }}</a-tag>
-             <span v-else-if="record.name != '合计' && record.totalPercentage == 100">{{ record.totalPercentage + "%" }}</span>
+            <a-tag v-if="record.name != '合计' && record.totalPercentage < 100" color="warning">
+              {{
+                (record.totalPercentage + "%") || ''
+              }}
+            </a-tag>
+            <span
+              v-else-if="record.name != '合计' && record.totalPercentage == 100"
+            >{{ record.totalPercentage + "%" }}</span>
           </template>
           <template #attachment="{ record }">
-            <a-button v-if="record.name != '合计'" @click="() => showImg(record.attachment)"
-              >查看任务书</a-button
-            >
+            <a-button v-if="record.name != '合计'" @click="() => showImg(record.attachment)">查看任务书</a-button>
           </template>
           <template #products="{ record }">
-            <a-button v-if="record.name != '合计'" @click="() => showProducts(record.products)"
-              >查看产值</a-button
-            >
+            <a-button v-if="record.name != '合计'" @click="() => showProducts(record.products)">查看产值</a-button>
           </template>
           <template #action="{ record }">
             <span v-if="record.name != '合计'">
-              <a-button @click="() => checkHistory(record.processId)">
-                流程查看
-              </a-button>
+              <a-button @click="() => checkHistory(record.processId)">流程查看</a-button>
             </span>
             <a-divider type="vertical" />
             <span v-if="record.name != '合计'">
-              <a-button
-                primary
-                danger
-                @click="() => deleteTask(record.processId)"
-              >
-                删除项目
-              </a-button>
+              <a-button primary danger @click="() => deleteTask(record.processId)">删除项目</a-button>
             </span>
           </template>
         </a-table>
@@ -162,7 +154,8 @@ import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 import { getAdminAllList } from "@/api/admin";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
-import moment from "moment";
+// import moment from "moment";
+import dayjs from "dayjs";
 import { SelectTypes } from "ant-design-vue/es/select";
 import { deleteProject, checkHistoryRequest } from "@/api/display";
 interface filterFormState {
@@ -199,6 +192,7 @@ export default defineComponent({
         title: "任务名",
         dataIndex: "name",
         key: "name",
+        width: 250
       },
       {
         title: "任务书编号",
@@ -319,7 +313,7 @@ export default defineComponent({
       state.products = [];
     };
     const changeTime = (time) => {
-      return moment(time).add(8, "hours").format("lll");
+      return dayjs(time).add(8, "hours").format("lll");
     };
 
     const createFilterFormState = () => ({
@@ -338,7 +332,7 @@ export default defineComponent({
       // 拿到filterFormState数据，拼接参数, 发送fetchData请求, 设置loading
       const formData = toRaw(filterFormState);
       const values = Object.values(formData);
-    
+
       tableLoading.value = true;
 
       if (values.length == 4) {

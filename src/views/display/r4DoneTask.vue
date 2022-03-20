@@ -120,7 +120,8 @@ import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 import { getR4FinishedList } from "@/api/display";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
-import moment from "moment";
+// import moment from "moment";
+import dayjs from "dayjs";
 import { SelectTypes } from "ant-design-vue/es/select";
 
 interface filterFormState {
@@ -246,7 +247,7 @@ export default defineComponent({
       state.products = [];
     };
     const changeTime = (time) => {
-      return moment(time).add(8, "hours").format("lll");
+      return dayjs(time).add(8, "hours").format("lll");
     };
 
     const createFilterFormState = () => ({

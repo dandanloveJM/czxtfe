@@ -1,8 +1,6 @@
 <template>
   <div class="issue__container">
-    <a-button type="primary" size="large" @click="createNewProject"
-      >点击新建任务</a-button
-    >
+    <a-button type="primary" size="large" @click="createNewProject">点击新建任务</a-button>
     <div class="filters-wrapper">
       <div class="search-filter-wrapper">
         <a-form ref="filter-form" :model="filterFormState" layout="inline">
@@ -45,38 +43,23 @@
         >
           <template #action="{ record }">
             <span v-if="record.activityName === 'R2/R1填写产值分配建议'">
-              <a-button
-                @click="() => addAdvice(record.processId, record.taskId)"
-              >
-                产值分配
-              </a-button>
+              <a-button @click="() => addAdvice(record.processId, record.taskId)">产值分配</a-button>
               <a-divider type="vertical" />
               <a-button @click="() => rollback(record)">节点回退</a-button>
               <a-divider type="vertical" />
             </span>
             <span v-if="record.activityName === 'R2上传任务'">
-              <a-button
-                @click="() => reuploadProjects(record.processId, record.taskId)"
-                >重新上传任务
-              </a-button>
+              <a-button @click="() => reuploadProjects(record.processId, record.taskId)">重新上传任务</a-button>
               <a-divider type="vertical" />
             </span>
 
             <span>
-              <a-button @click="() => checkHistory(record.processId)">
-                流程查看
-              </a-button>
+              <a-button @click="() => checkHistory(record.processId)">流程查看</a-button>
             </span>
             <a-divider type="vertical" />
 
             <span>
-              <a-button
-                primary
-                danger
-                @click="() => deleteTask(record.processId)"
-              >
-                删除项目
-              </a-button>
+              <a-button primary danger @click="() => deleteTask(record.processId)">删除项目</a-button>
             </span>
           </template>
           <template #type="{ record }">
@@ -86,9 +69,7 @@
             <span>{{ changeTime(record.updatedAt) }}</span>
           </template>
           <template #attachment="{ record }">
-            <a-button @click="() => showImg(record.attachment)"
-              >查看任务书</a-button
-            >
+            <a-button @click="() => showImg(record.attachment)">查看任务书</a-button>
           </template>
         </a-table>
       </div>
@@ -116,20 +97,11 @@
             type="primary"
             :loading="confirmLoading"
             @click="onSubmitForm"
-            >确认并发送
-          </a-button>
+          >确认并发送</a-button>
         </template>
         <a-form ref="formRef" :model="dynamicForm" :label-col="labelCol">
-          <div
-            class="line-wrapper"
-            v-for="(record, index) in dynamicForm.records"
-            :key="index"
-          >
-            <a-form-item
-              :label="record.peopleLabel"
-              style="min-width: 45%"
-              name="peopleValue"
-            >
+          <div class="line-wrapper" v-for="(record, index) in dynamicForm.records" :key="index">
+            <a-form-item :label="record.peopleLabel" style="min-width: 45%" name="peopleValue">
               <a-select
                 v-model:value="record.peopleValue"
                 show-search
@@ -157,26 +129,19 @@
               class="dynamic-delete-button"
               :disabled="dynamicForm.records.length === 1"
               @click="removeRecord(record)"
-            >
-              删除
-            </a-button>
+            >删除</a-button>
           </div>
           <div class="product_sum_calculator">
             <div style="min-width: 45%"></div>
             <div style="min-width: 35%">
-              <CalculatorTwoTone />当前产值比例总和: {{ adviceProductSum }}
+              <CalculatorTwoTone />
+              当前产值比例总和: {{ adviceProductSum }}
             </div>
           </div>
 
           <a-form-item>
-            <a-button
-              type="dashed"
-              class="add-record-button"
-              @click="addRecord"
-              size="large"
-            >
-              <PlusOutlined />
-              点击增加项目成员
+            <a-button type="dashed" class="add-record-button" @click="addRecord" size="large">
+              <PlusOutlined />点击增加项目成员
             </a-button>
           </a-form-item>
         </a-form>
@@ -264,14 +229,11 @@
               @change="fileUploadChange"
             >
               <a-button>
-                <upload-outlined></upload-outlined>
-                点击上传附件，只能传jpeg或jpg或png
+                <upload-outlined></upload-outlined>点击上传附件，只能传jpeg或jpg或png
               </a-button>
             </a-upload>
           </a-form-item>
-          <a-button style="margin-left: 10px" @click="resetProjectForm"
-            >重置数据</a-button
-          >
+          <a-button style="margin-left: 10px" @click="resetProjectForm">重置数据</a-button>
         </a-form>
       </a-modal>
     </div>
@@ -297,14 +259,9 @@ import {
   onMounted,
   UnwrapRef,
   toRaw,
-  watchEffect,
   createVNode,
   computed,
 } from "vue";
-import {
-  RuleObject,
-  ValidateErrorEntity,
-} from "ant-design-vue/es/form/interface";
 import {
   UploadOutlined,
   ExclamationCircleOutlined,
@@ -329,8 +286,9 @@ import {
   deleteProject,
 } from "@/api/display";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
-import moment from "moment";
+// import moment from "moment";
 import localStorageStore from "@/utils/localStorageStore";
+import dayjs from "dayjs";
 
 interface filterFormState {
   name: string;
@@ -344,6 +302,7 @@ const columns = [
     title: "任务名",
     dataIndex: "name",
     key: "name",
+    width: 250
   },
   {
     title: "任务书编号",
@@ -893,7 +852,7 @@ export default defineComponent({
     };
 
     const changeTime = (time) => {
-      return moment(time).add(8, "hours").format("lll");
+      return dayjs(time).add(8, "hours").format("lll");
     };
 
     const showImg = (srcURL) => {

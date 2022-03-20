@@ -144,7 +144,8 @@ import { message, Modal as antModal } from "ant-design-vue";
 import { checkHistoryRequest, deleteProject } from "@/api/display";
 import { getAdminAllList } from "@/api/admin";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
-import moment from "moment";
+// import moment from "moment";
+import dayjs from "dayjs";
 import { debounce } from "lodash-es";
 
 interface filterFormState {
@@ -455,7 +456,7 @@ export default defineComponent({
 
  
     const changeTime = (time) => {
-      return moment(time).add(8, "hours").format("lll");
+      return dayjs(time).add(8, "hours").format("lll");
     };
 
     const showImg = (srcURL) => {

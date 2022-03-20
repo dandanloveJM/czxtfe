@@ -26,6 +26,11 @@
               :options="options1"
             />
           </a-form-item>
+          <a-space direction="vertical" :size="12">
+            <a-date-picker v-model:value="filterFormState.month"
+            :disabled-date="disabledDate"
+             picker="month" />
+          </a-space>
           <a-form-item :wrapper-col="wrapperCol">
             <a-button type="primary" @click="searchFilters">搜索</a-button>
           </a-form-item>
@@ -43,14 +48,12 @@
         >
           <template #action="{ record }">
             <span v-if="record.activityName === 'A1填写产值'">
-              <a-button @click="() => check(record)">赋予产值 </a-button>
+              <a-button @click="() => check(record)">赋予产值</a-button>
               <a-divider type="vertical" />
             </span>
 
             <span>
-              <a-button @click="() => checkHistory(record.processId)">
-                流程查看
-              </a-button>
+              <a-button @click="() => checkHistory(record.processId)">流程查看</a-button>
             </span>
           </template>
 
@@ -118,8 +121,7 @@
           <a-tab-pane key="1">
             <template #tab>
               <span class="tab-title-header">
-                <AppstoreTwoTone />
-                项目详情
+                <AppstoreTwoTone />项目详情
               </span>
             </template>
             <a-table
@@ -136,17 +138,14 @@
                 <span>{{ typeMap[record.type] }}</span>
               </template>
               <template #attachment="{ record }">
-                <a-button @click="() => showImg(record.attachment)">
-                  查看任务书
-                </a-button>
+                <a-button @click="() => showImg(record.attachment)">查看任务书</a-button>
               </template>
             </a-table>
           </a-tab-pane>
           <a-tab-pane key="2">
             <template #tab>
               <span class="tab-title-header">
-                <CrownTwoTone />
-                产值比例
+                <CrownTwoTone />产值比例
               </span>
             </template>
             <a-table
@@ -162,9 +161,7 @@
           </a-tab-pane>
         </a-tabs>
 
-        <header
-          class="header-title-wrapper header-title-wrapper-with-margin-top"
-        >
+        <header class="header-title-wrapper header-title-wrapper-with-margin-top">
           <EditTwoTone />
           <span class="header-title">流程审批与赋予产值</span>
         </header>
@@ -177,23 +174,13 @@
 
         <div class="button-wrapper">
           <div class="reject-button">
-            <a-button @click="() => rollbackTo('R4check')" danger
-              >退回至分管领导
-            </a-button>
-            <a-button @click="() => rollbackTo('R3check')" danger
-              >退回至室主任
-            </a-button>
-            <a-button @click="() => rollbackTo('fillNumbers')" danger
-              >退回，重新填写产值比例
-            </a-button>
-            <a-button @click="() => rollbackTo('uploadTask')" danger
-              >退回，重新上传任务
-            </a-button>
+            <a-button @click="() => rollbackTo('R4check')" danger>退回至分管领导</a-button>
+            <a-button @click="() => rollbackTo('R3check')" danger>退回至室主任</a-button>
+            <a-button @click="() => rollbackTo('fillNumbers')" danger>退回，重新填写产值比例</a-button>
+            <a-button @click="() => rollbackTo('uploadTask')" danger>退回，重新上传任务</a-button>
           </div>
           <div class="agree">
-            <a-button @click="() => setValue()" type="primary"
-              >赋予产值
-            </a-button>
+            <a-button @click="() => setValue()" type="primary">赋予产值</a-button>
           </div>
         </div>
       </a-modal>
@@ -219,7 +206,8 @@
               :max="100"
               :formatter="(value) => `${value}%`"
               :parser="(value) => value.replace('%', '')"
-            /><span>填写0-100的正整数</span>
+            />
+            <span>填写0-100的正整数</span>
           </a-form-item>
         </a-form>
       </a-modal>
@@ -234,12 +222,7 @@ import {
   onMounted,
   UnwrapRef,
   toRaw,
-  watchEffect,
 } from "vue";
-import {
-  RuleObject,
-  ValidateErrorEntity,
-} from "ant-design-vue/es/form/interface";
 import { UploadOutlined } from "@ant-design/icons-vue";
 import aIcon from "@/components/aicon/aicon.vue";
 import {
@@ -250,26 +233,24 @@ import {
   EditTwoTone,
 } from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
-import { message, Modal as antModal } from "ant-design-vue";
+import { message } from "ant-design-vue";
 import {
   getA1Data,
-  getAllR1R2R3Users,
-  fillOutputValue,
   checkHistoryRequest,
   rollbackRequest,
-  startProcess,
-  generateNewProject,
   a1SetProduct,
 } from "@/api/display";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
-import moment from "moment";
+import dayjs from "dayjs";
 import { SelectTypes } from "ant-design-vue/es/select";
+import type { Dayjs } from 'dayjs';
 
 interface filterFormState {
   name: string;
   number: string;
   type: string;
   year: string;
+  month: Dayjs;
 }
 
 const columns = [
@@ -277,6 +258,7 @@ const columns = [
     title: "任务名",
     dataIndex: "name",
     key: "name",
+    width: 250
   },
   {
     title: "任务书编号",
@@ -499,9 +481,10 @@ export default defineComponent({
       name: string,
       number: string,
       type: string,
-      year: string
+      year: string,
+      month: number
     ) => {
-      const data = await getA1Data(name, number, type, year).then(
+      const data = await getA1Data(name, number, type, year, month).then(
         (response) => {
           tableLoading.value = false;
           return response.data.data;
@@ -515,7 +498,7 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      fetchData("", "", "", "2022");
+      fetchData("", "", "", "2022", null);
     });
 
     // 点击表单添加按钮
@@ -569,7 +552,7 @@ export default defineComponent({
         .then((response) => {
           message.success("退回成功");
           confirmLoading2.value = false;
-          fetchData("", "", "", "2022");
+          fetchData("", "", "", "2022",null);
 
           showRollback.value = false;
         })
@@ -617,7 +600,7 @@ export default defineComponent({
       rollbackRequest(params)
         .then((response) => {
           message.success("退回成功");
-          fetchData("", "", "", "2022");
+          fetchData("", "", "", "2022",null);
 
           showCheck.value = false;
           state.checkProcessId = "";
@@ -678,7 +661,7 @@ export default defineComponent({
       a1SetProduct(params)
         .then((response) => {
           message.success("设置产值及比例成功");
-          fetchData("", "", "", "2022");
+          fetchData("", "", "", "2022",null);
 
           state.currentProcessId = "";
           state.currentTaskId = "";
@@ -689,7 +672,7 @@ export default defineComponent({
         });
     };
     const changeTime = (time) => {
-      return moment(time).add(8, "hours").format("lll");
+      return dayjs(time).add(8, "hours").format('YYYY年MM月DD日 HH:mm');
     };
     const showImg = (srcURL: string) => {
       showPreview.value = true;
@@ -701,11 +684,17 @@ export default defineComponent({
       number: "",
       type: "",
       year: "2022",
+      month: null
     });
 
     const filterFormState: UnwrapRef<filterFormState> = reactive(
       createFilterFormState()
     );
+
+const disabledDate = (current: Dayjs) => {
+      // Can not select days before today and today
+      return current < dayjs().startOf('year') || current > dayjs().endOf('year')
+    };
 
     const searchFilters = () => {
       // 拿到filterFormState数据，拼接参数, 发送fetchData请求, 设置loading
@@ -713,10 +702,19 @@ export default defineComponent({
       const values = Object.values(formData);
       console.log("我看看参数");
       console.log(values);
+      if (values[4] !== null) {
+        console.log(values[4].month() + 1)
+      }
+
       tableLoading.value = true;
 
-      if (values.length == 4) {
-        fetchData(values[0], values[1], values[2], values[3]);
+      if (values.length == 5) {
+        if (values[4] !== null) {
+          fetchData(values[0], values[1], values[2], values[3], values[4].month() + 1);
+        } else {
+          fetchData(values[0], values[1], values[2], values[3], null);
+        }
+
       }
     };
 
@@ -795,6 +793,8 @@ export default defineComponent({
       options1,
       filterOption,
       cancelSetValue,
+      value3: ref<Dayjs>(),
+      disabledDate
     };
   },
 });

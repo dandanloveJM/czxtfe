@@ -44,34 +44,46 @@
           <template #updatedAt="{ record }">
             <span>{{ changeTime(record.updatedAt) }}</span>
           </template>
+
+          <template #check="{ record }">
+            <span v-if="record.activityName === 'R3审核'">
+              <a-tag color="warning">
+                <template #icon>
+                  <exclamation-circle-outlined />
+                </template>
+                待审核
+              </a-tag>
+            </span>
+            <span v-else>
+              <a-tag color="success">
+                <template #icon>
+                  <check-circle-outlined />
+                </template>
+                已审核
+              </a-tag>
+            </span>
+          </template>
+
           <template #action="{ record }">
             <span v-if="record.activityName === 'R2/R1填写产值分配建议'">
-              <a-button
-                @click="() => addAdvice(record.processId, record.taskId)"
-              >
-                产值分配
-              </a-button>
+              <a-button @click="() => addAdvice(record.processId, record.taskId)">产值分配</a-button>
               <a-divider type="vertical" />
             </span>
 
             <span v-if="record.activityName === 'R3审核'">
-              <a-button @click="() => check(record)">点击审核 </a-button>
+              <a-button @click="() => check(record)">点击审核</a-button>
               <a-divider type="vertical" />
             </span>
 
             <span>
-              <a-button @click="() => checkHistory(record.processId)">
-                流程查看
-              </a-button>
+              <a-button @click="() => checkHistory(record.processId)">流程查看</a-button>
             </span>
           </template>
           <template #type="{ record }">
             <span>{{ typeMap[record.type] }}</span>
           </template>
           <template #attachment="{ record }">
-            <a-button @click="() => showImg(record.attachment)"
-              >查看任务书</a-button
-            >
+            <a-button @click="() => showImg(record.attachment)">查看任务书</a-button>
           </template>
         </a-table>
       </div>
@@ -111,20 +123,11 @@
             type="primary"
             :loading="confirmLoading"
             @click="onSubmitForm"
-            >确认并发送
-          </a-button>
+          >确认并发送</a-button>
         </template>
         <a-form ref="formRef" :model="dynamicForm" :label-col="labelCol">
-          <div
-            class="line-wrapper"
-            v-for="(record, index) in dynamicForm.records"
-            :key="index"
-          >
-            <a-form-item
-              :label="record.peopleLabel"
-              style="min-width: 45%"
-              name="peopleValue"
-            >
+          <div class="line-wrapper" v-for="(record, index) in dynamicForm.records" :key="index">
+            <a-form-item :label="record.peopleLabel" style="min-width: 45%" name="peopleValue">
               <a-select
                 v-model:value="record.peopleValue"
                 show-search
@@ -152,25 +155,18 @@
               class="dynamic-delete-button"
               :disabled="dynamicForm.records.length === 1"
               @click="removeRecord(record)"
-            >
-              删除
-            </a-button>
+            >删除</a-button>
           </div>
           <div class="product_sum_calculator">
             <div style="min-width: 45%"></div>
             <div style="min-width: 35%">
-              <CalculatorTwoTone />当前产值比例总和: {{ adviceProductSum }}
+              <CalculatorTwoTone />
+              当前产值比例总和: {{ adviceProductSum }}
             </div>
           </div>
           <a-form-item>
-            <a-button
-              type="dashed"
-              class="add-record-button"
-              @click="addRecord"
-              size="large"
-            >
-              <PlusOutlined />
-              点击增加项目成员
+            <a-button type="dashed" class="add-record-button" @click="addRecord" size="large">
+              <PlusOutlined />点击增加项目成员
             </a-button>
           </a-form-item>
         </a-form>
@@ -212,8 +208,7 @@
           <a-tab-pane key="1">
             <template #tab>
               <span class="tab-title-header">
-                <AppstoreTwoTone />
-                项目详情
+                <AppstoreTwoTone />项目详情
               </span>
             </template>
             <a-table
@@ -230,17 +225,14 @@
                 <span>{{ typeMap[record.type] }}</span>
               </template>
               <template #attachment="{ record }">
-                <a-button @click="() => showImg(record.attachment)"
-                  >查看任务书</a-button
-                >
+                <a-button @click="() => showImg(record.attachment)">查看任务书</a-button>
               </template>
             </a-table>
           </a-tab-pane>
           <a-tab-pane key="2">
             <template #tab>
               <span class="tab-title-header">
-                <CrownTwoTone />
-                产值比例
+                <CrownTwoTone />产值比例
               </span>
             </template>
             <a-table
@@ -256,9 +248,7 @@
           </a-tab-pane>
         </a-tabs>
 
-        <header
-          class="header-title-wrapper header-title-wrapper-with-margin-top"
-        >
+        <header class="header-title-wrapper header-title-wrapper-with-margin-top">
           <EditTwoTone />
           <span class="header-title">流程审批</span>
         </header>
@@ -273,23 +263,11 @@
 
         <div class="button-wrapper">
           <div class="reject-button">
-            <a-button
-              danger
-              size="large"
-              @click="() => rollbackTo('fillNumbers')"
-              >退回，重新填写产值比例</a-button
-            >
-            <a-button
-              danger
-              size="large"
-              @click="() => rollbackTo('uploadTask')"
-              >退回，重新上传任务</a-button
-            >
+            <a-button danger size="large" @click="() => rollbackTo('fillNumbers')">退回，重新填写产值比例</a-button>
+            <a-button danger size="large" @click="() => rollbackTo('uploadTask')">退回，重新上传任务</a-button>
           </div>
           <div class="agree">
-            <a-button @click="() => agreeTo()" type="primary" size="large"
-              >审核通过</a-button
-            >
+            <a-button @click="() => agreeTo()" type="primary" size="large">审核通过</a-button>
           </div>
         </div>
       </a-modal>
@@ -304,13 +282,8 @@ import {
   onMounted,
   UnwrapRef,
   toRaw,
-  watchEffect,
   computed,
 } from "vue";
-import {
-  RuleObject,
-  ValidateErrorEntity,
-} from "ant-design-vue/es/form/interface";
 import { UploadOutlined } from "@ant-design/icons-vue";
 import { SelectTypes } from "ant-design-vue/es/select";
 import aIcon from "@/components/aicon/aicon.vue";
@@ -321,21 +294,21 @@ import {
   CrownTwoTone,
   EditTwoTone,
   CalculatorTwoTone,
+  CheckCircleOutlined,
 } from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
-import { message, Modal as antModal } from "ant-design-vue";
+import { message } from "ant-design-vue";
 import {
   getR3UnfinishedList,
   getAllR1R2R3Users,
   fillOutputValue,
   checkHistoryRequest,
   rollbackRequest,
-  startProcess,
-  generateNewProject,
   r3Approve,
 } from "@/api/display";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
-import moment from "moment";
+// import moment from "moment";
+import dayjs from "dayjs";
 import localStorageStore from "@/utils/localStorageStore";
 
 interface filterFormState {
@@ -350,6 +323,7 @@ const columns = [
     title: "任务名",
     dataIndex: "name",
     key: "name",
+    width: 250
   },
   {
     title: "任务书编号",
@@ -377,16 +351,36 @@ const columns = [
     key: "attachment",
   },
   {
+    title: "状态",
+    key: "check",
+    slots: { customRender: "check" },
+    filters: [
+      {
+        text: '已审核',
+        value: '已审核',
+      },
+      {
+        text: '待审核',
+        value: '待审核',
+      },
+
+    ],
+    filterMultiple: false,
+    onFilter: (value: string, record) => {
+      if (record.activityName === 'R3审核') {
+        return value === "待审核"
+      } else {
+        return value === "已审核"
+      }
+    },
+  },
+  {
     title: "操作",
     key: "action",
     slots: { customRender: "action" },
   },
 ];
 
-interface Member {
-  userId: string;
-  displayName: string;
-}
 
 interface PeopleAndProductRecord {
   peopleLabel: string;
@@ -417,10 +411,6 @@ interface FileItem {
   url: string;
 }
 
-interface FileInfo {
-  file: FileItem;
-  fileList: FileItem[];
-}
 export default defineComponent({
   name: "issue",
   components: {
@@ -433,6 +423,7 @@ export default defineComponent({
     AppstoreTwoTone,
     EditTwoTone,
     CalculatorTwoTone,
+    CheckCircleOutlined,
   },
   data() {
     return {
@@ -441,7 +432,7 @@ export default defineComponent({
     };
   },
 
-  setup(props, context) {
+  setup() {
     const addModal = ref();
     const visible = ref<boolean>(false);
     const confirmLoading = ref<boolean>(false);
@@ -451,7 +442,6 @@ export default defineComponent({
     const confirmLoading2 = ref<boolean>(false);
     const showNewProject = ref<boolean>(false);
     const showPreview = ref<boolean>(false);
-    const formRef3 = ref();
     const showCheck = ref<boolean>(false);
     const tableLoading = ref<boolean>(false);
     const state = reactive({
@@ -609,7 +599,7 @@ export default defineComponent({
       ];
     };
 
-    const addSubmit = (e: MouseEvent) => {
+    const addSubmit = () => {
       visible.value = false;
     };
 
@@ -680,7 +670,7 @@ export default defineComponent({
               message.error(response.data.msg);
             }
           })
-          .catch((err) => {
+          .catch(() => {
             confirmLoading.value = false;
             message.error("程序异常");
           });
@@ -738,7 +728,7 @@ export default defineComponent({
           state.historyData = historyData;
           historyLoading.value = false;
         })
-        .catch((err) => {
+        .catch(() => {
           message.error("程序异常");
         });
     };
@@ -757,7 +747,7 @@ export default defineComponent({
       console.dir(toRaw(state.currentRollbackRecord));
       confirmLoading2.value = true;
       rollbackRequest(toRaw(state.currentRollbackRecord))
-        .then((response) => {
+        .then(() => {
           message.success("退回成功");
           confirmLoading2.value = false;
           fetchData("", "", "", "2022");
@@ -803,7 +793,7 @@ export default defineComponent({
       commentForm.comment = "";
 
       rollbackRequest(params)
-        .then((response) => {
+        .then(() => {
           message.success({
             title: "退回成功",
           });
@@ -829,7 +819,7 @@ export default defineComponent({
       console.log(params);
 
       r3Approve(params)
-        .then((response) => {
+        .then(() => {
           message.success("审核通过成功");
           fetchData("", "", "", "2022");
 
@@ -844,7 +834,7 @@ export default defineComponent({
         });
     };
     const changeTime = (time) => {
-      return moment(time).add(8, "hours").format("lll");
+      return dayjs(time).add(8, "hours").format("lll");
     };
     const showImg = (srcURL) => {
       showPreview.value = true;

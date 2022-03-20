@@ -151,7 +151,8 @@ import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 import { getA1Data, a1ModifyProduct } from "@/api/display";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
-import moment from "moment";
+// import moment from "moment";
+import dayjs from "dayjs";
 import { SelectTypes } from "ant-design-vue/es/select";
 
 interface A1FormState {
@@ -327,7 +328,7 @@ export default defineComponent({
     };
 
     const changeTime = (time) => {
-      return moment(time).add(8, "hours").format("lll");
+      return dayjs(time).add(8, "hours").format("lll");
     };
     const createFilterFormState = () => ({
       name: "",
