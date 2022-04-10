@@ -129,7 +129,7 @@
           :rowKey="(record) => record.processId"
         >
           <template #comment="{ record }">
-            <span>{{ record.comment ? record.comment : "无" }}</span>
+            <span>{{ record.comment ? record.comment : (record.endTime? "【通过】":"【进行中】") }}</span>
           </template>
         </a-table>
       </a-modal>
@@ -154,7 +154,7 @@ import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 // import moment from "moment";
 import dayjs from "dayjs";
-import { deleteProject, checkHistoryRequest } from "@/api/display";
+import { deleteProject, checkHistoryAdminRequest } from "@/api/display";
 import  SelectTypes  from "ant-design-vue/es/select";
 interface filterFormState {
   name: string;
@@ -257,10 +257,16 @@ export default defineComponent({
 
     const historyColumns = [
       {
-        title: "时间",
-        dataIndex: "time",
-        key: "time",
+        title: "开始时间",
+        dataIndex: "startTime",
+        key: "startTime",
       },
+      {
+        title: "结束时间",
+        dataIndex: "endTime",
+        key: "endTime",
+      },
+      
       {
         title: "流程节点",
         dataIndex: "activityName",
@@ -387,7 +393,7 @@ export default defineComponent({
       showHistory.value = true;
       historyLoading.value = true;
       console.log(showHistory.value);
-      checkHistoryRequest(processId)
+      checkHistoryAdminRequest(processId)
         .then((response) => {
           const historyData = response.data.data;
           state.historyData = historyData;

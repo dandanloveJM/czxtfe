@@ -198,7 +198,7 @@
           :rowKey="(record) => record.processId"
         >
           <template #comment="{ record }">
-            <span>{{ record.comment ? record.comment : "无" }}</span>
+            <span>{{ record.comment ? record.comment : (record.endTime? "【通过】":"【进行中】") }}</span>
           </template>
         </a-table>
       </a-modal>
@@ -514,10 +514,15 @@ export default defineComponent({
     });
 
     const historyColumns = [
+       {
+        title: "开始时间",
+        dataIndex: "startTime",
+        key: "startTime",
+      },
       {
-        title: "时间",
-        dataIndex: "time",
-        key: "time",
+        title: "结束时间",
+        dataIndex: "endTime",
+        key: "endTime",
       },
       {
         title: "流程节点",

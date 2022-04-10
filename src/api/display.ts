@@ -50,6 +50,14 @@ export const checkHistoryRequest = (param) => {
   });
 };
 
+export const checkHistoryAdminRequest = (param) => {
+  return request({
+    url: "admin/history/list",
+    method: "get",
+    params: { processId: param },
+  });
+};
+
 export const rollbackRequest = (params) => {
   let data = new FormData();
   for (const key in params) {
