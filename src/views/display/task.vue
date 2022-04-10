@@ -43,7 +43,7 @@
           :loading="tableLoading"
         >
           <template #action="{ record }">
-            <span v-if="record.taskId">
+            <span v-if="record.activityName === 'R2/R1填写产值分配建议' && record.pmId === userId">
               <a-button
                 @click="() => addAdvice(record.processId, record.taskId)"
                 >产值分配</a-button
@@ -224,14 +224,10 @@ import {
   onMounted,
   UnwrapRef,
   toRaw,
-  watchEffect,
   computed,
 } from "vue";
-import {
-  RuleObject,
-  ValidateErrorEntity,
-} from "ant-design-vue/es/form/interface";
 import aIcon from "@/components/aicon/aicon.vue";
+import localCache from "@/utils/localCache";
 import {
   MinusCircleOutlined,
   PlusOutlined,
@@ -240,7 +236,7 @@ import {
   CalculatorTwoTone,
 } from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
-import { message, Modal as antModal } from "ant-design-vue";
+import { message } from "ant-design-vue";
 import {
   getR1UnfinishedList,
   getAllR1R2R3Users,
@@ -336,6 +332,7 @@ export default defineComponent({
 
   setup(props, context) {
     const addModal = ref();
+    const userId = localCache.getCache("setInfo")['id']
     const visible = ref<boolean>(false);
     const confirmLoading = ref<boolean>(false);
     const showHistory = ref<boolean>(false);
@@ -757,6 +754,7 @@ export default defineComponent({
       filterFormState,
       wrapperCol: { span: 14, offset: 4 },
       adviceProductSum,
+      userId
     };
   },
 });

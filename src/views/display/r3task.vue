@@ -54,6 +54,14 @@
                 待审核
               </a-tag>
             </span>
+            <span v-else-if="record.activityName === 'R2/R1填写产值分配建议'">
+              <a-tag color="blue">
+                <template #icon>
+                  <exclamation-circle-outlined />
+                </template>
+                待分配产值
+              </a-tag>
+            </span>
             <span v-else>
               <a-tag color="success">
                 <template #icon>
@@ -65,7 +73,7 @@
           </template>
 
           <template #action="{ record }">
-            <span v-if="record.activityName === 'R2/R1填写产值分配建议'">
+            <span v-if="record.activityName === 'R2/R1填写产值分配建议' && record.pmId === userId">
               <a-button @click="() => addAdvice(record.processId, record.taskId)">产值分配</a-button>
               <a-divider type="vertical" />
             </span>
@@ -285,7 +293,7 @@ import {
   computed,
 } from "vue";
 import { UploadOutlined } from "@ant-design/icons-vue";
-import  SelectTypes  from "ant-design-vue/es/select";
+import SelectTypes from "ant-design-vue/es/select";
 import aIcon from "@/components/aicon/aicon.vue";
 import {
   MinusCircleOutlined,
@@ -295,6 +303,7 @@ import {
   EditTwoTone,
   CalculatorTwoTone,
   CheckCircleOutlined,
+  ExclamationCircleOutlined
 } from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message } from "ant-design-vue";
@@ -310,12 +319,19 @@ import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 // import moment from "moment";
 import dayjs from "dayjs";
 import localStorageStore from "@/utils/localStorageStore";
+import localCache from "@/utils/localCache";
 
 interface filterFormState {
   name: string;
   number: string;
   type: string;
   year: string;
+}
+
+const filterDict = {
+  '待审核': ['R3审核'],
+  '已审核': ['R4审核', 'A1填写产值'],
+  '待分配产值': ['R2/R1填写产值分配建议']
 }
 
 const columns = [
@@ -363,15 +379,26 @@ const columns = [
         text: '待审核',
         value: '待审核',
       },
-
+      {
+        text: '待分配产值',
+        value: '待分配产值',
+      },
     ],
     filterMultiple: false,
     onFilter: (value: string, record) => {
-      if (record.activityName === 'R3审核') {
-        return value === "待审核"
-      } else {
-        return value === "已审核"
-      }
+      console.log('-----filter')
+      console.log(filterDict[value])
+      console.log(record.activityName)
+      console.log(filterDict[value].indexOf(record.activityName) === 0)
+      return filterDict[value].indexOf(record.activityName) === 0
+      // if (record.activityName === 'R3审核') {
+      //   return value === "待审核"
+      // } else if (record.activityName === 'R2/R1填写产值分配建议') {
+      //   return value === '待分配产值'
+      // }
+      // else {
+      //   return value === "已审核"
+      // }
     },
   },
   {
@@ -424,6 +451,7 @@ export default defineComponent({
     EditTwoTone,
     CalculatorTwoTone,
     CheckCircleOutlined,
+    ExclamationCircleOutlined
   },
   data() {
     return {
@@ -832,7 +860,7 @@ export default defineComponent({
         });
     };
     const changeTime = (time) => {
-     return dayjs(time).add(8, "hours").format('YYYY年MM月DD日 HH:mm');
+      return dayjs(time).add(8, "hours").format('YYYY年MM月DD日 HH:mm');
     };
     const showImg = (srcURL) => {
       showPreview.value = true;
@@ -941,6 +969,7 @@ export default defineComponent({
       wrapperCol: { span: 14, offset: 4 },
       options1,
       adviceProductSum,
+      userId: localCache.getCache("setInfo")['id']
     };
   },
 });

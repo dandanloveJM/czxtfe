@@ -42,7 +42,7 @@
           :loading="tableLoading"
         >
           <template #action="{ record }">
-            <span v-if="record.activityName === 'R2/R1填写产值分配建议'">
+            <span v-if="record.activityName === 'R2/R1填写产值分配建议' && record.pmId === userId">
               <a-button @click="() => addAdvice(record.processId, record.taskId)">产值分配</a-button>
               <a-divider type="vertical" />
               <a-button @click="() => rollback(record)">节点回退</a-button>
@@ -289,6 +289,7 @@ import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 // import moment from "moment";
 import localStorageStore from "@/utils/localStorageStore";
 import dayjs from "dayjs";
+import localCache from "@/utils/localCache";
 
 interface filterFormState {
   name: string;
@@ -979,6 +980,7 @@ export default defineComponent({
       deleteTask,
 
       adviceProductSum,
+      userId:localCache.getCache("setInfo")['id']
     };
   },
 });
