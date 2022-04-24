@@ -45,25 +45,27 @@
             <span>{{ TYPE_MAP[record.type] }}</span>
           </template>
           <template #updatedAt="{ record }">
-            <span>{{ changeTime(record.updatedAt) }}</span>
+            <span v-if="record.name != '合计'">{{ changeTime(record.updatedAt) }}</span>
           </template>
           <template #totalPercentage="{ record }">
-            <a-tag v-if="record.totalPercentage < 100" color="warning">{{
-              record.totalPercentage + "%"
+             <a-tag v-if="record.name != '合计' && record.totalPercentage < 100" color="warning">{{
+              (record.totalPercentage + "%") || ''
             }}</a-tag>
-            <span v-else>{{ record.totalPercentage + "%" }}</span>
+            <span v-else-if="record.name != '合计' && record.totalPercentage == 100">{{ record.totalPercentage + "%" }}</span>
+          
+  
           </template>
           <template #percentage="{ record }">
             <span>{{ record.percentage + "%" }}</span>
           </template>
           <template #attachment="{ record }">
-            <a-button @click="() => showImg(record.attachment)"
+            <a-button v-if="record.name != '合计'" @click="() => showImg(record.attachment)"
               >查看任务书</a-button
             >
             <!-- <a :href="record.attachment">点击查看附件</a> -->
           </template>
           <template #products="{ record }">
-            <a-button @click="() => showProducts(record.products)"
+            <a-button v-if="record.name != '合计'" @click="() => showProducts(record.products)"
               >查看产值</a-button
             >
           </template>
