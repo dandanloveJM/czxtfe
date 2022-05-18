@@ -27,6 +27,11 @@
               :options="options1"
             />
           </a-form-item>
+          <a-space>
+            日期筛选：
+            <a-range-picker v-model:value="filterFormState.range"
+            @change="onChangeRangePicker" />
+          </a-space>
           <a-form-item :wrapper-col="wrapperCol">
             <a-button type="primary" @click="searchFilters">搜索</a-button>
           </a-form-item>
@@ -250,6 +255,7 @@ import dayjs from "dayjs";
 import localStorageStore from "@/utils/localStorageStore";
 import  SelectTypes  from "ant-design-vue/es/select";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
+import type { Dayjs } from 'dayjs';
 
 const columns = [
   {
@@ -310,6 +316,9 @@ interface filterFormState {
   number: string;
   type: string;
   year: string;
+  startDate: string;
+  endDate:string;
+  range: Dayjs;
 }
 
 export default defineComponent({
@@ -373,6 +382,9 @@ export default defineComponent({
       number: "",
       type: "",
       year: "2022",
+      startDate: "",
+      endDate: "",
+      range: null
     });
     const typeOptions = TYPE_OPTIONS;
     const filterOption = (input: string, option: any) => {
@@ -414,9 +426,11 @@ export default defineComponent({
       name: string,
       number: string,
       type: string,
-      year: string
+      year: string,
+      startDate: string,
+      endDate:string
     ) => {
-      const data = await getR1UnfinishedList(name, number, type, year).then(
+      const data = await getR1UnfinishedList(name, number, type, year, startDate, endDate).then(
         (response) => {
           tableLoading.value = false;
           return response.data.data;
@@ -447,7 +461,7 @@ export default defineComponent({
     };
     onMounted(() => {
       fetchCandidates();
-      fetchData("", "", "", "2022");
+      fetchData("", "", "", ""+dayjs().year(),"","");
     });
 
     // 点击表单添加按钮
@@ -532,7 +546,7 @@ export default defineComponent({
             if (response.data.status === "ok") {
               visible.value = false;
               message.success("数据上传成功");
-              fetchData("", "", "", "2022");
+              fetchData("", "", "", ""+dayjs().year(),"","");
             } else {
               message.error("程序异常");
             }
@@ -626,7 +640,7 @@ export default defineComponent({
         .then((response) => {
           message.success("退回成功");
           confirmLoading2.value = false;
-          fetchData("", "", "", "2022");
+          fetchData("", "", "", ""+dayjs().year(),"","");
 
           showRollback.value = false;
         })
@@ -707,7 +721,7 @@ export default defineComponent({
       console.log("我看看参数");
       console.log(values);
       tableLoading.value = true;
-      fetchData(values[0], values[1], values[2], values[3]);
+      fetchData(formData.name, formData.number, formData.type, formData.year,formData.startDate, formData.endDate);
     };
 
     const adviceProductSum = computed(() => {
@@ -718,6 +732,11 @@ export default defineComponent({
       console.log(value);
       return value;
     });
+
+    const onChangeRangePicker = (value, dateString)=>{
+      filterFormState.startDate=dateString.slice(0,1).toString()
+      filterFormState.endDate=dateString.slice(1,2).toString()
+    }
 
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
@@ -759,7 +778,8 @@ export default defineComponent({
       filterFormState,
       wrapperCol: { span: 14, offset: 4 },
       adviceProductSum,
-      userId
+      userId,
+      onChangeRangePicker
     };
   },
 });

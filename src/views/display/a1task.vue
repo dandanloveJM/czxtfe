@@ -329,11 +329,6 @@ interface FileItem {
   url: string;
 }
 
-interface FileInfo {
-  file: FileItem;
-  fileList: FileItem[];
-}
-
 interface A1FormState {
   total: number;
   ratio: number;

@@ -9,12 +9,14 @@ export const getR1UnfinishedList = (
   name: string,
   number: string,
   type: string,
-  year: string
+  year: string,
+  startDate: string,
+  endDate: string
 ): ConfigType<R1UnfinishedList> => {
   return request({
     url: "R1/displayUnfinishedProjects",
     method: "get",
-    params: { query: name, year: year, type: type, number: number },
+    params: { query: name, year: year, type: type, number: number, startDate, endDate },
   });
 };
 
