@@ -27,6 +27,11 @@
               :options="options1"
             />
           </a-form-item>
+          <a-space>
+            日期筛选：
+            <a-range-picker v-model:value="filterFormState.range"
+            @change="onChangeRangePicker" />
+          </a-space>
           <a-form-item :wrapper-col="wrapperCol">
             <a-button type="primary" @click="searchFilters">搜索</a-button>
           </a-form-item>
@@ -290,12 +295,16 @@ import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 import localStorageStore from "@/utils/localStorageStore";
 import dayjs from "dayjs";
 import localCache from "@/utils/localCache";
+import type { Dayjs } from 'dayjs';
 
 interface filterFormState {
   name: string;
   number: string;
   type: string;
   year: string;
+   startDate: string;
+  endDate:string;
+  range: Dayjs;
 }
 
 const columns = [
@@ -502,9 +511,11 @@ export default defineComponent({
       name: string,
       number: string,
       type: string,
-      year: string
+      year: string,
+      startDate: string,
+      endDate:string
     ) => {
-      const data = await getR2UnfinishedList(name, number, type, year).then(
+      const data = await getR2UnfinishedList(name, number, type, year, startDate, endDate).then(
         (response) => {
           tableLoading.value = false;
           return response.data.data;
@@ -537,7 +548,7 @@ export default defineComponent({
     };
     onMounted(() => {
       fetchCandidates();
-      fetchData("", "", "", "2022");
+      fetchData("", "", "", ""+dayjs().year(),"","");
     });
 
     // 点击表单添加按钮
@@ -622,7 +633,7 @@ export default defineComponent({
             if (response.data.status === "ok") {
               visible.value = false;
               message.success("数据上传成功");
-              fetchData("", "", "", "2022");
+              fetchData("", "", "", ""+dayjs().year(), "","");
             } else {
               message.error("程序异常");
             }
@@ -720,7 +731,7 @@ export default defineComponent({
         .then((response) => {
           message.success("退回成功");
           confirmLoading2.value = false;
-          fetchData("", "", "", "2022");
+          fetchData("", "", "", ""+dayjs().year(),"","");
 
           showRollback.value = false;
         })
@@ -800,7 +811,7 @@ export default defineComponent({
                 // 清空表单数据
                 Object.assign(newFormState, createNewFormState());
 
-                fetchData("", "", "", "2022");
+                fetchData("", "", "", ""+dayjs().year(), "","");
               }
             })
             .catch((err) => {
@@ -876,6 +887,9 @@ export default defineComponent({
       number: "",
       type: "",
       year: "2022",
+      startDate: "",
+      endDate: "",
+      range: null
     });
     const typeOptions2 = TYPE_OPTIONS;
 
@@ -891,24 +905,22 @@ export default defineComponent({
       console.log(values);
       tableLoading.value = true;
 
-      if (values.length == 4) {
-        fetchData(values[0], values[1], values[2], values[3]);
-      }
+      fetchData(formData.name, formData.number, formData.type, formData.year,formData.startDate, formData.endDate)
     };
 
     const options1 = ref<typeof SelectTypes["options"]>([
       {
-        value: "2022",
-        label: "2022",
+        value: ""+dayjs().year(),
+        label: ""+dayjs().year(),
       },
       {
-        value: "2023",
-        label: "2023",
+        value: ""+(dayjs().year()+1),
+        label: ""+(dayjs().year()+1),
       },
 
       {
-        value: "2024",
-        label: "2024",
+        value: ""+(dayjs().year()+2),
+        label: ""+(dayjs().year()+2),
       },
     ]);
 
@@ -920,7 +932,7 @@ export default defineComponent({
           deleteProject(processId)
             .then((response) => {
               message.success("删除成功");
-              fetchData("", "", "", "2022");
+              fetchData("", "", "", ""+dayjs().year(),"","");
             })
             .catch((err) => {
               console.log(err);
@@ -932,6 +944,11 @@ export default defineComponent({
         class: "test",
       });
     };
+
+     const onChangeRangePicker = (value, dateString)=>{
+      filterFormState.startDate=dateString.slice(0,1).toString()
+      filterFormState.endDate=dateString.slice(1,2).toString()
+    }
 
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
@@ -985,7 +1002,8 @@ export default defineComponent({
       deleteTask,
 
       adviceProductSum,
-      userId:localCache.getCache("setInfo")['id']
+      userId:localCache.getCache("setInfo")['id'],
+      onChangeRangePicker
     };
   },
 });
