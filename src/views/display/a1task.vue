@@ -26,12 +26,10 @@
               :options="options1"
             />
           </a-form-item>
-          <a-space direction="vertical" :size="12">
-            <a-date-picker
-              v-model:value="filterFormState.month"
-              :disabled-date="disabledDate"
-              picker="month"
-            />
+          <a-space>
+            日期筛选：
+            <a-range-picker v-model:value="filterFormState.range"
+            @change="onChangeRangePicker" />
           </a-space>
           <a-form-item :wrapper-col="wrapperCol">
             <a-button type="primary" @click="searchFilters">搜索</a-button>
@@ -253,6 +251,9 @@ interface filterFormState {
   type: string;
   year: string;
   month: Dayjs;
+  startDate: string;
+  enddate:string;
+  range: Dayjs;
 }
 
 const columns = [
@@ -489,9 +490,10 @@ export default defineComponent({
       number: string,
       type: string,
       year: string,
-      month: number
+      startDate: string,
+      enddate:string
     ) => {
-      const data = await getA1Data(name, number, type, year, month).then(
+      const data = await getA1Data(name, number, type, year,startDate, enddate).then(
         (response) => {
           tableLoading.value = false;
           return response.data.data;
@@ -505,7 +507,7 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      fetchData("", "", "", "2022", null);
+      fetchData("", "","", ""+dayjs().year(), "","");
     });
 
     // 点击表单添加按钮
@@ -559,7 +561,7 @@ export default defineComponent({
         .then((response) => {
           message.success("退回成功");
           confirmLoading2.value = false;
-          fetchData("", "", "", "2022", null);
+          fetchData("", "", "",""+dayjs().year(), "","");
 
           showRollback.value = false;
         })
@@ -607,7 +609,7 @@ export default defineComponent({
       rollbackRequest(params)
         .then((response) => {
           message.success("退回成功");
-          fetchData("", "", "", "2022", null);
+          fetchData("", "", "",""+dayjs().year(), "","");
 
           showCheck.value = false;
           state.checkProcessId = "";
@@ -668,7 +670,7 @@ export default defineComponent({
       a1SetProduct(params)
         .then((response) => {
           message.success("设置产值及比例成功");
-          fetchData("", "", "", "2022", null);
+          fetchData("", "","", ""+dayjs().year(), "","");
 
           state.currentProcessId = "";
           state.currentTaskId = "";
@@ -691,7 +693,10 @@ export default defineComponent({
       number: "",
       type: "",
       year: "2022",
-      month: null
+      month: null,
+      startDate: "",
+      enddate:"",
+      range: null
     });
 
     const filterFormState: UnwrapRef<filterFormState> = reactive(
@@ -714,7 +719,7 @@ export default defineComponent({
       tableLoading.value = true;
 
       const month = formData.month === null ? null : formData.month.month() + 1;
-      fetchData(formData.name, formData.number, formData.type, formData.year, month);
+      fetchData(formData.name, formData.number, formData.type, formData.year,formData.startDate, formData.enddate);
 
 
     };
@@ -742,6 +747,16 @@ export default defineComponent({
     const cancelSetValue = () => {
       Object.assign(a1FormState, { total: 0, ratio: 100 });
     };
+
+    const onChangeRangePicker = (value, dateString)=>{
+      console.log('time',value)
+      console.log('time2',dateString)
+      console.log('timestart',dateString.slice(0,1).toString())
+      console.log('timestop',dateString.slice(1,2).toString())
+      filterFormState.startDate=dateString.slice(0,1).toString()
+      filterFormState.enddate=dateString.slice(1,2).toString()
+
+    }
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
       state,
@@ -795,7 +810,8 @@ export default defineComponent({
       filterOption,
       cancelSetValue,
       value3: ref<Dayjs>(),
-      disabledDate
+      disabledDate,
+      onChangeRangePicker
     };
   },
 });

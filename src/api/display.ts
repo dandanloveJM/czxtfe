@@ -289,13 +289,14 @@ export const getA1Data = (
   query: string,
   number: string,
   type: string,
-  year: string,
-  month: number
+  year:string,
+  startDate: string,
+  endDate: string
 ) => {
   return request({
     url: "A1/Projects",
     method: "get",
-    params: { query: query, year: year, type: type, number: number, month:month},
+    params: { query: query, type: type, number: number, year, startDate, endDate},
   });
 };
 
