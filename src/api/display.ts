@@ -107,12 +107,14 @@ export const getR2FinishedList = (
   query: string,
   number: string,
   type: string,
-  year: string
+  year: string,
+  startDate: string,
+   endDate: string
 ) => {
   return request({
     url: "R2/finishedProjects",
     method: "get",
-    params: { query: query, year: year, type: type, number: number },
+    params: { query: query, year: year, type: type, number: number , startDate, endDate},
   });
 };
 
