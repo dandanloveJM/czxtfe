@@ -78,12 +78,14 @@ export const getR1FinishedList = (
   query: string,
   number: string,
   type: string,
-  year: string
+  year: string,
+  startDate: string,
+  endDate: string
 ) => {
   return request({
     url: "R1/displayFinishedProjects",
     method: "get",
-    params: { query: query, year: year, type: type, number: number },
+    params: { query: query, year: year, type: type, number: number, startDate, endDate },
   });
 };
 

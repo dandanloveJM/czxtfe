@@ -27,6 +27,11 @@
               :options="options1"
             />
           </a-form-item>
+           <a-space>
+            日期筛选：
+            <a-range-picker v-model:value="filterFormState.range"
+            @change="onChangeRangePicker" />
+          </a-space>
           <a-form-item :wrapper-col="wrapperCol">
             <a-button type="primary" @click="searchFilters">搜索</a-button>
           </a-form-item>
@@ -42,7 +47,7 @@
           :loading="tableLoading"
         >
           <template #type="{ record }">
-            <span>{{ TYPE_MAP[record.type] }}</span>
+            <span>  {{ TYPE_MAP[record.type] || '' }}</span>
           </template>
           <template #updatedAt="{ record }">
             <span v-if="record.name != '合计'">{{ changeTime(record.updatedAt) }}</span>
@@ -125,12 +130,16 @@ import dayjs from "dayjs";
 import { SearchOutlined, CalendarTwoTone } from "@ant-design/icons-vue";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 import  SelectTypes  from "ant-design-vue/es/select";
+import type { Dayjs } from 'dayjs';
 
 interface filterFormState {
   name: string;
   number: string;
   type: string;
   year: string;
+  startDate: string;
+  endDate: string,
+  range: Dayjs;
 }
 
 export default defineComponent({
@@ -230,6 +239,9 @@ export default defineComponent({
       number: "",
       type: "",
       year: "2022",
+      range: null,
+      startDate: "",
+      endDate: "",
     });
     const typeOptions = TYPE_OPTIONS;
 
@@ -241,9 +253,11 @@ export default defineComponent({
       name: string,
       number: string,
       type: string,
-      year: string
+      year: string,
+      startDate: string,
+      endDate: string
     ) => {
-      const data = await getR1FinishedList(name, number, type, year).then(
+      const data = await getR1FinishedList(name, number, type, year, startDate, endDate).then(
         (response) => {
           tableLoading.value = false;
           return response.data.data;
@@ -257,24 +271,24 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      fetchData("", "", "", "2022");
+      fetchData("", "", "", ""+dayjs().year(),"","");
     });
 
     const searchValue = ref<string>("");
 
     const options1 = ref<typeof SelectTypes["options"]>([
-      {
-        value: "2022",
-        label: "2022",
+        {
+        value: ""+dayjs().year(),
+        label: ""+dayjs().year(),
       },
       {
-        value: "2023",
-        label: "2023",
+        value: ""+(dayjs().year()+1),
+        label: ""+(dayjs().year()+1),
       },
 
       {
-        value: "2024",
-        label: "2024",
+        value: ""+(dayjs().year()+2),
+        label: ""+(dayjs().year()+2),
       },
     ]);
 
@@ -286,9 +300,7 @@ export default defineComponent({
       console.log(values);
       tableLoading.value = true;
 
-      if (values.length == 4) {
-        fetchData(values[0], values[1], values[2], values[3]);
-      }
+     fetchData(formData.name, formData.number, formData.type, formData.year, formData.startDate, formData.endDate)
     };
 
     const showImg = (srcURL) => {
@@ -306,6 +318,10 @@ export default defineComponent({
       visible.value = false;
       state.products = [];
     };
+    const onChangeRangePicker = (value, dateString)=>{
+      filterFormState.startDate=dateString.slice(0,1).toString()
+      filterFormState.endDate=dateString.slice(1,2).toString()
+    }
     return {
       TYPE_MAP,
       state,
@@ -328,6 +344,7 @@ export default defineComponent({
       showProducts,
       productsOk,
       productColumns,
+      onChangeRangePicker
     };
   },
 });
