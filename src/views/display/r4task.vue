@@ -26,6 +26,11 @@
               :options="options1"
             />
           </a-form-item>
+          <a-space>
+            日期筛选：
+            <a-range-picker v-model:value="filterFormState.range"
+            @change="onChangeRangePicker" />
+          </a-space>
           <a-form-item :wrapper-col="wrapperCol">
             <a-button type="primary" @click="searchFilters">搜索</a-button>
           </a-form-item>
@@ -231,12 +236,16 @@ import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 // import moment from "moment";
 import dayjs from "dayjs";
 import { debounce } from "lodash-es";
+import type { Dayjs } from 'dayjs';
 
 interface filterFormState {
   name: string;
   number: string;
   type: string;
   year: string;
+  startDate: string;
+  endDate: string,
+  range: Dayjs;
 }
 
 const columns = [
@@ -482,9 +491,11 @@ export default defineComponent({
       name: string,
       number: string,
       type: string,
-      year: string
+      year: string,
+      startDate: string,
+      endDate: string
     ) => {
-      const data = await getR4UnfinishedList(name, number, type, year).then(
+      const data = await getR4UnfinishedList(name, number, type, year, startDate, endDate).then(
         (response) => {
           tableLoading.value = false;
           return response.data.data;
@@ -518,7 +529,7 @@ export default defineComponent({
     };
     onMounted(() => {
       fetchCandidates();
-      fetchData("", "", "", "2022");
+      fetchData("", "", "", ""+dayjs().year(),"","");
     });
 
     // 点击表单添加按钮
@@ -598,7 +609,7 @@ export default defineComponent({
       rollbackRequest(params)
         .then((response) => {
           message.success("退回成功");
-          fetchData("", "", "", "2022");
+          fetchData("", "", "", ""+dayjs().year(),"","");
 
           showCheck.value = false;
           state.checkProcessId = "";
@@ -621,7 +632,7 @@ export default defineComponent({
       r4Approve(params)
         .then((response) => {
           message.success("审核通过成功");
-          fetchData("", "", "", "2022");
+          fetchData("", "", "", ""+dayjs().year(),"","");
 
           showCheck.value = false;
           state.checkProcessId = "";
@@ -646,6 +657,9 @@ export default defineComponent({
       number: "",
       type: "",
       year: "2022",
+      startDate: "",
+      endDate: "",
+      range: null
     });
 
     const filterFormState: UnwrapRef<filterFormState> = reactive(
@@ -659,27 +673,31 @@ export default defineComponent({
       console.log("我看看参数");
       console.log(values);
       tableLoading.value = true;
+      fetchData(formData.name, formData.number, formData.type, formData.year, formData.startDate, formData.endDate)
 
-      if (values.length == 4) {
-        fetchData(values[0], values[1], values[2], values[3]);
-      }
+    
     };
 
     const options1 = ref<typeof SelectTypes["options"]>([
       {
-        value: "2022",
-        label: "2022",
+        value: ""+dayjs().year(),
+        label: ""+dayjs().year(),
       },
       {
-        value: "2023",
-        label: "2023",
+        value: ""+(dayjs().year()+1),
+        label: ""+(dayjs().year()+1),
       },
 
       {
-        value: "2024",
-        label: "2024",
+        value: ""+(dayjs().year()+2),
+        label: ""+(dayjs().year()+2),
       },
     ]);
+
+      const onChangeRangePicker = (value, dateString)=>{
+      filterFormState.startDate=dateString.slice(0,1).toString()
+      filterFormState.endDate=dateString.slice(1,2).toString()
+    }
 
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
@@ -726,6 +744,7 @@ export default defineComponent({
       searchFilters,
       wrapperCol: { span: 14, offset: 4 },
       options1,
+      onChangeRangePicker
     };
   },
 });
