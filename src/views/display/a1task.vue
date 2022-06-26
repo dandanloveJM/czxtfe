@@ -235,7 +235,7 @@ import {
 import Modal from "@/components/tableLayout/modal.vue";
 import { message } from "ant-design-vue";
 import {
-  getA1Data,
+  getA1UnfinishedData,
   checkHistoryRequest,
   rollbackRequest,
   a1SetProduct,
@@ -488,7 +488,7 @@ export default defineComponent({
       startDate: string,
       enddate:string
     ) => {
-      const data = await getA1Data(name, number, type, year,startDate, enddate).then(
+      const data = await getA1UnfinishedData(name, number, type, year,startDate, enddate).then(
         (response) => {
           tableLoading.value = false;
           return response.data.data;
@@ -497,7 +497,7 @@ export default defineComponent({
       if (data.hasOwnProperty("empty")) {
         state.taskList = [];
       } else {
-        state.taskList = data.unfinished;
+        state.taskList = data;
       }
     };
 

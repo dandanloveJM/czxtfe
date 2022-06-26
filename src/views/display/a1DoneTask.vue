@@ -26,11 +26,11 @@
               :options="options1"
             />
           </a-form-item>
-          <a-date-picker
-            v-model:value="filterFormState.month"
-            :disabled-date="disabledDate"
-            picker="month"
-          />
+           <a-space>
+            日期筛选：
+            <a-range-picker v-model:value="filterFormState.range"
+            @change="onChangeRangePicker" />
+          </a-space>
           <a-form-item :wrapper-col="wrapperCol">
             <a-button type="primary" @click="searchFilters">搜索</a-button>
           </a-form-item>
@@ -151,7 +151,7 @@ import {
   toRaw,
 } from "vue";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
-import { getA1Data, a1ModifyProduct } from "@/api/display";
+import { getA1FinishedData,  a1ModifyProduct } from "@/api/display";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 import dayjs from "dayjs";
@@ -168,7 +168,9 @@ interface filterFormState {
   number: string;
   type: string;
   year: string;
-  month: Dayjs;
+  startDate: string;
+  endDate:string;
+  range: Dayjs;
 }
 
 export default defineComponent({
@@ -271,9 +273,10 @@ export default defineComponent({
       number: string,
       type: string,
       year: string,
-      month: number
+      startDate: string,
+      endDate:string
     ) => {
-      const data = await getA1Data(name, number, type, year, month).then(
+      const data = await getA1FinishedData(name, number, type, year, startDate, endDate).then(
         (response) => {
           tableLoading.value = false;
           return response.data.data;
@@ -282,12 +285,12 @@ export default defineComponent({
       if (data.hasOwnProperty("empty")) {
         state.taskList = [];
       } else {
-        state.taskList = data.finished;
+        state.taskList = data;
       }
     };
 
     onMounted(() => {
-      fetchData("", "", "", "2022", null);
+      fetchData("", "","", ""+dayjs().year(), "","");
     });
 
     const showProducts = (products) => {
@@ -322,7 +325,7 @@ export default defineComponent({
       a1ModifyProduct(params)
         .then((response) => {
           message.success("产值及比例修改成功");
-          fetchData("", "", "", "2022", null);
+          fetchData("", "","", ""+dayjs().year(), "","");
 
           state.currentProcessId = "";
         })
@@ -340,7 +343,9 @@ export default defineComponent({
       number: "",
       type: "",
       year: "2022",
-      month: null
+      range: null,
+      startDate: "",
+      endDate: ""
     });
     const typeOptions = TYPE_OPTIONS;
 
@@ -348,10 +353,6 @@ export default defineComponent({
       createFilterFormState()
     );
 
-    const disabledDate = (current: Dayjs) => {
-      // Can not select days before today and today
-      return current < dayjs().startOf('year') || current > dayjs().endOf('year')
-    };
 
     const searchFilters = () => {
       // 拿到filterFormState数据，拼接参数, 发送fetchData请求, 设置loading
@@ -363,25 +364,24 @@ export default defineComponent({
 
       tableLoading.value = true;
 
-      const month = formData.month === null ? null : formData.month.month() + 1;
-      fetchData(formData.name, formData.number, formData.type, formData.year, month);
+      fetchData(formData.name, formData.number, formData.type, formData.year,formData.startDate, formData.endDate);
 
 
     };
 
     const options1 = ref<typeof SelectTypes["options"]>([
-      {
-        value: "2022",
-        label: "2022",
+       {
+        value: ""+dayjs().year(),
+        label: ""+dayjs().year(),
       },
       {
-        value: "2023",
-        label: "2023",
+        value: ""+(dayjs().year()+1),
+        label: ""+(dayjs().year()+1),
       },
 
       {
-        value: "2024",
-        label: "2024",
+        value: ""+(dayjs().year()+2),
+        label: ""+(dayjs().year()+2),
       },
     ]);
 
@@ -397,6 +397,12 @@ export default defineComponent({
       showPreview.value = true;
       state.previewURL = srcURL;
     };
+
+     const onChangeRangePicker = (value, dateString)=>{
+     
+      filterFormState.startDate=dateString.slice(0,1).toString()
+      filterFormState.endDate=dateString.slice(1,2).toString()
+    }
 
     return {
       TYPE_MAP,
@@ -423,7 +429,7 @@ export default defineComponent({
       cancelSetValue,
       showImg,
       showPreview,
-      disabledDate
+      onChangeRangePicker
     };
   },
 });

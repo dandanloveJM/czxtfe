@@ -137,12 +137,14 @@ export const getR3FinishedList = (
   query: string,
   number: string,
   type: string,
-  year: string
+  year: string,
+  startDate: string,
+  endDate: string
 ) => {
   return request({
     url: "R3/finishedProjects",
     method: "get",
-    params: { query: query, year: year, type: type, number: number },
+    params: { query: query, year: year, type: type, number: number, startDate, endDate },
   });
 };
 
@@ -293,7 +295,9 @@ export const getTeamBonus = (param) => {
   });
 };
 
-export const getA1Data = (
+
+
+export const getA1FinishedData = (
   query: string,
   number: string,
   type: string,
@@ -302,7 +306,22 @@ export const getA1Data = (
   endDate: string
 ) => {
   return request({
-    url: "A1/Projects",
+    url: "/A1/Finished/Projects",
+    method: "get",
+    params: { query: query, type: type, number: number, year, startDate, endDate},
+  });
+};
+
+export const getA1UnfinishedData = (
+  query: string,
+  number: string,
+  type: string,
+  year:string,
+  startDate: string,
+  endDate: string
+) => {
+  return request({
+    url: "/A1/Unfinished/Projects",
     method: "get",
     params: { query: query, type: type, number: number, year, startDate, endDate},
   });
