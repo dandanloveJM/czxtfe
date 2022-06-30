@@ -398,3 +398,23 @@ export const getR2PivotParams = (
     params: { team: team},
   });
 };
+
+export const getTeamMembers = () => {
+  return request({
+    url:"team/members",
+    method: "get"
+  })
+}
+
+
+export const updateTeamMembers = (params) => {
+  let data = new FormData();
+  data.append("data", params);
+
+  
+  return request({
+    url:"update/team/members",
+    method: "post",
+    data: data
+  })
+}

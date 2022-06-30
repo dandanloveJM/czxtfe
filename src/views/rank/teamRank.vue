@@ -24,6 +24,10 @@
           <template #team="{ record }">
             <span>{{ TEAM_MAP[record.team] || record.team }}</span>
           </template>
+          
+          <template #avgProduct="{ record }">
+            <span>{{ record.avgProduct || ''}}</span>
+          </template>
         </a-table>
       </div>
       <div class="emptyTable" v-else>
@@ -44,7 +48,7 @@ import {
   watchEffect,
 } from "vue";
 import { teamMap } from "@/utils/config";
-import { getTeamRank } from "@/api/display";
+import { getTeamRank, getTeamMembers } from "@/api/display";
 import { CalendarTwoTone } from "@ant-design/icons-vue";
 import  SelectTypes from "ant-design-vue/es/select";
 
@@ -73,9 +77,19 @@ export default defineComponent({
         key: "team",
       },
       {
-        title: "产值",
+        title: "人数",
+        dataIndex: "members",
+        key: "members",
+      },
+      {
+        title: "部门总产值",
         dataIndex: "allBonus",
         key: "allBonus",
+      },
+      {
+        title: "人均产值",
+        slots: { customRender: "avgProduct" },
+        key: "avgProduct",
       },
     ];
 
@@ -87,6 +101,22 @@ export default defineComponent({
       if (data.length === 0) {
         state.taskList = [];
       }
+
+      const teamMembers = await getTeamMembers().then((response) => {
+        return response.data.data
+      })
+
+      const teamMembersDict = {}
+      for(const teamMember of teamMembers){
+        teamMembersDict[teamMember['teamName']] = teamMember['members']
+      }
+
+      for(const team of data){
+        team['members'] = teamMembersDict[team['team']]
+        team['avgProduct'] = Math.ceil(team['allBonus']/parseFloat(team['members']))
+      }
+
+
 
       state.taskList = data;
     };
