@@ -1,6 +1,8 @@
 <template>
   <div class="issue__container">
-    <a-button type="primary" size="large" @click="createNewProject">点击新建任务</a-button>
+    <a-button type="primary" size="large" @click="createNewProject"
+      >点击新建任务</a-button
+    >
     <div class="filters-wrapper">
       <div class="search-filter-wrapper">
         <a-form ref="filter-form" :model="filterFormState" layout="inline">
@@ -29,8 +31,10 @@
           </a-form-item>
           <a-space>
             日期筛选：
-            <a-range-picker v-model:value="filterFormState.range"
-            @change="onChangeRangePicker" />
+            <a-range-picker
+              v-model:value="filterFormState.range"
+              @change="onChangeRangePicker"
+            />
           </a-space>
           <a-form-item :wrapper-col="wrapperCol">
             <a-button type="primary" @click="searchFilters">搜索</a-button>
@@ -45,36 +49,100 @@
           :data-source="state.taskList"
           :rowKey="(record) => record.processId"
           :loading="tableLoading"
+          :customRow="customRow"
         >
-          <template #action="{ record }">
-            <span v-if="record.activityName === 'R2/R1填写产值分配建议' && record.pmId === userId">
-              <a-button @click="() => addAdvice(record.processId, record.taskId)">产值分配</a-button>
-              <a-divider type="vertical" />
-              <a-button @click="() => rollback(record)">节点回退</a-button>
-              <a-divider type="vertical" />
-            </span>
-            <span v-if="record.activityName === 'R2上传任务'">
-              <a-button @click="() => reuploadProjects(record.processId, record.taskId)">重新上传任务</a-button>
-              <a-divider type="vertical" />
-            </span>
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.key === 'action'">
+              <span
+                v-if="
+                  record.activityName === 'R2/R1填写产值分配建议' &&
+                  record.pmId === userId
+                "
+              >
+                <a-button
+                  @click="() => addAdvice(record.processId, record.taskId)"
+                  >产值分配</a-button
+                >
+                <a-divider type="vertical" />
+                <a-button @click="() => rollback(record)">节点回退</a-button>
+                <a-divider type="vertical" />
+              </span>
+              <span v-if="record.activityName === 'R2上传任务'">
+                <a-button
+                  @click="
+                    () => reuploadProjects(record.processId, record.taskId)
+                  "
+                  >重新上传任务</a-button
+                >
+                <a-divider type="vertical" />
+              </span>
 
-            <span>
-              <a-button @click="() => checkHistory(record.processId)">流程查看</a-button>
-            </span>
-            <a-divider type="vertical" />
+              <span>
+                <a-button @click="() => checkHistory(record.processId)"
+                  >流程查看</a-button
+                >
+              </span>
+              <a-divider type="vertical" />
 
-            <span>
-              <a-button primary danger @click="() => deleteTask(record.processId)">删除项目</a-button>
-            </span>
-          </template>
-          <template #type="{ record }">
-            <span>{{ typeMap[record.type] }}</span>
-          </template>
-          <template #updatedAt="{ record }">
-            <span>{{ changeTime(record.updatedAt) }}</span>
-          </template>
-          <template #attachment="{ record }">
-            <a-button @click="() => showImg(record.attachment)">查看任务书</a-button>
+              <span>
+                <a-button
+                  primary
+                  danger
+                  @click="() => deleteTask(record.processId)"
+                  >删除项目</a-button
+                >
+              </span>
+            </template>
+            <template v-else-if="column.key === 'name'">
+              <span v-if="record.isNew" class="new-project-name"
+                >{{ record.name }}
+                <icon>
+                  <template #component>
+                    <svg
+                      t="1656949715400"
+                      class="icon"
+                      viewBox="0 0 1024 1024"
+                      version="1.1"
+                      xmlns="http://www.w3.org/2000/svg"
+                      p-id="2725"
+                      width="2em"
+                      height="2em"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M508.330667 733.994667c-11.008-7.338667-13.44-17.109333-7.338667-29.333334 28.117333-37.888 41.557333-98.986667 40.341333-183.317333v-165.013333c0-14.656 7.338667-23.210667 21.994667-25.664 37.888-1.216 82.496-5.504 133.845333-12.842667 13.44-2.432 21.376 3.072 23.829334 16.512 1.216 12.224-4.266667 19.562667-16.512 21.994667a1787.093333 1787.093333 0 0 1-113.664 11.008c-6.101333 0-9.173333 3.669333-9.173334 10.986666v84.330667h135.68c12.224 1.237333 18.944 7.957333 20.16 20.181333-1.216 10.986667-7.936 17.109333-20.16 18.346667h-36.672v223.658667c-1.216 12.202667-7.936 18.944-20.16 20.16-11.008-1.216-17.109333-7.957333-18.346666-20.16V501.162667h-60.48v18.346666c1.216 92.885333-13.44 161.92-44.010667 207.146667-6.101333 12.224-15.893333 14.677333-29.333333 7.338667z m-131.989334-282.325334c-1.237333 0-2.453333 0.618667-3.669333 1.834667h45.824a522.666667 522.666667 0 0 0 16.512-31.168c7.317333-12.224 12.224-20.778667 14.656-25.664 6.122667-11.008 15.274667-14.677333 27.52-11.008 9.770667 6.122667 12.202667 14.058667 7.317333 23.829333-4.906667 9.792-13.44 24.448-25.664 44.010667h49.493334c9.770667 1.216 15.274667 6.72 16.512 16.490667-1.237333 11.008-6.741333 17.109333-16.512 18.346666h-82.496a12.437333 12.437333 0 0 1 3.669333 9.173334v38.485333h69.653333c9.792 1.216 15.296 6.72 16.512 16.490667-1.216 11.008-6.72 17.130667-16.512 18.346666h-69.653333v108.16c0 34.218667-15.274667 51.946667-45.845333 53.162667h-16.490667a195.157333 195.157333 0 0 1-20.16 1.834667c-12.224 0-19.562667-6.72-22.016-20.16 1.237333-12.224 7.338667-18.944 18.346667-20.16 2.432 0 6.101333 0.597333 10.986666 1.834666h11.008c15.893333 0 23.829333-8.554667 23.829334-25.685333v-98.986667H314.026667c-11.008-1.216-17.109333-7.338667-18.346667-18.346666 1.237333-9.770667 7.338667-15.274667 18.346667-16.490667h75.157333V497.493333c0-3.669333 1.216-6.72 3.669333-9.173333h-89.813333c-11.029333-1.216-17.130667-7.317333-18.346667-18.325333 1.216-9.770667 7.317333-15.274667 18.346667-16.490667h56.810667c-3.669333-1.216-6.72-4.266667-9.173334-9.173333-1.216-1.216-3.050667-4.266667-5.482666-9.173334a758.336 758.336 0 0 0-14.677334-23.829333c-4.885333-9.770667-3.050667-17.706667 5.504-23.829333 11.008-3.669333 19.562667-1.216 25.664 7.338666 2.453333 2.432 6.122667 7.338667 11.008 14.656 6.101333 8.554667 9.770667 14.08 10.986667 16.512 4.906667 9.770667 2.453333 18.346667-7.317333 25.664z m-60.501333-71.509333c-9.792-1.216-15.274667-7.317333-16.512-18.346667 1.237333-9.749333 6.72-15.253333 16.512-16.490666h75.157333c-3.669333-12.202667-7.338667-21.973333-10.986666-29.333334-1.237333-12.202667 3.648-19.541333 14.656-21.973333 12.224-2.453333 21.397333 1.216 27.52 10.986667 0 1.216 0.597333 3.669333 1.813333 7.338666 4.906667 15.872 9.173333 26.88 12.842667 32.981334h60.48c11.008 1.237333 17.130667 6.741333 18.346666 16.512-1.216 11.008-7.338667 17.109333-18.346666 18.346666h-181.482667z m-14.677333 311.68c-8.533333-6.122667-10.986667-14.08-7.338667-23.829333a1659.648 1659.648 0 0 0 33.002667-66.005334c4.906667-9.792 12.224-12.842667 22.016-9.173333 9.770667 4.906667 13.44 12.224 10.986666 21.994667-3.669333 6.122667-9.173333 17.728-16.490666 34.837333-8.554667 15.893333-14.677333 27.52-18.346667 34.837333-4.885333 8.554667-12.821333 11.008-23.829333 7.338667z m201.664-25.664c-9.770667 4.885333-18.346667 2.432-25.664-7.338667a1138.56 1138.56 0 0 1-27.498667-44.010666c-4.885333-8.533333-3.050667-16.490667 5.504-23.829334 9.770667-3.669333 18.346667-1.216 25.664 7.338667l14.677333 21.994667c6.101333 9.770667 10.389333 17.109333 12.821334 21.994666 4.906667 8.554667 3.050667 16.512-5.504 23.850667z"
+                        fill="#ea3323"
+                        p-id="2726"
+                      ></path>
+                      <path
+                        d="M675.328 117.717333A425.429333 425.429333 0 0 0 512 85.333333C276.352 85.333333 85.333333 276.352 85.333333 512s191.018667 426.666667 426.666667 426.666667 426.666667-191.018667 426.666667-426.666667c0-56.746667-11.093333-112-32.384-163.328a21.333333 21.333333 0 0 0-39.402667 16.341333A382.762667 382.762667 0 0 1 896 512c0 212.074667-171.925333 384-384 384S128 724.074667 128 512 299.925333 128 512 128c51.114667 0 100.8 9.984 146.986667 29.12a21.333333 21.333333 0 0 0 16.341333-39.402667z"
+                        fill="#ea3323"
+                        p-id="2727"
+                      ></path>
+                    </svg>
+                  </template>
+                </icon>
+              </span>
+              <span v-else>{{ record.name }}</span>
+            </template>
+            <template v-else-if="column.key === 'type'">
+              <span :class="record.isNew ? 'new-project-name' : ''">{{
+                typeMap[record.type]
+              }}</span>
+            </template>
+            <template v-else-if="column.key === 'number'">
+              <span :class="record.isNew ? 'new-project-name' : ''">{{
+                record.number
+              }}</span>
+            </template>
+            <template v-else-if="column.key === 'updatedAt'">
+              <span>{{ changeTime(record.createdAt) }}</span>
+            </template>
+            <template v-else-if="column.key === 'attachment'">
+              <a-button @click="() => showImg(record.attachment)"
+                >查看任务书</a-button
+              >
+            </template>
           </template>
         </a-table>
       </div>
@@ -102,11 +170,20 @@
             type="primary"
             :loading="confirmLoading"
             @click="onSubmitForm"
-          >确认并发送</a-button>
+            >确认并发送</a-button
+          >
         </template>
         <a-form ref="formRef" :model="dynamicForm" :label-col="labelCol">
-          <div class="line-wrapper" v-for="(record, index) in dynamicForm.records" :key="index">
-            <a-form-item :label="record.peopleLabel" style="min-width: 45%" name="peopleValue">
+          <div
+            class="line-wrapper"
+            v-for="(record, index) in dynamicForm.records"
+            :key="index"
+          >
+            <a-form-item
+              :label="record.peopleLabel"
+              style="min-width: 45%"
+              name="peopleValue"
+            >
               <a-select
                 v-model:value="record.peopleValue"
                 show-search
@@ -134,18 +211,24 @@
               class="dynamic-delete-button"
               :disabled="dynamicForm.records.length === 1"
               @click="removeRecord(record)"
-            >删除</a-button>
+              >删除</a-button
+            >
           </div>
           <div class="product_sum_calculator">
             <div style="min-width: 45%"></div>
             <div style="min-width: 35%">
-              <CalculatorTwoTone />
+              <calculator-two-tone />
               当前产值比例总和: {{ adviceProductSum }}
             </div>
           </div>
 
           <a-form-item>
-            <a-button type="dashed" class="add-record-button" @click="addRecord" size="large">
+            <a-button
+              type="dashed"
+              class="add-record-button"
+              @click="addRecord"
+              size="large"
+            >
               <PlusOutlined />点击增加项目成员
             </a-button>
           </a-form-item>
@@ -170,7 +253,13 @@
           :rowKey="(record) => record.processId"
         >
           <template #comment="{ record }">
-            <span>{{ record.comment ? record.comment : (record.endTime? "【通过】":"【进行中】") }}</span>
+            <span>{{
+              record.comment
+                ? record.comment
+                : record.endTime
+                ? "【通过】"
+                : "【进行中】"
+            }}</span>
           </template>
         </a-table>
       </a-modal>
@@ -202,6 +291,7 @@
         :destroyOnClose="true"
         @ok="createProjectOk"
         width="1000px"
+        :confirm-loading="confirmLoadingNew"
       >
         <a-form ref="formRef3" :model="newFormState" :rules="projectRules">
           <a-form-item name="name" label="项目名称">
@@ -234,11 +324,14 @@
               @change="fileUploadChange"
             >
               <a-button>
-                <upload-outlined></upload-outlined>点击上传附件，只能传jpeg或jpg或png
+                <upload-outlined></upload-outlined
+                >点击上传附件，只能传jpeg或jpg或png
               </a-button>
             </a-upload>
           </a-form-item>
-          <a-button style="margin-left: 10px" @click="resetProjectForm">重置数据</a-button>
+          <a-button style="margin-left: 10px" @click="resetProjectForm"
+            >重置数据</a-button
+          >
         </a-form>
       </a-modal>
     </div>
@@ -267,11 +360,11 @@ import {
   createVNode,
   computed,
 } from "vue";
-import {
+import Icon, {
   UploadOutlined,
   ExclamationCircleOutlined,
 } from "@ant-design/icons-vue";
-import  SelectTypes from "ant-design-vue/es/select";
+import SelectTypes from "ant-design-vue/es/select";
 import aIcon from "@/components/aicon/aicon.vue";
 import {
   MinusCircleOutlined,
@@ -289,21 +382,23 @@ import {
   startProcess,
   generateNewProject,
   deleteProject,
+  updateIsNewProject,
 } from "@/api/display";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 // import moment from "moment";
 import localStorageStore from "@/utils/localStorageStore";
 import dayjs from "dayjs";
 import localCache from "@/utils/localCache";
-import type { Dayjs } from 'dayjs';
+import type { Dayjs } from "dayjs";
+import { throttle } from "lodash-es";
 
 interface filterFormState {
   name: string;
   number: string;
   type: string;
   year: string;
-   startDate: string;
-  endDate:string;
+  startDate: string;
+  endDate: string;
   range: Dayjs;
 }
 
@@ -312,7 +407,7 @@ const columns = [
     title: "任务名",
     dataIndex: "name",
     key: "name",
-    width: 250
+    width: 300,
   },
   {
     title: "任务书编号",
@@ -321,12 +416,12 @@ const columns = [
   },
   {
     title: "任务类型",
-    slots: { customRender: "type" },
+    dataIndex: "type",
     key: "type",
   },
   {
     title: "上传任务时间",
-    slots: { customRender: "updatedAt" },
+    dataIndex: "updatedAt",
     key: "updatedAt",
   },
   {
@@ -336,13 +431,12 @@ const columns = [
   },
   {
     title: "附件",
-    slots: { customRender: "attachment" },
+    dataIndex: "attachment",
     key: "attachment",
   },
   {
     title: "操作",
     key: "action",
-    slots: { customRender: "action" },
   },
 ];
 
@@ -403,6 +497,7 @@ export default defineComponent({
     UploadOutlined,
     ExclamationCircleOutlined,
     CalculatorTwoTone,
+    Icon,
   },
   data() {
     return {
@@ -423,6 +518,7 @@ export default defineComponent({
     const showPreview = ref<boolean>(false);
     const formRef3 = ref();
     const tableLoading = ref<boolean>(false);
+    const confirmLoadingNew = ref<boolean>(false);
     const state = reactive({
       taskList: [],
       candidates: [],
@@ -513,14 +609,19 @@ export default defineComponent({
       type: string,
       year: string,
       startDate: string,
-      endDate:string
+      endDate: string
     ) => {
-      const data = await getR2UnfinishedList(name, number, type, year, startDate, endDate).then(
-        (response) => {
-          tableLoading.value = false;
-          return response.data.data;
-        }
-      );
+      const data = await getR2UnfinishedList(
+        name,
+        number,
+        type,
+        year,
+        startDate,
+        endDate
+      ).then((response) => {
+        tableLoading.value = false;
+        return response.data.data;
+      });
 
       state.taskList = data;
     };
@@ -548,7 +649,7 @@ export default defineComponent({
     };
     onMounted(() => {
       fetchCandidates();
-      fetchData("", "", "", ""+dayjs().year(),"","");
+      fetchData("", "", "", "" + dayjs().year(), "", "");
     });
 
     // 点击表单添加按钮
@@ -633,7 +734,7 @@ export default defineComponent({
             if (response.data.status === "ok") {
               visible.value = false;
               message.success("数据上传成功");
-              fetchData("", "", "", ""+dayjs().year(), "","");
+              fetchData("", "", "", "" + dayjs().year(), "", "");
             } else {
               message.error("程序异常");
             }
@@ -731,7 +832,7 @@ export default defineComponent({
         .then((response) => {
           message.success("退回成功");
           confirmLoading2.value = false;
-          fetchData("", "", "", ""+dayjs().year(),"","");
+          fetchData("", "", "", "" + dayjs().year(), "", "");
 
           showRollback.value = false;
         })
@@ -762,68 +863,73 @@ export default defineComponent({
         });
     };
 
-    const createProjectOk = () => {
-      console.log("表单数据");
-      console.dir(formRef3.value);
-      const formData = toRaw(newFormState);
-      console.dir(formData);
-      formRef3.value
-        .validate()
-        .then(() => {
-          if (formData["nextAssignee"] === "") {
-            message.error("必须指定项目长");
-            return;
-          }
+    const createProjectOk = throttle(
+      () => {
+        console.log("表单数据");
+        console.dir(formRef3.value);
+        const formData = toRaw(newFormState);
+        console.dir(formData);
+        formRef3.value
+          .validate()
+          .then(() => {
+            if (formData["nextAssignee"] === "") {
+              message.error("必须指定项目长");
+              return;
+            }
 
-          // 附件不能为空
-          if (formData["fileList"].length === 0) {
-            message.error("必须上传附件");
-            return;
-          }
+            // 附件不能为空
+            if (formData["fileList"].length === 0) {
+              message.error("必须上传附件");
+              return;
+            }
 
-          const params = {};
-          params["processId"] = state.newProcessId;
-          params["taskId"] = state.newTaskId;
-          params["nextAssignee"] = formData.nextAssignee;
-          params["name"] = formData.name;
-          params["number"] = formData.number;
-          params["type"] = formData.type;
-          params["file"] =
-            formData["fileList"].length > 0
-              ? formData["fileList"][0].originFileObj
-              : null;
-          console.log("拼接参数");
-          console.dir(params);
+            const params = {};
+            params["processId"] = state.newProcessId;
+            params["taskId"] = state.newTaskId;
+            params["nextAssignee"] = formData.nextAssignee;
+            params["name"] = formData.name;
+            params["number"] = formData.number;
+            params["type"] = formData.type;
+            params["file"] =
+              formData["fileList"].length > 0
+                ? formData["fileList"][0].originFileObj
+                : null;
+            console.log("拼接参数");
+            console.dir(params);
+            confirmLoadingNew.value = true;
+            generateNewProject(params)
+              .then((response) => {
+                confirmLoadingNew.value = false;
+                console.log("response");
+                console.log(response);
+                if (response.data.status === "fail") {
+                  message.error(response.data.msg);
+                } else {
+                  showNewProject.value = false;
+                  message.success("创建项目成功");
 
-          generateNewProject(params)
-            .then((response) => {
-              console.log("response");
-              console.log(response);
-              if (response.data.status === "fail") {
-                message.error(response.data.msg);
-              } else {
-                showNewProject.value = false;
-                message.success("创建项目成功");
+                  state.newProcessId = "";
+                  state.newTaskId = "";
 
-                state.newProcessId = "";
-                state.newTaskId = "";
+                  // 清空表单数据
+                  Object.assign(newFormState, createNewFormState());
 
-                // 清空表单数据
-                Object.assign(newFormState, createNewFormState());
-
-                fetchData("", "", "", ""+dayjs().year(), "","");
-              }
-            })
-            .catch((err) => {
-              console.log("err");
-              console.log(err);
-              message.error("创建项目失败");
-            });
-        })
-        .catch((error) => {
-          console.log("error", error);
-        });
-    };
+                  fetchData("", "", "", "" + dayjs().year(), "", "");
+                }
+              })
+              .catch((err) => {
+                console.log("err");
+                console.log(err);
+                message.error("创建项目失败");
+              });
+          })
+          .catch((error) => {
+            console.log("error", error);
+          });
+      },
+      5000,
+      true
+    );
 
     const handleRemove = (file: FileItem) => {
       const index = newFormState.fileList.indexOf(file);
@@ -869,7 +975,7 @@ export default defineComponent({
     };
 
     const changeTime = (time) => {
-   return dayjs(time).add(8, "hours").format('YYYY年MM月DD日 HH:mm');
+      return dayjs(time).add(8, "hours").format("YYYY年MM月DD日 HH:mm");
     };
 
     const showImg = (srcURL) => {
@@ -889,7 +995,7 @@ export default defineComponent({
       year: "2022",
       startDate: "",
       endDate: "",
-      range: null
+      range: null,
     });
     const typeOptions2 = TYPE_OPTIONS;
 
@@ -905,22 +1011,29 @@ export default defineComponent({
       console.log(values);
       tableLoading.value = true;
 
-      fetchData(formData.name, formData.number, formData.type, formData.year,formData.startDate, formData.endDate)
+      fetchData(
+        formData.name,
+        formData.number,
+        formData.type,
+        formData.year,
+        formData.startDate,
+        formData.endDate
+      );
     };
 
     const options1 = ref<typeof SelectTypes["options"]>([
       {
-        value: ""+dayjs().year(),
-        label: ""+dayjs().year(),
+        value: "" + dayjs().year(),
+        label: "" + dayjs().year(),
       },
       {
-        value: ""+(dayjs().year()+1),
-        label: ""+(dayjs().year()+1),
+        value: "" + (dayjs().year() + 1),
+        label: "" + (dayjs().year() + 1),
       },
 
       {
-        value: ""+(dayjs().year()+2),
-        label: ""+(dayjs().year()+2),
+        value: "" + (dayjs().year() + 2),
+        label: "" + (dayjs().year() + 2),
       },
     ]);
 
@@ -932,7 +1045,7 @@ export default defineComponent({
           deleteProject(processId)
             .then((response) => {
               message.success("删除成功");
-              fetchData("", "", "", ""+dayjs().year(),"","");
+              fetchData("", "", "", "" + dayjs().year(), "", "");
             })
             .catch((err) => {
               console.log(err);
@@ -945,10 +1058,30 @@ export default defineComponent({
       });
     };
 
-     const onChangeRangePicker = (value, dateString)=>{
-      filterFormState.startDate=dateString.slice(0,1).toString()
-      filterFormState.endDate=dateString.slice(1,2).toString()
-    }
+    const onChangeRangePicker = (value, dateString) => {
+      filterFormState.startDate = dateString.slice(0, 1).toString();
+      filterFormState.endDate = dateString.slice(1, 2).toString();
+    };
+
+    const customRow = (record) => {
+      return {
+        onClick: (event) => {
+          console.log("click");
+          if (!!record.isNew) {
+            record.isNew = !record.isNew;
+          }
+
+          updateIsNewProject(record.processId)
+            .then((response) => {
+              // fetchData("", "", "", "" + dayjs().year(), "", "");
+            })
+            .catch((err) => {
+              message.error("系统错误");
+            });
+          console.dir(event);
+        },
+      };
+    };
 
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
@@ -1002,8 +1135,9 @@ export default defineComponent({
       deleteTask,
 
       adviceProductSum,
-      userId:localCache.getCache("setInfo")['id'],
-      onChangeRangePicker
+      userId: localCache.getCache("setInfo")["id"],
+      onChangeRangePicker,
+      customRow,
     };
   },
 });
@@ -1035,6 +1169,11 @@ export default defineComponent({
 
 .table-wrapper {
   margin-top: 30px;
+
+  .new-project-name {
+    font-weight: bold;
+    display: flex;
+  }
 }
 
 .filters-wrapper {

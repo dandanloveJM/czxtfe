@@ -418,3 +418,15 @@ export const updateTeamMembers = (params) => {
     data: data
   })
 }
+
+export const updateIsNewProject = (param) => {
+  let data = new FormData();
+  data.append("processId", param);
+
+  
+  return request({
+    url:"update/isnew",
+    method: "post",
+    data: data
+  })
+}
