@@ -419,14 +419,19 @@ export const updateTeamMembers = (params) => {
   })
 }
 
-export const updateIsNewProject = (param) => {
-  let data = new FormData();
-  data.append("processId", param);
+export const updateIsNewProject = (processId, isStep2New, isStep3New, isStep4New) => {
+  // let data = new FormData();
+  // data.append("processId", processId);
+  // data.append("isStep2New",isStep2New)
+  // data.append("isStep3New",isStep3New)
+  // data.append("isStep4New",isStep4New)
 
   
   return request({
     url:"update/isnew",
     method: "post",
-    data: data
+    data: {
+      processId,isStep2New,isStep3New,isStep4New
+    }
   })
 }

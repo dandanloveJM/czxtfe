@@ -94,7 +94,7 @@
               </span>
             </template>
             <template v-else-if="column.key === 'name'">
-              <span v-if="record.isNew" class="new-project-name"
+              <span v-if="record.pmId === userId && record.step2New" class="new-project-name"
                 >{{ record.name }}
                 <icon>
                   <template #component>
@@ -126,12 +126,12 @@
               <span v-else>{{ record.name }}</span>
             </template>
             <template v-else-if="column.key === 'type'">
-              <span :class="record.isNew ? 'new-project-name' : ''">{{
+              <span :class="(record.pmId === userId && record.step2New) ? 'new-project-name' : ''">{{
                 typeMap[record.type]
               }}</span>
             </template>
             <template v-else-if="column.key === 'number'">
-              <span :class="record.isNew ? 'new-project-name' : ''">{{
+              <span :class="(record.pmId === userId && record.step2New) ? 'new-project-name' : ''">{{
                 record.number
               }}</span>
             </template>
@@ -508,6 +508,7 @@ export default defineComponent({
 
   setup(props, context) {
     const addModal = ref();
+    const userId = localCache.getCache("setInfo")["id"];
     const visible = ref<boolean>(false);
     const confirmLoading = ref<boolean>(false);
     const showHistory = ref<boolean>(false);
@@ -1067,11 +1068,9 @@ export default defineComponent({
       return {
         onClick: (event) => {
           console.log("click");
-          if (!!record.isNew) {
-            record.isNew = !record.isNew;
-          }
-
-          updateIsNewProject(record.processId)
+          if (record.pmId == userId && !!record.step2New) {
+            record.step2New = !record.step2New;
+             updateIsNewProject(record.processId, false, null ,null)
             .then((response) => {
               // fetchData("", "", "", "" + dayjs().year(), "", "");
             })
@@ -1079,6 +1078,9 @@ export default defineComponent({
               message.error("系统错误");
             });
           console.dir(event);
+          }
+         
+         
         },
       };
     };
@@ -1135,9 +1137,10 @@ export default defineComponent({
       deleteTask,
 
       adviceProductSum,
-      userId: localCache.getCache("setInfo")["id"],
       onChangeRangePicker,
       customRow,
+      confirmLoadingNew,
+      userId
     };
   },
 });
