@@ -416,6 +416,7 @@ import dayjs from "dayjs";
 import localStorageStore from "@/utils/localStorageStore";
 import localCache from "@/utils/localCache";
 import type { Dayjs } from "dayjs";
+import { throttle } from "lodash-es";
 
 interface filterFormState {
   name: string;
@@ -751,7 +752,7 @@ export default defineComponent({
       return new Set(array).size !== array.length;
     };
 
-    const onSubmitForm = () => {
+    const onSubmitForm = throttle(() => {
       // visible.value = false;
       const records = toRaw(dynamicForm).records;
       let sum = 0;
@@ -820,7 +821,7 @@ export default defineComponent({
           });
       }
       console.log("submit!", toRaw(dynamicForm));
-    };
+    });
 
     const buildParam = (candidates, records, processId, taskId) => {
       const param = {};
@@ -927,7 +928,7 @@ export default defineComponent({
       },
     ];
 
-    const rollbackTo = (targetKey) => {
+    const rollbackTo = throttle((targetKey) => {
       const params = {};
       params["processId"] = state.checkProcessId;
       params["taskId"] = state.checkTaskId;
@@ -949,9 +950,9 @@ export default defineComponent({
           console.log(err);
           message.error("程序异常");
         });
-    };
+    });
 
-    const agreeTo = () => {
+    const agreeTo = throttle(() => {
       const params = {};
       params["processId"] = state.checkProcessId;
       params["taskId"] = state.checkTaskId;
@@ -974,7 +975,7 @@ export default defineComponent({
           console.log(err);
           message.error("程序异常");
         });
-    };
+    });
     const changeTime = (time) => {
       return dayjs(time).add(8, "hours").format("YYYY年MM月DD日 HH:mm");
     };

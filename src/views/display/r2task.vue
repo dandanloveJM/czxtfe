@@ -676,7 +676,7 @@ export default defineComponent({
       return new Set(array).size !== array.length;
     };
 
-    const onSubmitForm = () => {
+    const onSubmitForm = throttle(() => {
       // visible.value = false;
       const records = toRaw(dynamicForm).records;
       let sum = 0;
@@ -746,7 +746,7 @@ export default defineComponent({
           });
       }
       console.log("submit!", toRaw(dynamicForm));
-    };
+    });
 
     const buildParam = (candidates, records, processId, taskId) => {
       const param = {};

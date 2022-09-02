@@ -306,6 +306,7 @@ import localStorageStore from "@/utils/localStorageStore";
 import SelectTypes from "ant-design-vue/es/select";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 import type { Dayjs } from "dayjs";
+import { throttle } from "lodash-es";
 
 const columns = [
   {
@@ -539,7 +540,7 @@ export default defineComponent({
       return new Set(array).size !== array.length;
     };
 
-    const onSubmitForm = () => {
+    const onSubmitForm = throttle(() => {
       // visible.value = false;
       const records = toRaw(dynamicForm).records;
       let sum = 0;
@@ -609,7 +610,7 @@ export default defineComponent({
           });
       }
       console.log("submit!", toRaw(dynamicForm));
-    };
+    });
 
     const buildParam = (candidates, records, processId, taskId) => {
       const param = {};
