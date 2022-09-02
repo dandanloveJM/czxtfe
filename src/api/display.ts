@@ -419,7 +419,7 @@ export const updateTeamMembers = (params) => {
   })
 }
 
-export const updateIsNewProject = (processId, isStep2New, isStep3New, isStep4New) => {
+export const updateIsNewProject = (processId, isStep2New, isStep3New, isStep4New, isStep5New) => {
   // let data = new FormData();
   // data.append("processId", processId);
   // data.append("isStep2New",isStep2New)
@@ -431,7 +431,7 @@ export const updateIsNewProject = (processId, isStep2New, isStep3New, isStep4New
     url:"update/isnew",
     method: "post",
     data: {
-      processId,isStep2New,isStep3New,isStep4New
+      processId,isStep2New,isStep3New,isStep4New,isStep5New
     }
   })
 }

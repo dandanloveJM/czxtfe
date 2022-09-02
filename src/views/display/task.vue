@@ -803,7 +803,7 @@ export default defineComponent({
           console.log("click");
           if (record.pmId == userId && !!record.step2New) {
             record.step2New = !record.step2New;
-             updateIsNewProject(record.processId, false, null, null)
+             updateIsNewProject(record.processId, false, null, null, null)
             .then((response) => {
               // fetchData("", "", "", "" + dayjs().year(), "", "");
             })
