@@ -19,7 +19,7 @@
           <a-form-item name="number" label="项目编号">
             <a-input v-model:value="filterFormState.number" />
           </a-form-item>
-         
+
           <a-form-item name="year" label="按年度筛选">
             <a-select
               v-model:value="filterFormState.year"
@@ -29,8 +29,10 @@
           </a-form-item>
           <a-space>
             日期筛选：
-            <a-range-picker v-model:value="filterFormState.range"
-            @change="onChangeRangePicker" />
+            <a-range-picker
+              v-model:value="filterFormState.range"
+              @change="onChangeRangePicker"
+            />
           </a-space>
           <a-form-item :wrapper-col="wrapperCol">
             <a-button type="primary" @click="searchFilters">搜索</a-button>
@@ -47,57 +49,68 @@
           :rowKey="(record) => record.processId"
           :loading="tableLoading"
         >
-          <template #updatedAt="{ record }">
-            <span>{{ changeTime(record.updatedAt) }}</span>
-          </template>
+          <template #bodycell="{ column, record }">
+            <template v-if="column.dataIndex === 'updatedAt'">
+              <span>{{ changeTime(record.updatedAt) }}</span>
+            </template>
 
-          <template #check="{ record }">
-            <span v-if="record.activityName === 'R3审核'">
-              <a-tag color="warning">
-                <template #icon>
-                  <exclamation-circle-outlined />
-                </template>
-                待审核
-              </a-tag>
-            </span>
-            <span v-else-if="record.activityName === 'R2/R1填写产值分配建议'">
-              <a-tag color="blue">
-                <template #icon>
-                  <exclamation-circle-outlined />
-                </template>
-                待分配产值
-              </a-tag>
-            </span>
-            <span v-else>
-              <a-tag color="success">
-                <template #icon>
-                  <check-circle-outlined />
-                </template>
-                已审核
-              </a-tag>
-            </span>
-          </template>
+            <template v-else-if="column.dataIndex === 'check'">
+              <span v-if="record.activityName === 'R3审核'">
+                <a-tag color="warning">
+                  <template #icon>
+                    <exclamation-circle-outlined />
+                  </template>
+                  待审核
+                </a-tag>
+              </span>
+              <span v-else-if="record.activityName === 'R2/R1填写产值分配建议'">
+                <a-tag color="blue">
+                  <template #icon>
+                    <exclamation-circle-outlined />
+                  </template>
+                  待分配产值
+                </a-tag>
+              </span>
+              <span v-else>
+                <a-tag color="success">
+                  <template #icon>
+                    <check-circle-outlined />
+                  </template>
+                  已审核
+                </a-tag>
+              </span>
+            </template>
 
-          <template #action="{ record }">
-            <span v-if="record.activityName === 'R2/R1填写产值分配建议' && record.pmId === userId">
-              <a-button @click="() => addAdvice(record.processId, record.taskId)">产值分配</a-button>
-              <a-divider type="vertical" />
-            </span>
+            <template v-else-if="column.dataIndex === 'action'">
+              <span
+                v-if="
+                  record.activityName === 'R2/R1填写产值分配建议' &&
+                  record.pmId === userId
+                "
+              >
+                <a-button @click="() => addAdvice(record.processId, record.taskId)"
+                  >产值分配</a-button
+                >
+                <a-divider type="vertical" />
+              </span>
 
-            <span v-if="record.activityName === 'R3审核'">
-              <a-button @click="() => check(record)">点击审核</a-button>
-              <a-divider type="vertical" />
-            </span>
+              <span v-if="record.activityName === 'R3审核'">
+                <a-button @click="() => check(record)">点击审核</a-button>
+                <a-divider type="vertical" />
+              </span>
 
-            <span>
-              <a-button @click="() => checkHistory(record.processId)">流程查看</a-button>
-            </span>
-          </template>
-          <template #type="{ record }">
-            <span>{{ typeMap[record.type] }}</span>
-          </template>
-          <template #attachment="{ record }">
-            <a-button @click="() => showImg(record.attachment)">查看任务书</a-button>
+              <span>
+                <a-button @click="() => checkHistory(record.processId)"
+                  >流程查看</a-button
+                >
+              </span>
+            </template>
+            <template v-else-if="column.dataIndex === 'type'">
+              <span>{{ typeMap[record.type] }}</span>
+            </template>
+            <template v-else-if="column.dataIndex === 'attachment'">
+              <a-button @click="() => showImg(record.attachment)">查看任务书</a-button>
+            </template>
           </template>
         </a-table>
       </div>
@@ -137,11 +150,20 @@
             type="primary"
             :loading="confirmLoading"
             @click="onSubmitForm"
-          >确认并发送</a-button>
+            >确认并发送</a-button
+          >
         </template>
         <a-form ref="formRef" :model="dynamicForm" :label-col="labelCol">
-          <div class="line-wrapper" v-for="(record, index) in dynamicForm.records" :key="index">
-            <a-form-item :label="record.peopleLabel" style="min-width: 45%" name="peopleValue">
+          <div
+            class="line-wrapper"
+            v-for="(record, index) in dynamicForm.records"
+            :key="index"
+          >
+            <a-form-item
+              :label="record.peopleLabel"
+              style="min-width: 45%"
+              name="peopleValue"
+            >
               <a-select
                 v-model:value="record.peopleValue"
                 show-search
@@ -169,7 +191,8 @@
               class="dynamic-delete-button"
               :disabled="dynamicForm.records.length === 1"
               @click="removeRecord(record)"
-            >删除</a-button>
+              >删除</a-button
+            >
           </div>
           <div class="product_sum_calculator">
             <div style="min-width: 45%"></div>
@@ -179,7 +202,12 @@
             </div>
           </div>
           <a-form-item>
-            <a-button type="dashed" class="add-record-button" @click="addRecord" size="large">
+            <a-button
+              type="dashed"
+              class="add-record-button"
+              @click="addRecord"
+              size="large"
+            >
               <PlusOutlined />点击增加项目成员
             </a-button>
           </a-form-item>
@@ -204,7 +232,9 @@
           :rowKey="(record) => record.processId"
         >
           <template #comment="{ record }">
-            <span>{{ record.comment ? record.comment : (record.endTime? "【通过】":"【进行中】") }}</span>
+            <span>{{
+              record.comment ? record.comment : record.endTime ? "【通过】" : "【进行中】"
+            }}</span>
           </template>
         </a-table>
       </a-modal>
@@ -221,9 +251,7 @@
         <a-tabs v-model:activeKey="activeKey">
           <a-tab-pane key="1">
             <template #tab>
-              <span class="tab-title-header">
-                <AppstoreTwoTone />项目详情
-              </span>
+              <span class="tab-title-header"> <AppstoreTwoTone />项目详情 </span>
             </template>
             <a-table
               :columns="columnsWithoutOperation"
@@ -245,9 +273,7 @@
           </a-tab-pane>
           <a-tab-pane key="2">
             <template #tab>
-              <span class="tab-title-header">
-                <CrownTwoTone />产值比例
-              </span>
+              <span class="tab-title-header"> <CrownTwoTone />产值比例 </span>
             </template>
             <a-table
               :columns="productColumns"
@@ -277,11 +303,17 @@
 
         <div class="button-wrapper">
           <div class="reject-button">
-            <a-button danger size="large" @click="() => rollbackTo('fillNumbers')">退回，重新填写产值比例</a-button>
-            <a-button danger size="large" @click="() => rollbackTo('uploadTask')">退回，重新上传任务</a-button>
+            <a-button danger size="large" @click="() => rollbackTo('fillNumbers')"
+              >退回，重新填写产值比例</a-button
+            >
+            <a-button danger size="large" @click="() => rollbackTo('uploadTask')"
+              >退回，重新上传任务</a-button
+            >
           </div>
           <div class="agree">
-            <a-button @click="() => agreeTo()" type="primary" size="large">审核通过</a-button>
+            <a-button @click="() => agreeTo()" type="primary" size="large"
+              >审核通过</a-button
+            >
           </div>
         </div>
       </a-modal>
@@ -297,7 +329,7 @@ import {
   UnwrapRef,
   toRaw,
   computed,
-  h
+  h,
 } from "vue";
 import { UploadOutlined } from "@ant-design/icons-vue";
 import SelectTypes from "ant-design-vue/es/select";
@@ -310,7 +342,7 @@ import {
   EditTwoTone,
   CalculatorTwoTone,
   CheckCircleOutlined,
-  ExclamationCircleOutlined
+  ExclamationCircleOutlined,
 } from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message } from "ant-design-vue";
@@ -321,13 +353,14 @@ import {
   checkHistoryRequest,
   rollbackRequest,
   r3Approve,
+  updateIsNewProject,
 } from "@/api/display";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 // import moment from "moment";
 import dayjs from "dayjs";
 import localStorageStore from "@/utils/localStorageStore";
 import localCache from "@/utils/localCache";
-import type { Dayjs } from 'dayjs';
+import type { Dayjs } from "dayjs";
 
 interface filterFormState {
   name: string;
@@ -335,22 +368,26 @@ interface filterFormState {
   type: string;
   year: string;
   startDate: string;
-  endDate:string;
+  endDate: string;
   range: Dayjs;
 }
 
 const filterDict = {
-  '待审核': ['R3审核'],
-  '已审核': ['R4审核', 'A1填写产值'],
-  '待分配产值': ['R2/R1填写产值分配建议']
-}
-const vnode = h('div', { class: 'bar', innerHTML: '点击筛选状态',  style: { color: '#4748ed' } })
+  待审核: ["R3审核"],
+  已审核: ["R4审核", "A1填写产值"],
+  待分配产值: ["R2/R1填写产值分配建议"],
+};
+const vnode = h("div", {
+  class: "bar",
+  innerHTML: "点击筛选状态",
+  style: { color: "#4748ed" },
+});
 const columns = [
   {
     title: "任务名",
     dataIndex: "name",
     key: "name",
-    width: 250
+    width: 250,
   },
   {
     title: "任务书编号",
@@ -359,12 +396,12 @@ const columns = [
   },
   {
     title: "任务类型",
-    slots: { customRender: "type" },
+    dataIndex: "type",
     key: "type",
   },
   {
     title: "上传任务时间",
-    slots: { customRender: "updatedAt" },
+    dataIndex: "updatedAt",
     key: "updatedAt",
   },
   {
@@ -374,35 +411,35 @@ const columns = [
   },
   {
     title: "附件",
-    slots: { customRender: "attachment" },
+    dataIndex: "attachment",
     key: "attachment",
   },
   {
     title: "状态",
     key: "check",
-    slots: { customRender: "check" },
+    dataIndex: "check",
     filters: [
       {
-        text: '已审核',
-        value: '已审核',
+        text: "已审核",
+        value: "已审核",
       },
       {
-        text: '待审核',
-        value: '待审核',
+        text: "待审核",
+        value: "待审核",
       },
       {
-        text: '待分配产值',
-        value: '待分配产值',
+        text: "待分配产值",
+        value: "待分配产值",
       },
     ],
     filterMultiple: false,
     filterIcon: vnode,
     onFilter: (value: string, record) => {
-      console.log('-----filter')
-      console.log(filterDict[value])
-      console.log(record.activityName)
-      console.log(filterDict[value].indexOf(record.activityName) === 0)
-      return filterDict[value].indexOf(record.activityName) >= 0
+      console.log("-----filter");
+      console.log(filterDict[value]);
+      console.log(record.activityName);
+      console.log(filterDict[value].indexOf(record.activityName) === 0);
+      return filterDict[value].indexOf(record.activityName) >= 0;
       // if (record.activityName === 'R3审核') {
       //   return value === "待审核"
       // } else if (record.activityName === 'R2/R1填写产值分配建议') {
@@ -419,7 +456,6 @@ const columns = [
     slots: { customRender: "action" },
   },
 ];
-
 
 interface PeopleAndProductRecord {
   peopleLabel: string;
@@ -463,7 +499,7 @@ export default defineComponent({
     EditTwoTone,
     CalculatorTwoTone,
     CheckCircleOutlined,
-    ExclamationCircleOutlined
+    ExclamationCircleOutlined,
   },
   data() {
     return {
@@ -526,7 +562,7 @@ export default defineComponent({
     });
 
     const historyColumns = [
-       {
+      {
         title: "开始时间",
         dataIndex: "startTime",
         key: "startTime",
@@ -587,8 +623,7 @@ export default defineComponent({
     ];
 
     const typeOptions = TYPE_OPTIONS;
-  
-       
+
     console.log("typeOptions");
     console.dir(typeOptions);
 
@@ -597,22 +632,25 @@ export default defineComponent({
       number: string,
       type: string,
       year: string,
-       startDate: string,
-      endDate:string
+      startDate: string,
+      endDate: string
     ) => {
-      const data = await getR3UnfinishedList(name, number, type, year, startDate, endDate).then(
-        (response) => {
-          tableLoading.value = false;
-          return response.data.data;
-        }
-      );
+      const data = await getR3UnfinishedList(
+        name,
+        number,
+        type,
+        year,
+        startDate,
+        endDate
+      ).then((response) => {
+        tableLoading.value = false;
+        return response.data.data;
+      });
       state.taskList = data;
     };
 
     const fetchCandidates = async () => {
-      const candidates = await getAllR1R2R3Users().then(
-        (response) => response.data.data
-      );
+      const candidates = await getAllR1R2R3Users().then((response) => response.data.data);
       const options = candidates.map((item) => {
         let tmp = {};
         tmp["value"] = item["id"];
@@ -630,7 +668,7 @@ export default defineComponent({
     };
     onMounted(() => {
       fetchCandidates();
-      fetchData("", "", "", ""+dayjs().year(),"","");
+      fetchData("", "", "", "" + dayjs().year(), "", "");
     });
 
     // 点击表单添加按钮
@@ -714,7 +752,7 @@ export default defineComponent({
             if (response.data.status === "ok") {
               visible.value = false;
               message.success("数据上传成功");
-              fetchData("", "", "", ""+dayjs().year(),"","");
+              fetchData("", "", "", "" + dayjs().year(), "", "");
             } else {
               message.error(response.data.msg);
             }
@@ -799,7 +837,7 @@ export default defineComponent({
         .then(() => {
           message.success("退回成功");
           confirmLoading2.value = false;
-          fetchData("", "", "", ""+dayjs().year(),"","");
+          fetchData("", "", "", "" + dayjs().year(), "", "");
 
           showRollback.value = false;
         })
@@ -844,7 +882,7 @@ export default defineComponent({
       rollbackRequest(params)
         .then(() => {
           message.success("退回成功");
-          fetchData("", "", "", ""+dayjs().year(),"","");
+          fetchData("", "", "", "" + dayjs().year(), "", "");
 
           showCheck.value = false;
           state.checkProcessId = "";
@@ -868,7 +906,7 @@ export default defineComponent({
       r3Approve(params)
         .then(() => {
           message.success("审核通过成功");
-          fetchData("", "", "", ""+dayjs().year(),"","");
+          fetchData("", "", "", "" + dayjs().year(), "", "");
 
           showCheck.value = false;
           state.checkProcessId = "";
@@ -881,7 +919,7 @@ export default defineComponent({
         });
     };
     const changeTime = (time) => {
-      return dayjs(time).add(8, "hours").format('YYYY年MM月DD日 HH:mm');
+      return dayjs(time).add(8, "hours").format("YYYY年MM月DD日 HH:mm");
     };
     const showImg = (srcURL) => {
       showPreview.value = true;
@@ -900,12 +938,10 @@ export default defineComponent({
       year: "2022",
       startDate: "",
       endDate: "",
-      range: null
+      range: null,
     });
 
-    const filterFormState: UnwrapRef<filterFormState> = reactive(
-      createFilterFormState()
-    );
+    const filterFormState: UnwrapRef<filterFormState> = reactive(createFilterFormState());
 
     const searchFilters = () => {
       // 拿到filterFormState数据，拼接参数, 发送fetchData请求, 设置loading
@@ -913,23 +949,29 @@ export default defineComponent({
       const values = Object.values(formData);
 
       tableLoading.value = true;
-      fetchData(formData.name, formData.number, formData.type, formData.year,formData.startDate, formData.endDate)
-
+      fetchData(
+        formData.name,
+        formData.number,
+        formData.type,
+        formData.year,
+        formData.startDate,
+        formData.endDate
+      );
     };
 
     const options1 = ref<typeof SelectTypes["options"]>([
       {
-        value: ""+dayjs().year(),
-        label: ""+dayjs().year(),
+        value: "" + dayjs().year(),
+        label: "" + dayjs().year(),
       },
       {
-        value: ""+(dayjs().year()+1),
-        label: ""+(dayjs().year()+1),
+        value: "" + (dayjs().year() + 1),
+        label: "" + (dayjs().year() + 1),
       },
 
       {
-        value: ""+(dayjs().year()+2),
-        label: ""+(dayjs().year()+2),
+        value: "" + (dayjs().year() + 2),
+        label: "" + (dayjs().year() + 2),
       },
     ]);
 
@@ -942,10 +984,10 @@ export default defineComponent({
       return value;
     });
 
-    const onChangeRangePicker = (value, dateString)=>{
-      filterFormState.startDate=dateString.slice(0,1).toString()
-      filterFormState.endDate=dateString.slice(1,2).toString()
-    }
+    const onChangeRangePicker = (value, dateString) => {
+      filterFormState.startDate = dateString.slice(0, 1).toString();
+      filterFormState.endDate = dateString.slice(1, 2).toString();
+    };
 
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
@@ -996,8 +1038,8 @@ export default defineComponent({
       wrapperCol: { span: 14, offset: 4 },
       options1,
       adviceProductSum,
-      userId: localCache.getCache("setInfo")['id'],
-      onChangeRangePicker
+      userId: localCache.getCache("setInfo")["id"],
+      onChangeRangePicker,
     };
   },
 });
