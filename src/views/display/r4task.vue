@@ -28,8 +28,10 @@
           </a-form-item>
           <a-space>
             日期筛选：
-            <a-range-picker v-model:value="filterFormState.range"
-            @change="onChangeRangePicker" />
+            <a-range-picker
+              v-model:value="filterFormState.range"
+              @change="onChangeRangePicker"
+            />
           </a-space>
           <a-form-item :wrapper-col="wrapperCol">
             <a-button type="primary" @click="searchFilters">搜索</a-button>
@@ -45,6 +47,7 @@
           :data-source="state.taskList"
           :rowKey="(record) => record.processId"
           :loading="tableLoading"
+          :customRow="customRow"
         >
           <template #updatedAt="{ record }">
             <span>{{ changeTime(record.updatedAt) }}</span>
@@ -120,7 +123,9 @@
           :rowKey="(record) => record.processId"
         >
           <template #comment="{ record }">
-            <span>{{ record.comment ? record.comment : (record.endTime? "【通过】":"【进行中】") }}</span>
+            <span>{{
+              record.comment ? record.comment : record.endTime ? "【通过】" : "【进行中】"
+            }}</span>
           </template>
         </a-table>
       </a-modal>
@@ -137,9 +142,7 @@
         <a-tabs v-model:activeKey="activeKey">
           <a-tab-pane key="1">
             <template #tab>
-              <span class="tab-title-header">
-                <AppstoreTwoTone />项目详情
-              </span>
+              <span class="tab-title-header"> <AppstoreTwoTone />项目详情 </span>
             </template>
             <a-table
               :columns="columnsWithoutOperation"
@@ -161,9 +164,7 @@
           </a-tab-pane>
           <a-tab-pane key="2">
             <template #tab>
-              <span class="tab-title-header">
-                <CrownTwoTone />产值比例
-              </span>
+              <span class="tab-title-header"> <CrownTwoTone />产值比例 </span>
             </template>
             <a-table
               :columns="productColumns"
@@ -191,12 +192,20 @@
 
         <div class="button-wrapper">
           <div class="reject-button">
-            <a-button danger size="large" @click="() => rollbackTo('R3check')">退回，室主任重新审核</a-button>
-            <a-button danger size="large" @click="() => rollbackTo('fillNumbers')">退回，重新填写产值比例</a-button>
-            <a-button danger size="large" @click="() => rollbackTo('uploadTask')">退回，重新上传任务</a-button>
+            <a-button danger size="large" @click="() => rollbackTo('R3check')"
+              >退回，室主任重新审核</a-button
+            >
+            <a-button danger size="large" @click="() => rollbackTo('fillNumbers')"
+              >退回，重新填写产值比例</a-button
+            >
+            <a-button danger size="large" @click="() => rollbackTo('uploadTask')"
+              >退回，重新上传任务</a-button
+            >
           </div>
           <div class="agree">
-            <a-button @click="() => agreeTo()" type="primary" size="large">审核通过</a-button>
+            <a-button @click="() => agreeTo()" type="primary" size="large"
+              >审核通过</a-button
+            >
           </div>
         </div>
       </a-modal>
@@ -204,16 +213,9 @@
   </div>
 </template>
 <script lang="ts">
-import {
-  defineComponent,
-  ref,
-  reactive,
-  onMounted,
-  UnwrapRef,
-  toRaw,
-} from "vue";
+import { defineComponent, ref, reactive, onMounted, UnwrapRef, toRaw } from "vue";
 import { UploadOutlined } from "@ant-design/icons-vue";
-import  SelectTypes  from "ant-design-vue/es/select";
+import SelectTypes from "ant-design-vue/es/select";
 import aIcon from "@/components/aicon/aicon.vue";
 import {
   MinusCircleOutlined,
@@ -222,6 +224,7 @@ import {
   CrownTwoTone,
   EditTwoTone,
   CheckCircleOutlined,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons-vue";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message } from "ant-design-vue";
@@ -236,7 +239,7 @@ import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 // import moment from "moment";
 import dayjs from "dayjs";
 import { debounce } from "lodash-es";
-import type { Dayjs } from 'dayjs';
+import type { Dayjs } from "dayjs";
 
 interface filterFormState {
   name: string;
@@ -244,7 +247,7 @@ interface filterFormState {
   type: string;
   year: string;
   startDate: string;
-  endDate: string,
+  endDate: string;
   range: Dayjs;
 }
 
@@ -253,7 +256,7 @@ const columns = [
     title: "任务名",
     dataIndex: "name",
     key: "name",
-    width: 250
+    width: 250,
   },
   {
     title: "任务书编号",
@@ -286,21 +289,20 @@ const columns = [
     slots: { customRender: "check" },
     filters: [
       {
-        text: '已审核',
-        value: '已审核',
+        text: "已审核",
+        value: "已审核",
       },
       {
-        text: '待审核',
-        value: '待审核',
+        text: "待审核",
+        value: "待审核",
       },
-
     ],
     filterMultiple: false,
     onFilter: (value: string, record) => {
-      if (record.activityName === 'R4审核') {
-        return value === "待审核"
+      if (record.activityName === "R4审核") {
+        return value === "待审核";
       } else {
-        return value === "已审核"
+        return value === "已审核";
       }
     },
   },
@@ -360,7 +362,8 @@ export default defineComponent({
     CrownTwoTone,
     AppstoreTwoTone,
     EditTwoTone,
-    CheckCircleOutlined
+    CheckCircleOutlined,
+    ExclamationCircleOutlined,
   },
   data() {
     return {
@@ -456,7 +459,7 @@ export default defineComponent({
     ];
 
     const historyColumns = [
-       {
+      {
         title: "开始时间",
         dataIndex: "startTime",
         key: "startTime",
@@ -495,12 +498,17 @@ export default defineComponent({
       startDate: string,
       endDate: string
     ) => {
-      const data = await getR4UnfinishedList(name, number, type, year, startDate, endDate).then(
-        (response) => {
-          tableLoading.value = false;
-          return response.data.data;
-        }
-      );
+      const data = await getR4UnfinishedList(
+        name,
+        number,
+        type,
+        year,
+        startDate,
+        endDate
+      ).then((response) => {
+        tableLoading.value = false;
+        return response.data.data;
+      });
       if (data.hasOwnProperty("empty")) {
         state.taskList = [];
       } else {
@@ -509,9 +517,7 @@ export default defineComponent({
     };
 
     const fetchCandidates = async () => {
-      const candidates = await getAllR1R2R3Users().then(
-        (response) => response.data.data
-      );
+      const candidates = await getAllR1R2R3Users().then((response) => response.data.data);
       const options = candidates.map((item) => {
         let tmp = {};
         tmp["value"] = item["id"];
@@ -529,7 +535,7 @@ export default defineComponent({
     };
     onMounted(() => {
       fetchCandidates();
-      fetchData("", "", "", ""+dayjs().year(),"","");
+      fetchData("", "", "", "" + dayjs().year(), "", "");
     });
 
     // 点击表单添加按钮
@@ -609,7 +615,7 @@ export default defineComponent({
       rollbackRequest(params)
         .then((response) => {
           message.success("退回成功");
-          fetchData("", "", "", ""+dayjs().year(),"","");
+          fetchData("", "", "", "" + dayjs().year(), "", "");
 
           showCheck.value = false;
           state.checkProcessId = "";
@@ -632,7 +638,7 @@ export default defineComponent({
       r4Approve(params)
         .then((response) => {
           message.success("审核通过成功");
-          fetchData("", "", "", ""+dayjs().year(),"","");
+          fetchData("", "", "", "" + dayjs().year(), "", "");
 
           showCheck.value = false;
           state.checkProcessId = "";
@@ -644,7 +650,7 @@ export default defineComponent({
         });
     }, 1000);
     const changeTime = (time) => {
-    return dayjs(time).add(8, "hours").format('YYYY年MM月DD日 HH:mm');
+      return dayjs(time).add(8, "hours").format("YYYY年MM月DD日 HH:mm");
     };
 
     const showImg = (srcURL) => {
@@ -659,12 +665,10 @@ export default defineComponent({
       year: "2022",
       startDate: "",
       endDate: "",
-      range: null
+      range: null,
     });
 
-    const filterFormState: UnwrapRef<filterFormState> = reactive(
-      createFilterFormState()
-    );
+    const filterFormState: UnwrapRef<filterFormState> = reactive(createFilterFormState());
 
     const searchFilters = () => {
       // 拿到filterFormState数据，拼接参数, 发送fetchData请求, 设置loading
@@ -673,32 +677,45 @@ export default defineComponent({
       console.log("我看看参数");
       console.log(values);
       tableLoading.value = true;
-      fetchData(formData.name, formData.number, formData.type, formData.year, formData.startDate, formData.endDate)
-
-    
+      fetchData(
+        formData.name,
+        formData.number,
+        formData.type,
+        formData.year,
+        formData.startDate,
+        formData.endDate
+      );
     };
 
     const options1 = ref<typeof SelectTypes["options"]>([
       {
-        value: ""+dayjs().year(),
-        label: ""+dayjs().year(),
+        value: "" + dayjs().year(),
+        label: "" + dayjs().year(),
       },
       {
-        value: ""+(dayjs().year()+1),
-        label: ""+(dayjs().year()+1),
+        value: "" + (dayjs().year() + 1),
+        label: "" + (dayjs().year() + 1),
       },
 
       {
-        value: ""+(dayjs().year()+2),
-        label: ""+(dayjs().year()+2),
+        value: "" + (dayjs().year() + 2),
+        label: "" + (dayjs().year() + 2),
       },
     ]);
 
-      const onChangeRangePicker = (value, dateString)=>{
-      filterFormState.startDate=dateString.slice(0,1).toString()
-      filterFormState.endDate=dateString.slice(1,2).toString()
-    }
+    const onChangeRangePicker = (value, dateString) => {
+      filterFormState.startDate = dateString.slice(0, 1).toString();
+      filterFormState.endDate = dateString.slice(1, 2).toString();
+    };
 
+    const customRow = (record) => {
+      return {
+        onClick: (event) => {
+          console.log("click");
+          console.dir(event);
+        },
+      };
+    };
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
       state,
@@ -744,7 +761,8 @@ export default defineComponent({
       searchFilters,
       wrapperCol: { span: 14, offset: 4 },
       options1,
-      onChangeRangePicker
+      onChangeRangePicker,
+      customRow,
     };
   },
 });
