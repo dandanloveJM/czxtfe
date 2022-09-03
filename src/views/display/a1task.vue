@@ -28,8 +28,10 @@
           </a-form-item>
           <a-space>
             日期筛选：
-            <a-range-picker v-model:value="filterFormState.range"
-            @change="onChangeRangePicker" />
+            <a-range-picker
+              v-model:value="filterFormState.range"
+              @change="onChangeRangePicker"
+            />
           </a-space>
           <a-form-item :wrapper-col="wrapperCol">
             <a-button type="primary" @click="searchFilters">搜索</a-button>
@@ -103,7 +105,9 @@
           :rowKey="(record) => record.processId"
         >
           <template #comment="{ record }">
-            <span>{{ record.comment ? record.comment : (record.endTime? "【通过】":"【进行中】") }}</span>
+            <span>{{
+              record.comment ? record.comment : record.endTime ? "【通过】" : "【进行中】"
+            }}</span>
           </template>
         </a-table>
       </a-modal>
@@ -120,9 +124,7 @@
         <a-tabs v-model:activeKey="activeKey">
           <a-tab-pane key="1">
             <template #tab>
-              <span class="tab-title-header">
-                <AppstoreTwoTone />项目详情
-              </span>
+              <span class="tab-title-header"> <AppstoreTwoTone />项目详情 </span>
             </template>
             <a-table
               :columns="columnsWithoutOperation"
@@ -144,9 +146,7 @@
           </a-tab-pane>
           <a-tab-pane key="2">
             <template #tab>
-              <span class="tab-title-header">
-                <CrownTwoTone />产值比例
-              </span>
+              <span class="tab-title-header"> <CrownTwoTone />产值比例 </span>
             </template>
             <a-table
               :columns="productColumns"
@@ -174,10 +174,16 @@
 
         <div class="button-wrapper">
           <div class="reject-button">
-            <a-button @click="() => rollbackTo('R4check')" danger>退回至分管领导</a-button>
+            <a-button @click="() => rollbackTo('R4check')" danger
+              >退回至分管领导</a-button
+            >
             <a-button @click="() => rollbackTo('R3check')" danger>退回至室主任</a-button>
-            <a-button @click="() => rollbackTo('fillNumbers')" danger>退回，重新填写产值比例</a-button>
-            <a-button @click="() => rollbackTo('uploadTask')" danger>退回，重新上传任务</a-button>
+            <a-button @click="() => rollbackTo('fillNumbers')" danger
+              >退回，重新填写产值比例</a-button
+            >
+            <a-button @click="() => rollbackTo('uploadTask')" danger
+              >退回，重新上传任务</a-button
+            >
           </div>
           <div class="agree">
             <a-button @click="() => setValue()" type="primary">赋予产值</a-button>
@@ -215,14 +221,7 @@
   </div>
 </template>
 <script lang="ts">
-import {
-  defineComponent,
-  ref,
-  reactive,
-  onMounted,
-  UnwrapRef,
-  toRaw,
-} from "vue";
+import { defineComponent, ref, reactive, onMounted, UnwrapRef, toRaw } from "vue";
 import { UploadOutlined } from "@ant-design/icons-vue";
 import aIcon from "@/components/aicon/aicon.vue";
 import {
@@ -242,7 +241,7 @@ import {
 } from "@/api/display";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 import dayjs from "dayjs";
-import type { Dayjs } from 'dayjs';
+import type { Dayjs } from "dayjs";
 import SelectTypes from "ant-design-vue/es/select";
 
 interface filterFormState {
@@ -252,7 +251,7 @@ interface filterFormState {
   year: string;
   month: Dayjs;
   startDate: string;
-  enddate:string;
+  enddate: string;
   range: Dayjs;
 }
 
@@ -261,7 +260,7 @@ const columns = [
     title: "任务名",
     dataIndex: "name",
     key: "name",
-    width: 250
+    width: 250,
   },
   {
     title: "任务书编号",
@@ -486,14 +485,19 @@ export default defineComponent({
       type: string,
       year: string,
       startDate: string,
-      enddate:string
+      enddate: string
     ) => {
-      const data = await getA1UnfinishedData(name, number, type, year,startDate, enddate).then(
-        (response) => {
-          tableLoading.value = false;
-          return response.data.data;
-        }
-      );
+      const data = await getA1UnfinishedData(
+        name,
+        number,
+        type,
+        year,
+        startDate,
+        enddate
+      ).then((response) => {
+        tableLoading.value = false;
+        return response.data.data;
+      });
       if (data.hasOwnProperty("empty")) {
         state.taskList = [];
       } else {
@@ -502,7 +506,7 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      fetchData("", "","", ""+dayjs().year(), "","");
+      fetchData("", "", "", "" + dayjs().year(), "", "");
     });
 
     // 点击表单添加按钮
@@ -556,7 +560,7 @@ export default defineComponent({
         .then((response) => {
           message.success("退回成功");
           confirmLoading2.value = false;
-          fetchData("", "", "",""+dayjs().year(), "","");
+          fetchData("", "", "", "" + dayjs().year(), "", "");
 
           showRollback.value = false;
         })
@@ -604,7 +608,7 @@ export default defineComponent({
       rollbackRequest(params)
         .then((response) => {
           message.success("退回成功");
-          fetchData("", "", "",""+dayjs().year(), "","");
+          fetchData("", "", "", "" + dayjs().year(), "", "");
 
           showCheck.value = false;
           state.checkProcessId = "";
@@ -665,7 +669,7 @@ export default defineComponent({
       a1SetProduct(params)
         .then((response) => {
           message.success("设置产值及比例成功");
-          fetchData("", "","", ""+dayjs().year(), "","");
+          fetchData("", "", "", "" + dayjs().year(), "", "");
 
           state.currentProcessId = "";
           state.currentTaskId = "";
@@ -676,7 +680,7 @@ export default defineComponent({
         });
     };
     const changeTime = (time) => {
-      return dayjs(time).add(8, "hours").format('YYYY年MM月DD日 HH:mm');
+      return dayjs(time).add(8, "hours").format("YYYY年MM月DD日 HH:mm");
     };
     const showImg = (srcURL: string) => {
       showPreview.value = true;
@@ -690,17 +694,15 @@ export default defineComponent({
       year: "2022",
       month: null,
       startDate: "",
-      enddate:"",
-      range: null
+      enddate: "",
+      range: null,
     });
 
-    const filterFormState: UnwrapRef<filterFormState> = reactive(
-      createFilterFormState()
-    );
+    const filterFormState: UnwrapRef<filterFormState> = reactive(createFilterFormState());
 
     const disabledDate = (current: Dayjs) => {
       // Can not select days before today and today
-      return current < dayjs().startOf('year') || current > dayjs().endOf('year')
+      return current < dayjs().startOf("year") || current > dayjs().endOf("year");
     };
 
     const searchFilters = () => {
@@ -710,13 +712,17 @@ export default defineComponent({
       console.log("我看看参数");
       console.log(formData);
 
-
       tableLoading.value = true;
 
       const month = formData.month === null ? null : formData.month.month() + 1;
-      fetchData(formData.name, formData.number, formData.type, formData.year,formData.startDate, formData.enddate);
-
-
+      fetchData(
+        formData.name,
+        formData.number,
+        formData.type,
+        formData.year,
+        formData.startDate,
+        formData.enddate
+      );
     };
 
     const options1 = ref<typeof SelectTypes["options"]>([
@@ -743,15 +749,10 @@ export default defineComponent({
       Object.assign(a1FormState, { total: 0, ratio: 100 });
     };
 
-    const onChangeRangePicker = (value, dateString)=>{
-      console.log('time',value)
-      console.log('time2',dateString)
-      console.log('timestart',dateString.slice(0,1).toString())
-      console.log('timestop',dateString.slice(1,2).toString())
-      filterFormState.startDate=dateString.slice(0,1).toString()
-      filterFormState.enddate=dateString.slice(1,2).toString()
-
-    }
+    const onChangeRangePicker = (value, dateString) => {
+      filterFormState.startDate = dateString.slice(0, 1).toString();
+      filterFormState.enddate = dateString.slice(1, 2).toString();
+    };
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
       state,
@@ -806,7 +807,7 @@ export default defineComponent({
       cancelSetValue,
       value3: ref<Dayjs>(),
       disabledDate,
-      onChangeRangePicker
+      onChangeRangePicker,
     };
   },
 });
