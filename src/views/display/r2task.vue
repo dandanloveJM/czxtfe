@@ -59,8 +59,7 @@
                   record.pmId === userId
                 "
               >
-                <a-button
-                  @click="() => addAdvice(record.processId, record.taskId)"
+                <a-button @click="() => addAdvice(record.processId, record.taskId)"
                   >产值分配</a-button
                 >
                 <a-divider type="vertical" />
@@ -68,10 +67,7 @@
                 <a-divider type="vertical" />
               </span>
               <span v-if="record.activityName === 'R2上传任务'">
-                <a-button
-                  @click="
-                    () => reuploadProjects(record.processId, record.taskId)
-                  "
+                <a-button @click="() => reuploadProjects(record.processId, record.taskId)"
                   >重新上传任务</a-button
                 >
                 <a-divider type="vertical" />
@@ -85,16 +81,15 @@
               <a-divider type="vertical" />
 
               <span>
-                <a-button
-                  primary
-                  danger
-                  @click="() => deleteTask(record.processId)"
+                <a-button primary danger @click="() => deleteTask(record.processId)"
                   >删除项目</a-button
                 >
               </span>
             </template>
             <template v-else-if="column.key === 'name'">
-              <span v-if="record.pmId === userId && record.step2New" class="new-project-name"
+              <span
+                v-if="record.pmId === userId && record.step2New"
+                class="new-project-name"
                 >{{ record.name }}
                 <icon>
                   <template #component>
@@ -126,22 +121,26 @@
               <span v-else>{{ record.name }}</span>
             </template>
             <template v-else-if="column.key === 'type'">
-              <span :class="(record.pmId === userId && record.step2New) ? 'new-project-name' : ''">{{
-                typeMap[record.type]
-              }}</span>
+              <span
+                :class="
+                  record.pmId === userId && record.step2New ? 'new-project-name' : ''
+                "
+                >{{ typeMap[record.type] }}</span
+              >
             </template>
             <template v-else-if="column.key === 'number'">
-              <span :class="(record.pmId === userId && record.step2New) ? 'new-project-name' : ''">{{
-                record.number
-              }}</span>
+              <span
+                :class="
+                  record.pmId === userId && record.step2New ? 'new-project-name' : ''
+                "
+                >{{ record.number }}</span
+              >
             </template>
             <template v-else-if="column.key === 'updatedAt'">
               <span>{{ changeTime(record.createdAt) }}</span>
             </template>
             <template v-else-if="column.key === 'attachment'">
-              <a-button @click="() => showImg(record.attachment)"
-                >查看任务书</a-button
-              >
+              <a-button @click="() => showImg(record.attachment)">查看任务书</a-button>
             </template>
           </template>
         </a-table>
@@ -254,11 +253,7 @@
         >
           <template #comment="{ record }">
             <span>{{
-              record.comment
-                ? record.comment
-                : record.endTime
-                ? "【通过】"
-                : "【进行中】"
+              record.comment ? record.comment : record.endTime ? "【通过】" : "【进行中】"
             }}</span>
           </template>
         </a-table>
@@ -324,8 +319,7 @@
               @change="fileUploadChange"
             >
               <a-button>
-                <upload-outlined></upload-outlined
-                >点击上传附件，只能传jpeg或jpg或png
+                <upload-outlined></upload-outlined>点击上传附件，只能传jpeg或jpg或png
               </a-button>
             </a-upload>
           </a-form-item>
@@ -360,10 +354,7 @@ import {
   createVNode,
   computed,
 } from "vue";
-import Icon, {
-  UploadOutlined,
-  ExclamationCircleOutlined,
-} from "@ant-design/icons-vue";
+import Icon, { UploadOutlined, ExclamationCircleOutlined } from "@ant-design/icons-vue";
 import SelectTypes from "ant-design-vue/es/select";
 import aIcon from "@/components/aicon/aicon.vue";
 import {
@@ -390,7 +381,8 @@ import localStorageStore from "@/utils/localStorageStore";
 import dayjs from "dayjs";
 import localCache from "@/utils/localCache";
 import type { Dayjs } from "dayjs";
-import { throttle } from "lodash-es";
+import { debounce } from "lodash-es";
+import { throttle } from "echarts";
 
 interface filterFormState {
   name: string;
@@ -546,9 +538,7 @@ export default defineComponent({
       nextAssignee: "",
     });
 
-    const newFormState: UnwrapRef<newFormState> = reactive(
-      createNewFormState()
-    );
+    const newFormState: UnwrapRef<newFormState> = reactive(createNewFormState());
     const formRef = ref();
     const dynamicForm: UnwrapRef<{
       records: PeopleAndProductRecord[];
@@ -628,9 +618,7 @@ export default defineComponent({
     };
 
     const fetchCandidates = async () => {
-      const candidates = await getAllR1R2R3Users().then(
-        (response) => response.data.data
-      );
+      const candidates = await getAllR1R2R3Users().then((response) => response.data.data);
       const options = candidates.map((item) => {
         let tmp = {};
         tmp["value"] = item["id"];
@@ -676,77 +664,84 @@ export default defineComponent({
       return new Set(array).size !== array.length;
     };
 
-    const onSubmitForm = throttle(() => {
-      // visible.value = false;
-      const records = toRaw(dynamicForm).records;
-      let sum = 0;
-      const peoples = records.map((item) => item.peopleValue);
-      const isDuplicates = checkForDuplicates(peoples);
-      let isError = 0;
-      if (isDuplicates) {
-        isError += 1;
-        message.error("项目成员不可以相同");
-        return;
-      }
-      records.forEach((element) => {
-        if (element.peopleValue === "") {
-          message.error("请选择一位项目成员");
+    const onSubmitForm = debounce(
+      () => {
+        // visible.value = false;
+        const records = toRaw(dynamicForm).records;
+        let sum = 0;
+        const peoples = records.map((item) => item.peopleValue);
+        const isDuplicates = checkForDuplicates(peoples);
+        let isError = 0;
+        if (isDuplicates) {
           isError += 1;
+          message.error("项目成员不可以相同");
           return;
-        } else if (
-          !element.productValue ||
-          element.productValue < 0 ||
-          element.productValue > 100 ||
-          !Number.isInteger(element.productValue)
-        ) {
-          isError += 1;
-          message.error("产值比例建议填写错误,需要为0到100的正整数");
-
-          return;
-        } else {
-          sum += element.productValue;
         }
-      });
+        records.forEach((element) => {
+          if (element.peopleValue === "") {
+            message.error("请选择一位项目成员");
+            isError += 1;
+            return;
+          } else if (
+            !element.productValue ||
+            element.productValue < 0 ||
+            element.productValue > 100 ||
+            !Number.isInteger(element.productValue)
+          ) {
+            isError += 1;
+            message.error("产值比例建议填写错误,需要为0到100的正整数");
 
-      if (sum !== 100) {
-        console.log(sum);
-        isError += 1;
-        message.error("所有成员的产值比例之和必须刚好是100");
-        return;
-      }
+            return;
+          } else {
+            sum += element.productValue;
+          }
+        });
 
-      if (isError === 0) {
-        message.success("填写成功，正在上传数据中");
-        // TODO 构造参数 发送请求
-        confirmLoading.value = true;
+        if (sum !== 100) {
+          console.log(sum);
+          isError += 1;
+          message.error("所有成员的产值比例之和必须刚好是100");
+          return;
+        }
 
-        let params = buildParam(
-          toRaw(state.candidates),
-          records,
-          state.processId,
-          state.taskId
-        );
+        if (isError === 0) {
+          message.success("填写成功，正在上传数据中");
+          // TODO 构造参数 发送请求
+          confirmLoading.value = true;
 
-        fillOutputValue(params)
-          .then((response) => {
-            // 删除本地缓存
-            localStorageStore.deleteCache(state.processId);
-            confirmLoading.value = false;
-            if (response.data.status === "ok") {
-              visible.value = false;
-              message.success("数据上传成功");
-              fetchData("", "", "", "" + dayjs().year(), "", "");
-            } else {
+          let params = buildParam(
+            toRaw(state.candidates),
+            records,
+            state.processId,
+            state.taskId
+          );
+
+          fillOutputValue(params)
+            .then((response) => {
+              // 删除本地缓存
+              localStorageStore.deleteCache(state.processId);
+              confirmLoading.value = false;
+              if (response.data.status === "ok") {
+                visible.value = false;
+                message.success("数据上传成功");
+                fetchData("", "", "", "" + dayjs().year(), "", "");
+              } else {
+                message.error("程序异常");
+              }
+            })
+            .catch((err) => {
+              confirmLoading.value = false;
               message.error("程序异常");
-            }
-          })
-          .catch((err) => {
-            confirmLoading.value = false;
-            message.error("程序异常");
-          });
+            });
+        }
+        console.log("submit!", toRaw(dynamicForm));
+      },
+      1000,
+      {
+        leading: true,
+        trailing: false,
       }
-      console.log("submit!", toRaw(dynamicForm));
-    });
+    );
 
     const buildParam = (candidates, records, processId, taskId) => {
       const param = {};
@@ -864,7 +859,7 @@ export default defineComponent({
         });
     };
 
-    const createProjectOk = throttle(
+    const createProjectOk = debounce(
       () => {
         console.log("表单数据");
         console.dir(formRef3.value);
@@ -928,8 +923,11 @@ export default defineComponent({
             console.log("error", error);
           });
       },
-      5000,
-      true
+      3000,
+      {
+        leading: true,
+        trailing: false,
+      }
     );
 
     const handleRemove = (file: FileItem) => {
@@ -958,9 +956,7 @@ export default defineComponent({
 
     const projectRules = {
       name: [{ required: true, message: "请填写项目名称", trigger: "blur" }],
-      number: [
-        { required: true, message: "请填写任务书编号", trigger: "blur" },
-      ],
+      number: [{ required: true, message: "请填写任务书编号", trigger: "blur" }],
       type: [{ required: true, message: "请选择项目类型", trigger: "change" }],
       // nextAssignee: [
       //   {
@@ -1000,9 +996,7 @@ export default defineComponent({
     });
     const typeOptions2 = TYPE_OPTIONS;
 
-    const filterFormState: UnwrapRef<filterFormState> = reactive(
-      createFilterFormState()
-    );
+    const filterFormState: UnwrapRef<filterFormState> = reactive(createFilterFormState());
 
     const searchFilters = () => {
       // 拿到filterFormState数据，拼接参数, 发送fetchData请求, 设置loading
@@ -1070,17 +1064,15 @@ export default defineComponent({
           console.log("click");
           if (record.pmId == userId && !!record.step2New) {
             record.step2New = !record.step2New;
-             updateIsNewProject(record.processId, false, null ,null, null)
-            .then((response) => {
-              // fetchData("", "", "", "" + dayjs().year(), "", "");
-            })
-            .catch((err) => {
-              message.error("系统错误");
-            });
-          console.dir(event);
+            updateIsNewProject(record.processId, false, null, null, null)
+              .then((response) => {
+                // fetchData("", "", "", "" + dayjs().year(), "", "");
+              })
+              .catch((err) => {
+                message.error("系统错误");
+              });
+            console.dir(event);
           }
-         
-         
         },
       };
     };
@@ -1140,7 +1132,7 @@ export default defineComponent({
       onChangeRangePicker,
       customRow,
       confirmLoadingNew,
-      userId
+      userId,
     };
   },
 });

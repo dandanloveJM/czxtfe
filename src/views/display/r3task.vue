@@ -416,7 +416,7 @@ import dayjs from "dayjs";
 import localStorageStore from "@/utils/localStorageStore";
 import localCache from "@/utils/localCache";
 import type { Dayjs } from "dayjs";
-import { throttle } from "lodash-es";
+import { debounce } from "lodash-es";
 
 interface filterFormState {
   name: string;
@@ -752,7 +752,7 @@ export default defineComponent({
       return new Set(array).size !== array.length;
     };
 
-    const onSubmitForm = throttle(() => {
+    const onSubmitForm = debounce(() => {
       // visible.value = false;
       const records = toRaw(dynamicForm).records;
       let sum = 0;
@@ -781,7 +781,8 @@ export default defineComponent({
         } else {
           sum += element.productValue;
         }
-      });
+      }
+);
 
       if (sum !== 100) {
         console.log(sum);
@@ -821,7 +822,11 @@ export default defineComponent({
           });
       }
       console.log("submit!", toRaw(dynamicForm));
-    });
+    }, 3000, {
+        leading: true,
+        trailing: false,
+      }
+);
 
     const buildParam = (candidates, records, processId, taskId) => {
       const param = {};
@@ -928,7 +933,7 @@ export default defineComponent({
       },
     ];
 
-    const rollbackTo = throttle((targetKey) => {
+    const rollbackTo = debounce((targetKey) => {
       const params = {};
       params["processId"] = state.checkProcessId;
       params["taskId"] = state.checkTaskId;
@@ -950,9 +955,13 @@ export default defineComponent({
           console.log(err);
           message.error("程序异常");
         });
-    });
+    }, 3000, {
+        leading: true,
+        trailing: false,
+      }
+);
 
-    const agreeTo = throttle(() => {
+    const agreeTo = debounce(() => {
       const params = {};
       params["processId"] = state.checkProcessId;
       params["taskId"] = state.checkTaskId;
@@ -975,7 +984,11 @@ export default defineComponent({
           console.log(err);
           message.error("程序异常");
         });
-    });
+    }, 3000, {
+        leading: true,
+        trailing: false,
+      }
+);
     const changeTime = (time) => {
       return dayjs(time).add(8, "hours").format("YYYY年MM月DD日 HH:mm");
     };
