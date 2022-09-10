@@ -98,3 +98,11 @@ export const getAllUsers = (department: string) => {
     params: { department: department },
   });
 }
+
+export const addUserAPI = (params) =>{
+    return request({
+      url:"add/user",
+      method: "post",
+      data: params
+    })
+  }

@@ -435,3 +435,4 @@ export const updateIsNewProject = (processId, isStep2New, isStep3New, isStep4New
     }
   })
 }
+
