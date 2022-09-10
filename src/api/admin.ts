@@ -17,10 +17,9 @@ export const getAllR4Types = (type: string, leader: string) => {
   return request({
     url: "r4types",
     method: "get",
-    params: { typeId: type, userId:leader },
+    params: { typeId: type, userId: leader },
   });
 };
-
 
 export const changeUserId = (params) => {
   let data = new FormData();
@@ -50,7 +49,7 @@ export const deleteR4Type = (params) => {
     method: "post",
     data: data,
   });
-}
+};
 
 export const addR4Type = (params) => {
   let data = new FormData();
@@ -65,14 +64,14 @@ export const addR4Type = (params) => {
     method: "post",
     data: data,
   });
-}
+};
 
 export const getAllR4Users = () => {
   return request({
     url: "/all/r4",
     method: "get",
   });
-}
+};
 
 export const reallocateProduct = (params) => {
   let data = new FormData();
@@ -87,9 +86,7 @@ export const reallocateProduct = (params) => {
     method: "post",
     data: data,
   });
-
-}
-
+};
 
 export const getAllUsers = (department: string) => {
   return request({
@@ -97,12 +94,20 @@ export const getAllUsers = (department: string) => {
     method: "get",
     params: { department: department },
   });
-}
+};
 
-export const addUserAPI = (params) =>{
-    return request({
-      url:"add/user",
-      method: "post",
-      data: params
-    })
-  }
+export const addUserAPI = (params) => {
+  return request({
+    url: "add/user",
+    method: "post",
+    data: params,
+  });
+};
+
+export const deleteUserAPI = (params) => {
+  return request({
+    url: "delete/user",
+    method: "post",
+    data: params,
+  });
+};

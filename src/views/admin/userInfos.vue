@@ -12,6 +12,14 @@
           :loading="tableLoading"
           :pagination="false"
         >
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.key === 'action'">
+              <span>
+                <a-button primary danger @click="() => deleteUser(record.id)"
+                  >删除用户</a-button>
+              </span> 
+              </template>
+          </template>
         </a-table>
       </div>
       <div class="emptyTable" v-else>
@@ -83,10 +91,18 @@
 </template>
 <script lang="ts">
 import aIcon from "@/components/aicon/aicon.vue";
-import { defineComponent, ref, reactive, onMounted, UnwrapRef, toRaw } from "vue";
+import {
+  defineComponent,
+  ref,
+  reactive,
+  onMounted,
+  UnwrapRef,
+  toRaw,
+  createVNode,
+} from "vue";
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
 import { typeMap, TYPE_OPTIONS, TEAMS_OPTIONS, teamMap } from "@/utils/config";
-import { getAllUsers, addUserAPI } from "@/api/admin";
+import { getAllUsers, addUserAPI, deleteUserAPI } from "@/api/admin";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 import SelectTypes from "ant-design-vue/es/select";
@@ -130,7 +146,7 @@ export default defineComponent({
     const historyLoading = ref<boolean>(false);
     const confirmLoadingNew = ref<boolean>(false);
     const showCheck = ref<boolean>(false);
-   
+
     const teamOptions = TEAMS_OPTIONS;
 
     const columns = [
@@ -153,6 +169,11 @@ export default defineComponent({
         title: "部门",
         dataIndex: "teamName",
         key: "teamName",
+      },
+      {
+        title: "操作",
+        dataIndex: "action",
+        key: "action",
       },
     ];
 
@@ -224,7 +245,7 @@ export default defineComponent({
     ]);
 
     const createNewUserformState = () => ({
-       username: "",
+      username: "",
       password: "Abc@123",
       department: "",
       displayName: "",
@@ -232,8 +253,9 @@ export default defineComponent({
       roleId: "",
     });
 
-    const newUserformState: UnwrapRef<newUserformState> = reactive(createNewUserformState());
-
+    const newUserformState: UnwrapRef<newUserformState> = reactive(
+      createNewUserformState()
+    );
 
     const checkIfEmpty = (formData) => {
       if (formData["department"] === "") {
@@ -256,7 +278,7 @@ export default defineComponent({
         message.error("请选择角色");
         return false;
       }
-      return true
+      return true;
     };
     const addUserOk = () => {
       console.log("表单数据");
@@ -269,29 +291,49 @@ export default defineComponent({
         params["teamName"] = teamMap[formData["department"]];
         console.log("拼接参数");
         console.dir(params);
-        const submit = addUserAPI(params).then((response)=>{
-          confirmLoadingNew.value = false;
-                console.log("response");
-                console.log(response);
-                if (response.data.status === "fail") {
-                  message.error(response.data.msg);
-                } else {
-                  showCheck.value = false;
-                  message.success("新建用户成功");
+        const submit = addUserAPI(params)
+          .then((response) => {
+            confirmLoadingNew.value = false;
+            console.log("response");
+            console.log(response);
+            if (response.data.status === "fail") {
+              message.error(response.data.msg);
+            } else {
+              showCheck.value = false;
+              message.success("新建用户成功");
+              // 清空表单数据
+              Object.assign(newUserformState, createNewUserformState());
 
-              
-
-                  // 清空表单数据
-                  Object.assign(newUserformState, createNewUserformState());
-
-                  fetchData("");
-                }
-
-        }).catch((err)=>{
-          message.error("增加用户失败")
-        })
-
+              fetchData("");
+            }
+          })
+          .catch((err) => {
+            message.error("增加用户失败");
+          });
       }
+    };
+
+    const deleteUser = (id) => {
+      antModal.confirm({
+        title: "您确认删除此用户吗？",
+        icon: createVNode(ExclamationCircleOutlined),
+        onOk() {
+          deleteUserAPI({ userId: id })
+            .then((response) => {
+              if (response.data.status === "ok") {
+                message.success("删除成功");
+                fetchData("");
+              }
+            })
+            .catch((err) => {
+              message.error("删除失败");
+            });
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+        class: "test",
+      });
     };
 
     return {
@@ -320,6 +362,7 @@ export default defineComponent({
       newUserformState,
       addUserOk,
       confirmLoadingNew,
+      deleteUser,
     };
   },
 });
