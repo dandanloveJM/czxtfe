@@ -47,27 +47,72 @@
           :data-source="state.taskList"
           :rowKey="(record) => record.processId"
           :loading="tableLoading"
+          :customRow="customRow"
         >
-          <template #action="{ record }">
-            <span v-if="record.activityName === 'A1填写产值'">
-              <a-button @click="() => check(record)">赋予产值</a-button>
-              <a-divider type="vertical" />
-            </span>
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.dataIndex === 'action'">
+              <span v-if="record.activityName === 'A1填写产值'">
+                <a-button @click="() => check(record)">赋予产值</a-button>
+                <a-divider type="vertical" />
+              </span>
 
-            <span>
-              <a-button @click="() => checkHistory(record.processId)">流程查看</a-button>
-            </span>
+              <span>
+                <a-button @click="() => checkHistory(record.processId)"
+                  >流程查看</a-button
+                >
+              </span>
+            </template>
+
+            <template v-else-if="column.dataIndex === 'name'">
+              <span v-if="record.step5New" class="new-project-name"
+                >{{ record.name }}
+                <icon>
+                  <template #component>
+                    <svg
+                      t="1656949715400"
+                      class="icon"
+                      viewBox="0 0 1024 1024"
+                      version="1.1"
+                      xmlns="http://www.w3.org/2000/svg"
+                      p-id="2725"
+                      width="2em"
+                      height="2em"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M508.330667 733.994667c-11.008-7.338667-13.44-17.109333-7.338667-29.333334 28.117333-37.888 41.557333-98.986667 40.341333-183.317333v-165.013333c0-14.656 7.338667-23.210667 21.994667-25.664 37.888-1.216 82.496-5.504 133.845333-12.842667 13.44-2.432 21.376 3.072 23.829334 16.512 1.216 12.224-4.266667 19.562667-16.512 21.994667a1787.093333 1787.093333 0 0 1-113.664 11.008c-6.101333 0-9.173333 3.669333-9.173334 10.986666v84.330667h135.68c12.224 1.237333 18.944 7.957333 20.16 20.181333-1.216 10.986667-7.936 17.109333-20.16 18.346667h-36.672v223.658667c-1.216 12.202667-7.936 18.944-20.16 20.16-11.008-1.216-17.109333-7.957333-18.346666-20.16V501.162667h-60.48v18.346666c1.216 92.885333-13.44 161.92-44.010667 207.146667-6.101333 12.224-15.893333 14.677333-29.333333 7.338667z m-131.989334-282.325334c-1.237333 0-2.453333 0.618667-3.669333 1.834667h45.824a522.666667 522.666667 0 0 0 16.512-31.168c7.317333-12.224 12.224-20.778667 14.656-25.664 6.122667-11.008 15.274667-14.677333 27.52-11.008 9.770667 6.122667 12.202667 14.058667 7.317333 23.829333-4.906667 9.792-13.44 24.448-25.664 44.010667h49.493334c9.770667 1.216 15.274667 6.72 16.512 16.490667-1.237333 11.008-6.741333 17.109333-16.512 18.346666h-82.496a12.437333 12.437333 0 0 1 3.669333 9.173334v38.485333h69.653333c9.792 1.216 15.296 6.72 16.512 16.490667-1.216 11.008-6.72 17.130667-16.512 18.346666h-69.653333v108.16c0 34.218667-15.274667 51.946667-45.845333 53.162667h-16.490667a195.157333 195.157333 0 0 1-20.16 1.834667c-12.224 0-19.562667-6.72-22.016-20.16 1.237333-12.224 7.338667-18.944 18.346667-20.16 2.432 0 6.101333 0.597333 10.986666 1.834666h11.008c15.893333 0 23.829333-8.554667 23.829334-25.685333v-98.986667H314.026667c-11.008-1.216-17.109333-7.338667-18.346667-18.346666 1.237333-9.770667 7.338667-15.274667 18.346667-16.490667h75.157333V497.493333c0-3.669333 1.216-6.72 3.669333-9.173333h-89.813333c-11.029333-1.216-17.130667-7.317333-18.346667-18.325333 1.216-9.770667 7.317333-15.274667 18.346667-16.490667h56.810667c-3.669333-1.216-6.72-4.266667-9.173334-9.173333-1.216-1.216-3.050667-4.266667-5.482666-9.173334a758.336 758.336 0 0 0-14.677334-23.829333c-4.885333-9.770667-3.050667-17.706667 5.504-23.829333 11.008-3.669333 19.562667-1.216 25.664 7.338666 2.453333 2.432 6.122667 7.338667 11.008 14.656 6.101333 8.554667 9.770667 14.08 10.986667 16.512 4.906667 9.770667 2.453333 18.346667-7.317333 25.664z m-60.501333-71.509333c-9.792-1.216-15.274667-7.317333-16.512-18.346667 1.237333-9.749333 6.72-15.253333 16.512-16.490666h75.157333c-3.669333-12.202667-7.338667-21.973333-10.986666-29.333334-1.237333-12.202667 3.648-19.541333 14.656-21.973333 12.224-2.453333 21.397333 1.216 27.52 10.986667 0 1.216 0.597333 3.669333 1.813333 7.338666 4.906667 15.872 9.173333 26.88 12.842667 32.981334h60.48c11.008 1.237333 17.130667 6.741333 18.346666 16.512-1.216 11.008-7.338667 17.109333-18.346666 18.346666h-181.482667z m-14.677333 311.68c-8.533333-6.122667-10.986667-14.08-7.338667-23.829333a1659.648 1659.648 0 0 0 33.002667-66.005334c4.906667-9.792 12.224-12.842667 22.016-9.173333 9.770667 4.906667 13.44 12.224 10.986666 21.994667-3.669333 6.122667-9.173333 17.728-16.490666 34.837333-8.554667 15.893333-14.677333 27.52-18.346667 34.837333-4.885333 8.554667-12.821333 11.008-23.829333 7.338667z m201.664-25.664c-9.770667 4.885333-18.346667 2.432-25.664-7.338667a1138.56 1138.56 0 0 1-27.498667-44.010666c-4.885333-8.533333-3.050667-16.490667 5.504-23.829334 9.770667-3.669333 18.346667-1.216 25.664 7.338667l14.677333 21.994667c6.101333 9.770667 10.389333 17.109333 12.821334 21.994666 4.906667 8.554667 3.050667 16.512-5.504 23.850667z"
+                        fill="#ea3323"
+                        p-id="2726"
+                      ></path>
+                      <path
+                        d="M675.328 117.717333A425.429333 425.429333 0 0 0 512 85.333333C276.352 85.333333 85.333333 276.352 85.333333 512s191.018667 426.666667 426.666667 426.666667 426.666667-191.018667 426.666667-426.666667c0-56.746667-11.093333-112-32.384-163.328a21.333333 21.333333 0 0 0-39.402667 16.341333A382.762667 382.762667 0 0 1 896 512c0 212.074667-171.925333 384-384 384S128 724.074667 128 512 299.925333 128 512 128c51.114667 0 100.8 9.984 146.986667 29.12a21.333333 21.333333 0 0 0 16.341333-39.402667z"
+                        fill="#ea3323"
+                        p-id="2727"
+                      ></path>
+                    </svg>
+                  </template>
+                </icon>
+              </span>
+              <span v-else>{{ record.name }}</span>
+            </template>
+
+
+            <template v-else-if="column.dataIndex === 'updatedAt'">
+              <span>{{ changeTime(record.updatedAt) }}</span>
+            </template>
+
+              <template v-else-if="column.dataIndex === 'number'">
+            <span :class="(record.step5New) ? 'new-project-name' : ''">{{
+              record.number
+            }}</span>
           </template>
 
-          <template #updatedAt="{ record }">
-            <span>{{ changeTime(record.updatedAt) }}</span>
-          </template>
-
-          <template #type="{ record }">
-            <span>{{ typeMap[record.type] }}</span>
-          </template>
-          <template #attachment="{ record }">
-            <a-button @click="() => showImg(record.attachment)">查看任务书</a-button>
+           <template v-else-if="column.dataIndex === 'type'">
+              <span :class="(record.step5New) ? 'new-project-name' : ''">{{ typeMap[record.type] }}</span>
+            </template>
+            <template v-else-if="column.dataIndex === 'attachment'">
+              <a-button @click="() => showImg(record.attachment)">查看任务书</a-button>
+            </template>
           </template>
         </a-table>
       </div>
@@ -224,7 +269,7 @@
 import { defineComponent, ref, reactive, onMounted, UnwrapRef, toRaw } from "vue";
 import { UploadOutlined } from "@ant-design/icons-vue";
 import aIcon from "@/components/aicon/aicon.vue";
-import {
+import Icon, {
   MinusCircleOutlined,
   PlusOutlined,
   AppstoreTwoTone,
@@ -238,11 +283,13 @@ import {
   checkHistoryRequest,
   rollbackRequest,
   a1SetProduct,
+  updateIsNewProject,
 } from "@/api/display";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
 import SelectTypes from "ant-design-vue/es/select";
+import { debounce, throttle } from "lodash-es";
 
 interface filterFormState {
   name: string;
@@ -269,12 +316,12 @@ const columns = [
   },
   {
     title: "任务类型",
-    slots: { customRender: "type" },
+    dataIndex: "type",
     key: "type",
   },
   {
     title: "上传任务时间",
-    slots: { customRender: "updatedAt" },
+    dataIndex: "updatedAt",
     key: "updatedAt",
   },
   {
@@ -284,13 +331,13 @@ const columns = [
   },
   {
     title: "附件",
-    slots: { customRender: "attachment" },
+    dataIndex: "attachment",
     key: "attachment",
   },
   {
     title: "操作",
     key: "action",
-    slots: { customRender: "action" },
+    dataIndex: "action",
   },
 ];
 
@@ -337,6 +384,7 @@ export default defineComponent({
   components: {
     aIcon,
     Modal,
+    Icon,
     PlusOutlined,
     MinusCircleOutlined,
     UploadOutlined,
@@ -548,7 +596,7 @@ export default defineComponent({
       state.historyData = [];
     };
 
-    const rollbackOk = () => {
+    const rollbackOk = debounce(() => {
       //获取填写的comment值
       const newComment = toRaw(commentForm).comment;
       state.currentRollbackRecord["comment"] = newComment;
@@ -569,7 +617,11 @@ export default defineComponent({
           confirmLoading2.value = false;
           message.error("程序异常");
         });
-    };
+    }, 3000, {
+        leading: true,
+        trailing: false,
+      }
+);
 
     const check = (record) => {
       showCheck.value = true;
@@ -596,7 +648,7 @@ export default defineComponent({
       },
     ];
 
-    const rollbackTo = (targetKey) => {
+    const rollbackTo = debounce((targetKey) => {
       const params = {};
       params["processId"] = state.checkProcessId;
       params["taskId"] = state.checkTaskId;
@@ -618,7 +670,11 @@ export default defineComponent({
           console.log(err);
           message.error("程序异常");
         });
-    };
+    }, 3000, {
+        leading: true,
+        trailing: false,
+      }
+    );
 
     // const agreeTo = () => {
     //   const params = {};
@@ -653,7 +709,7 @@ export default defineComponent({
       // state.currentTaskId = state.checkRecord.taskId;
     };
 
-    const resetOk = () => {
+    const resetOk = debounce(() => {
       // 1. 拼接参数 ，发请求，1.关闭modal, 2. 清空state.products
       const params = {};
       const a1FormState2 = toRaw(a1FormState);
@@ -678,7 +734,11 @@ export default defineComponent({
           console.log(err);
           message.error("程序异常");
         });
-    };
+    }, 3000, {
+        leading: true,
+        trailing: false,
+      }
+    );
     const changeTime = (time) => {
       return dayjs(time).add(8, "hours").format("YYYY年MM月DD日 HH:mm");
     };
@@ -753,6 +813,27 @@ export default defineComponent({
       filterFormState.startDate = dateString.slice(0, 1).toString();
       filterFormState.enddate = dateString.slice(1, 2).toString();
     };
+
+    const customRow = (record) => {
+      return {
+        onClick: (event) => {
+          console.log("click");
+          if (!!record.step5New) {
+           
+              record.step4New = !record.step5New;
+              updateIsNewProject(record.processId, null, null, null, false)
+                .then((response) => {
+                  // fetchData("", "", "", "" + dayjs().year(), "", "");
+                })
+                .catch((err) => {
+                  message.error("系统错误");
+                });
+              console.dir(event);
+            }
+           
+          }
+        }
+    };
     return {
       labelCol: { style: { width: "150px", textAlign: "center" } },
       state,
@@ -808,6 +889,7 @@ export default defineComponent({
       value3: ref<Dayjs>(),
       disabledDate,
       onChangeRangePicker,
+      customRow
     };
   },
 });
@@ -904,5 +986,12 @@ export default defineComponent({
 }
 .doneTask__container {
   padding: 0 20px;
+}
+
+.ant-table-cell {
+  .new-project-name {
+    font-weight: bold;
+    display: flex;
+  }
 }
 </style>
