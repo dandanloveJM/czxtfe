@@ -1,9 +1,17 @@
 <template>
   <div class="doneTask__container">
-    <h2>用户信息</h2>
+    <h2>
+      <a-space>
+        <contacts-two-tone />
+        <span>用户信息</span>
+      </a-space>
+    </h2>
 
     <div class="table-wrapper">
-      <a-button @click="() => addUser()">新增用户</a-button>
+      <div class="button-class">
+      <a-button  type="primary" @click="() => addUser()">新增用户</a-button>
+
+      </div>
       <div class="tableWithData" v-if="state.taskList.length > 0">
         <a-table
           :columns="columns"
@@ -11,14 +19,64 @@
           :rowKey="(record) => record.id"
           :loading="tableLoading"
           :pagination="false"
+          bordered
         >
-          <template #bodyCell="{ column, record }">
-            <template v-if="column.key === 'action'">
+          <template #bodyCell="{ column, text, record }">
+            <template
+              v-if="
+                ['username', 'displayName', 'password', 'teamName'].includes(
+                  column.dataIndex
+                )
+              "
+            >
+              <div>
+                <a-input
+                  v-if="
+                    editableData[record.id] &&
+                    ['username', 'displayName', 'password'].includes(column.dataIndex)
+                  "
+                  v-model:value="editableData[record.id][column.dataIndex]"
+                  style="width: 200px"
+                />
+                <a-select
+                  v-else-if="editableData[record.id] && column.dataIndex === 'teamName'"
+                  v-model:value="editableData[record.id]['department']"
+                  :options="teamOptions"
+                  style="width: 120px"
+                  :allowClear="true"
+                >
+                </a-select>
+                <template v-else-if="column.dataIndex === 'teamName'">
+                  <!-- {{text}} -->
+                  {{ teamMap[record.department] }}
+                </template>
+                <template v-else>
+                  {{ text }}
+                </template>
+              </div>
+            </template>
+
+            <template v-else-if="column.key === 'action'">
+              <div class="editable-row-operations">
+                <span v-if="editableData[record.id]">
+                  <a-typography-link @click="save(record.id)">保存</a-typography-link>
+                  <a-popconfirm title="确定取消吗?" @confirm="cancel(record.id)">
+                    <a>取消</a>
+                  </a-popconfirm>
+                </span>
+                <span v-else>
+                  <a @click="edit(record.id)">编辑用户</a>
+                </span>
+              </div>
+            </template>
+
+            <template v-else-if="column.key === 'delete'">
               <span>
                 <a-button primary danger @click="() => deleteUser(record.id)"
-                  >删除用户</a-button>
-              </span> 
-              </template>
+                  >删除用户</a-button
+                >
+              </span>
+            </template>
           </template>
         </a-table>
       </div>
@@ -100,12 +158,13 @@ import {
   toRaw,
   createVNode,
 } from "vue";
-import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
+import { ExclamationCircleOutlined, ContactsTwoTone } from "@ant-design/icons-vue";
 import { typeMap, TYPE_OPTIONS, TEAMS_OPTIONS, teamMap } from "@/utils/config";
-import { getAllUsers, addUserAPI, deleteUserAPI } from "@/api/admin";
+import { getAllUsers, addUserAPI, deleteUserAPI, updateUserAPI } from "@/api/admin";
 import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 import SelectTypes from "ant-design-vue/es/select";
+import { cloneDeep } from "lodash-es";
 
 interface filterFormState {
   name: string;
@@ -123,6 +182,14 @@ interface newUserformState {
   roleId: string;
 }
 
+interface newUserinfoState {
+  username: string;
+  password: string;
+  department: string;
+  displayName: string;
+  teamName: string;
+}
+
 export default defineComponent({
   name: "el_done",
   components: {
@@ -130,6 +197,7 @@ export default defineComponent({
     Modal,
     antModal,
     ExclamationCircleOutlined,
+    ContactsTwoTone,
   },
   setup() {
     const TYPE_MAP = typeMap;
@@ -146,6 +214,7 @@ export default defineComponent({
     const historyLoading = ref<boolean>(false);
     const confirmLoadingNew = ref<boolean>(false);
     const showCheck = ref<boolean>(false);
+    const editableData: UnwrapRef<Record<string, newUserinfoState>> = reactive({});
 
     const teamOptions = TEAMS_OPTIONS;
 
@@ -171,9 +240,14 @@ export default defineComponent({
         key: "teamName",
       },
       {
-        title: "操作",
+        title: "编辑",
         dataIndex: "action",
         key: "action",
+      },
+      {
+        title: "删除",
+        dataIndex: "delete",
+        key: "delete",
       },
     ];
 
@@ -183,6 +257,53 @@ export default defineComponent({
         return response.data.data;
       });
       state.taskList = data;
+    };
+
+    const edit = (key: string) => {
+      console.log("key: " + key);
+
+      editableData[key] = cloneDeep(
+        state.taskList.filter((item) => {
+          return item.id === key;
+        })[0]
+      );
+
+      console.log("edit");
+      console.dir(editableData[key]);
+    };
+    const save = (key: string) => {
+      Object.assign(
+        state.taskList.filter((item) => key === item.id)[0],
+        editableData[key]
+      );
+
+      
+      const params = cloneDeep(toRaw(editableData[key]));
+      delete editableData[key];
+      const newParams = {};
+      newParams["username"] = params.username;
+      newParams["password"] = params.password;
+      newParams["displayName"] = params.displayName;
+      newParams["department"] = params.department;
+      newParams["teamName"] = teamMap[params["department"]];
+      newParams["userId"] = params.id;
+
+      updateUserAPI(newParams)
+        .then((response) => {
+          if (response.data.status === "fail") {
+            message.error(response.data.msg);
+          } else {
+            message.success("修改用户成功");
+
+            fetchData("");
+          }
+        })
+        .catch((err) => {
+          message.error("修改失败");
+        });
+    };
+    const cancel = (key: string) => {
+      delete editableData[key];
     };
 
     onMounted(() => {
@@ -363,6 +484,11 @@ export default defineComponent({
       addUserOk,
       confirmLoadingNew,
       deleteUser,
+      edit,
+      save,
+      cancel,
+      editableData,
+      teamMap,
     };
   },
 });
@@ -381,6 +507,9 @@ export default defineComponent({
   }
   .table-wrapper {
     padding: 20px;
+    .button-class {
+      margin-bottom: 20px;
+    }
   }
 
   .header-wrapper {
@@ -394,6 +523,18 @@ export default defineComponent({
   h2 {
     font-size: 20px;
     margin-bottom: 20px;
+    margin-top: 20px;
   }
 }
+
+.editable-row-operations a {
+  margin-right: 8px;
+}
+
+ .table-wrapper {
+    .button-class {
+      margin-bottom: 20px;
+    }
+  }
+
 </style>

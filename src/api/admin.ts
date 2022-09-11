@@ -111,3 +111,14 @@ export const deleteUserAPI = (params) => {
     data: params,
   });
 };
+
+
+export const updateUserAPI = (params) => {
+  return request({
+    url: "update/userinfo",
+    method: "post",
+    data: params,
+  });
+};
+
+
