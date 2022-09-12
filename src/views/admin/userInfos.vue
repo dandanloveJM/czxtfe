@@ -288,6 +288,14 @@ export default defineComponent({
         return response.data.data;
       });
       state.taskList = data;
+      const options = data.map((item) => {
+        let tmp = {};
+        tmp["value"] = item["id"];
+        tmp["label"] = item["displayName"];
+        return tmp;
+      });
+      state.candidates = options;
+
     };
 
     const edit = (key: string) => {
@@ -325,9 +333,8 @@ export default defineComponent({
               message.error(response.data.msg);
             } else {
               message.success("修改用户成功");
-
-              fetchData("", "");
             }
+            fetchData("", "");
           })
           .catch((err) => {
             message.error("修改失败");
@@ -344,7 +351,6 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      fetchCandidates();
       fetchData("", "");
     });
 
@@ -511,23 +517,7 @@ export default defineComponent({
       }
     );
 
-    const fetchCandidates = async () => {
-      const candidates = await getAllR1R2R3Users().then((response) => response.data.data);
-      const options = candidates.map((item) => {
-        let tmp = {};
-        tmp["value"] = item["id"];
-        tmp["label"] = item["displayName"];
-        return tmp;
-      });
-      state.candidates = options;
-      const idNameMap = candidates.reduce((accumulator, currentValue) => {
-        let id = currentValue["id"];
-        let name = currentValue["displayName"];
-        accumulator[id] = name;
-        return accumulator;
-      }, {});
-      state.userIdToNameMap = idNameMap;
-    };
+    
 
     return {
       TYPE_MAP,
