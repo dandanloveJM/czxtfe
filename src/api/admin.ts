@@ -88,11 +88,11 @@ export const reallocateProduct = (params) => {
   });
 };
 
-export const getAllUsers = (department: string) => {
+export const getAllUsers = (id, department) => {
   return request({
     url: "/all/users",
     method: "get",
-    params: { department: department },
+    params: { id, department },
   });
 };
 

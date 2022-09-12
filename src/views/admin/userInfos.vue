@@ -7,10 +7,39 @@
       </a-space>
     </h2>
 
+    <div class="filters-wrapper">
+      <div class="search-filter-wrapper">
+        <a-form ref="filter-form" :model="filterFormState" layout="inline">
+          <a-form-item name="department" label="部门">
+            <a-select
+              v-model:value="filterFormState.department"
+              show-search
+              :options="teamOptions"
+              style="width: 120px"
+              :allowClear="true"
+            />
+          </a-form-item>
+          <a-form-item name="id" label="姓名">
+            <a-select
+              v-model:value="filterFormState.id"
+              show-search
+              :options="state.candidates"
+              :filterOption="filterOption"
+              style="width: 120px"
+              :allowClear="true"
+            />
+          </a-form-item>
+
+          <a-form-item :wrapper-col="wrapperCol">
+            <a-button type="primary" @click="searchFilters">搜索</a-button>
+          </a-form-item>
+        </a-form>
+      </div>
+    </div>
+
     <div class="table-wrapper">
       <div class="button-class">
-      <a-button  type="primary" @click="() => addUser()">新增用户</a-button>
-
+        <a-button type="primary" @click="() => addUser()">新增用户</a-button>
       </div>
       <div class="tableWithData" v-if="state.taskList.length > 0">
         <a-table
@@ -165,12 +194,12 @@ import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 import SelectTypes from "ant-design-vue/es/select";
 import { cloneDeep } from "lodash-es";
+import { getAllR1R2R3Users } from "@/api/display";
+import { debounce, throttle } from "lodash-es";
 
 interface filterFormState {
-  name: string;
-  number: string;
-  type: string;
-  year: string;
+  id: string;
+  department: string;
 }
 
 interface newUserformState {
@@ -206,6 +235,8 @@ export default defineComponent({
       products: [],
       previewURL: "",
       historyData: [],
+      candidates: [],
+      userIdToNameMap: {},
     });
     const visible = ref<boolean>(false);
     const tableLoading = ref<boolean>(false);
@@ -251,8 +282,8 @@ export default defineComponent({
       },
     ];
 
-    const fetchData = async (department: string) => {
-      const data = await getAllUsers(department).then((response) => {
+    const fetchData = async (id, department: string) => {
+      const data = await getAllUsers(id, department).then((response) => {
         tableLoading.value = false;
         return response.data.data;
       });
@@ -271,50 +302,55 @@ export default defineComponent({
       console.log("edit");
       console.dir(editableData[key]);
     };
-    const save = (key: string) => {
-      Object.assign(
-        state.taskList.filter((item) => key === item.id)[0],
-        editableData[key]
-      );
+    const save = debounce(
+      (key: string) => {
+        Object.assign(
+          state.taskList.filter((item) => key === item.id)[0],
+          editableData[key]
+        );
 
-      
-      const params = cloneDeep(toRaw(editableData[key]));
-      delete editableData[key];
-      const newParams = {};
-      newParams["username"] = params.username;
-      newParams["password"] = params.password;
-      newParams["displayName"] = params.displayName;
-      newParams["department"] = params.department;
-      newParams["teamName"] = teamMap[params["department"]];
-      newParams["userId"] = params.id;
+        const params = cloneDeep(toRaw(editableData[key]));
+        delete editableData[key];
+        const newParams = {};
+        newParams["username"] = params.username;
+        newParams["password"] = params.password;
+        newParams["displayName"] = params.displayName;
+        newParams["department"] = params.department;
+        newParams["teamName"] = teamMap[params["department"]];
+        newParams["userId"] = params.id;
 
-      updateUserAPI(newParams)
-        .then((response) => {
-          if (response.data.status === "fail") {
-            message.error(response.data.msg);
-          } else {
-            message.success("修改用户成功");
+        updateUserAPI(newParams)
+          .then((response) => {
+            if (response.data.status === "fail") {
+              message.error(response.data.msg);
+            } else {
+              message.success("修改用户成功");
 
-            fetchData("");
-          }
-        })
-        .catch((err) => {
-          message.error("修改失败");
-        });
-    };
+              fetchData("", "");
+            }
+          })
+          .catch((err) => {
+            message.error("修改失败");
+          });
+      },
+      3000,
+      {
+        leading: true,
+        trailing: false,
+      }
+    );
     const cancel = (key: string) => {
       delete editableData[key];
     };
 
     onMounted(() => {
-      fetchData("");
+      fetchCandidates();
+      fetchData("", "");
     });
 
     const createFilterFormState = () => ({
-      name: "",
-      number: "",
-      type: "",
-      year: "2022",
+      id: "",
+      department: "",
     });
     const typeOptions = TYPE_OPTIONS;
 
@@ -325,12 +361,16 @@ export default defineComponent({
       const formData = toRaw(filterFormState);
       const values = Object.values(formData);
       console.log("我看看参数");
+      console.dir(formData);
       console.log(values);
       tableLoading.value = true;
 
-      if (values.length == 4) {
-        fetchData(values[0]);
-      }
+      // if (values.length == 2) {
+      //   fetchData(values[0]);
+      // }
+      const idParam = formData.id ? formData.id : "0";
+      const departmentParam = formData.department ? formData.department : "";
+      fetchData(idParam, departmentParam);
     };
 
     const filterOption = (input: string, option: any) => {
@@ -401,60 +441,92 @@ export default defineComponent({
       }
       return true;
     };
-    const addUserOk = () => {
-      console.log("表单数据");
-      const formData = toRaw(newUserformState);
-      console.dir(formData);
-      const flag = checkIfEmpty(formData);
-      if (!!flag) {
-        const params = {};
-        Object.assign(params, formData);
-        params["teamName"] = teamMap[formData["department"]];
-        console.log("拼接参数");
-        console.dir(params);
-        const submit = addUserAPI(params)
-          .then((response) => {
-            confirmLoadingNew.value = false;
-            console.log("response");
-            console.log(response);
-            if (response.data.status === "fail") {
-              message.error(response.data.msg);
-            } else {
-              showCheck.value = false;
-              message.success("新建用户成功");
-              // 清空表单数据
-              Object.assign(newUserformState, createNewUserformState());
-
-              fetchData("");
-            }
-          })
-          .catch((err) => {
-            message.error("增加用户失败");
-          });
-      }
-    };
-
-    const deleteUser = (id) => {
-      antModal.confirm({
-        title: "您确认删除此用户吗？",
-        icon: createVNode(ExclamationCircleOutlined),
-        onOk() {
-          deleteUserAPI({ userId: id })
+    const addUserOk = debounce(
+      () => {
+        console.log("表单数据");
+        const formData = toRaw(newUserformState);
+        console.dir(formData);
+        const flag = checkIfEmpty(formData);
+        if (!!flag) {
+          const params = {};
+          Object.assign(params, formData);
+          params["teamName"] = teamMap[formData["department"]];
+          console.log("拼接参数");
+          console.dir(params);
+          const submit = addUserAPI(params)
             .then((response) => {
-              if (response.data.status === "ok") {
-                message.success("删除成功");
-                fetchData("");
+              confirmLoadingNew.value = false;
+              console.log("response");
+              console.log(response);
+              if (response.data.status === "fail") {
+                message.error(response.data.msg);
+              } else {
+                showCheck.value = false;
+                message.success("新建用户成功");
+                // 清空表单数据
+                Object.assign(newUserformState, createNewUserformState());
+
+                fetchData("", "");
               }
             })
             .catch((err) => {
-              message.error("删除失败");
+              message.error("增加用户失败");
             });
-        },
-        onCancel() {
-          console.log("Cancel");
-        },
-        class: "test",
+        }
+      },
+      3000,
+      {
+        leading: true,
+        trailing: false,
+      }
+    );
+
+    const deleteUser = debounce(
+      (id) => {
+        antModal.confirm({
+          title: "您确认删除此用户吗？",
+          icon: createVNode(ExclamationCircleOutlined),
+          onOk() {
+            deleteUserAPI({ userId: id })
+              .then((response) => {
+                if (response.data.status === "ok") {
+                  message.success("删除成功");
+                  fetchData("", "");
+                }
+              })
+              .catch((err) => {
+                message.error("删除失败");
+              });
+          },
+          onCancel() {
+            console.log("Cancel");
+          },
+          class: "test",
+        });
+      },
+      3000,
+      {
+        leading: true,
+        trailing: false,
+      }
+    );
+
+    const fetchCandidates = async () => {
+      const candidates = await getAllR1R2R3Users().then((response) => response.data.data);
+      const options = candidates.map((item) => {
+        let tmp = {};
+        tmp["value"] = item["id"];
+        tmp["label"] = item["displayName"];
+        return tmp;
       });
+      state.candidates = options;
+      const idNameMap = candidates.reduce((accumulator, currentValue) => {
+        let id = currentValue["id"];
+        let name = currentValue["displayName"];
+        accumulator[id] = name;
+        return accumulator;
+      }, {});
+      state.userIdToNameMap = idNameMap;
     };
 
     return {
@@ -531,10 +603,9 @@ export default defineComponent({
   margin-right: 8px;
 }
 
- .table-wrapper {
-    .button-class {
-      margin-bottom: 20px;
-    }
+.table-wrapper {
+  .button-class {
+    margin-bottom: 20px;
   }
-
+}
 </style>
