@@ -110,6 +110,17 @@ export default defineComponent({
         const key = item.team;
         const value = item.allBonus;
         localRankMap[key] = value;
+
+        if (["Z1", "Z2", "F1", "F2"].indexOf(key) >= 0) {
+          const teamSum = data[key].reduce((previous, current) => {
+            return previous + current.sum;
+          }, 0);
+          data[key].push({
+            name: "其他",
+            department: key,
+            sum: Math.round(value - teamSum),
+          });
+        }
       }
 
       state.pieChartParams = data;
@@ -129,7 +140,7 @@ export default defineComponent({
           const total_sum = pieParams.reduce((perviousValue, current) => {
             return perviousValue + current.value;
           }, 0);
-     
+
           drawPie(
             localMap[key][0],
             localMap[key][1] + "总产值\n" + localRankMap[key],
@@ -312,12 +323,7 @@ export default defineComponent({
 
     onMounted(() => {
       fetchData();
-      //   echartInit();
       fetchBarChartData();
-      //   fetchData(2022);
-      // watchEffect(() => {
-
-      // });
     });
 
     return {
