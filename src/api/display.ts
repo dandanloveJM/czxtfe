@@ -174,12 +174,14 @@ export const getR4FinishedList = (
   type: string,
   year: string,
   startDate: string,
-  endDate: string
+  endDate: string,
+  page: number,
+  pageSize: number
 ) => {
   return request({
     url: "R4/finished/projects",
     method: "get",
-    params: { query: query, year: year, type: type, number: number, startDate, endDate },
+    params: { query: query, year: year, type: type, number: number, startDate, endDate, page, pageSize },
   });
 };
 

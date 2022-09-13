@@ -28,8 +28,10 @@
           </a-form-item>
           <a-space>
             日期筛选：
-            <a-range-picker v-model:value="filterFormState.range"
-            @change="onChangeRangePicker" />
+            <a-range-picker
+              v-model:value="filterFormState.range"
+              @change="onChangeRangePicker"
+            />
           </a-space>
           <a-form-item :wrapper-col="wrapperCol">
             <a-button type="primary" @click="searchFilters">搜索</a-button>
@@ -43,37 +45,70 @@
         <a-table
           :columns="columns"
           :data-source="state.taskList"
-          :rowKey="(record) => record.name"
+          :rowKey="(record) => record.id"
           :loading="tableLoading"
-           :pagination="false"
+          :pagination="false"
         >
           <template #updatedAt="{ record }">
-              <span v-if="record.name != '合计'">
-                {{ changeTime(record.updatedAt)}}
-                </span>
+            <span v-if="record.name != '合计'">
+              {{ changeTime(record.updatedAt) }}
+            </span>
           </template>
           <template #type="{ record }">
-             <span  v-if="record.name != '合计'">
-             {{ TYPE_MAP[record.type] || '' }}
-             </span>
+            <span v-if="record.name != '合计'">
+              {{ TYPE_MAP[record.type] || "" }}
+            </span>
           </template>
           <template #totalPercentage="{ record }">
-            <a-tag v-if="record.name != '合计' && record.totalPercentage < 100" color="warning">{{
-              (record.totalPercentage + "%") || ''
-            }}</a-tag>
-             <span v-else-if="record.name != '合计' && record.totalPercentage == 100">{{ record.totalPercentage + "%" }}</span>
+            <a-tag
+              v-if="record.name != '合计' && record.totalPercentage < 100"
+              color="warning"
+              >{{ record.totalPercentage + "%" || "" }}</a-tag
+            >
+            <span v-else-if="record.name != '合计' && record.totalPercentage == 100">{{
+              record.totalPercentage + "%"
+            }}</span>
           </template>
           <template #attachment="{ record }">
-            <a-button v-if="record.name != '合计'" @click="() => showImg(record.attachment)"
+            <a-button
+              v-if="record.name != '合计'"
+              @click="() => showImg(record.attachment)"
               >查看任务书</a-button
             >
           </template>
           <template #products="{ record }">
-            <a-button v-if="record.name != '合计'" @click="() => showProducts(record.products)"
+            <a-button
+              v-if="record.name != '合计'"
+              @click="() => showProducts(record.products)"
               >查看产值</a-button
             >
           </template>
+          <template #summary>
+            <a-table-summary-row>
+              <a-table-summary-cell :index="0">合计总产值</a-table-summary-cell>
+              <a-table-summary-cell></a-table-summary-cell>
+              <a-table-summary-cell></a-table-summary-cell>
+              <a-table-summary-cell></a-table-summary-cell>
+              <a-table-summary-cell :index="4">
+                <a-typography-text>{{ state.projectSum }}</a-typography-text>
+              </a-table-summary-cell>
+              <a-table-summary-cell></a-table-summary-cell>
+              <a-table-summary-cell></a-table-summary-cell>
+              <a-table-summary-cell></a-table-summary-cell>
+            </a-table-summary-row>
+          </template>
         </a-table>
+        <div class="page-wrapper">
+          <a-pagination
+            v-model:current="current1"
+            v-model:page-size="pageSize1"
+            :total="state.pageTotal"
+            :show-total="(total) => `共 ${total} 条数据`"
+            @change="onPaginationChange"
+            show-size-changer
+          >
+          </a-pagination>
+        </div>
       </div>
       <div class="emptyTable" v-else>
         <a-empty />
@@ -124,6 +159,7 @@ import {
   UnwrapRef,
   toRaw,
   watchEffect,
+  computed,
 } from "vue";
 import { typeMap, TYPE_OPTIONS } from "@/utils/config";
 import { getR4FinishedList } from "@/api/display";
@@ -131,16 +167,16 @@ import Modal from "@/components/tableLayout/modal.vue";
 import { message, Modal as antModal } from "ant-design-vue";
 // import moment from "moment";
 import dayjs from "dayjs";
-import  SelectTypes from "ant-design-vue/es/select";
-import type { Dayjs } from 'dayjs';
+import SelectTypes from "ant-design-vue/es/select";
+import type { Dayjs } from "dayjs";
 
 interface filterFormState {
   name: string;
   number: string;
   type: string;
   year: string;
-   startDate: string;
-  endDate: string,
+  startDate: string;
+  endDate: string;
   range: Dayjs;
 }
 
@@ -157,6 +193,8 @@ export default defineComponent({
       taskList: [],
       products: [],
       previewURL: "",
+      pageTotal: 0,
+      projectSum: 0,
     });
     const visible = ref<boolean>(false);
     const tableLoading = ref<boolean>(false);
@@ -232,23 +270,35 @@ export default defineComponent({
       type: string,
       year: string,
       startDate: string,
-      endDate: string
+      endDate: string,
+      page: number,
+      pageSize: number
     ) => {
-      const data = await getR4FinishedList(name, number, type, year, startDate, endDate).then(
-        (response) => {
-          tableLoading.value = false;
-          return response.data.data;
-        }
-      );
+      const data = await getR4FinishedList(
+        name,
+        number,
+        type,
+        year,
+        startDate,
+        endDate,
+        page,
+        pageSize
+      ).then((response) => {
+        tableLoading.value = false;
+
+        return response.data;
+      });
       if (data.hasOwnProperty("empty")) {
         state.taskList = [];
       } else {
-        state.taskList = data;
+        state.taskList = data.data;
+        state.pageTotal = data.total;
+        state.projectSum = data.sum;
       }
     };
 
     onMounted(() => {
-      fetchData("", "", "", ""+dayjs().year(),"","");
+      fetchData("", "", "", "" + dayjs().year(), "", "", 1, 10);
     });
 
     const showProducts = (products) => {
@@ -262,7 +312,7 @@ export default defineComponent({
       state.products = [];
     };
     const changeTime = (time) => {
-  return dayjs(time).add(8, "hours").format('YYYY年MM月DD日 HH:mm');
+      return dayjs(time).add(8, "hours").format("YYYY年MM月DD日 HH:mm");
     };
 
     const createFilterFormState = () => ({
@@ -272,13 +322,11 @@ export default defineComponent({
       year: "2022",
       range: null,
       startDate: "",
-      endDate: ""
+      endDate: "",
     });
     const typeOptions = TYPE_OPTIONS;
 
-    const filterFormState: UnwrapRef<filterFormState> = reactive(
-      createFilterFormState()
-    );
+    const filterFormState: UnwrapRef<filterFormState> = reactive(createFilterFormState());
 
     const searchFilters = () => {
       // 拿到filterFormState数据，拼接参数, 发送fetchData请求, 设置loading
@@ -287,23 +335,34 @@ export default defineComponent({
       console.log("我看看参数");
       console.log(values);
       tableLoading.value = true;
+      current1.value=1 ;
+      pageSize1.value=10;
 
-      fetchData(formData.name, formData.number, formData.type, formData.year, formData.startDate, formData.endDate)
+      fetchData(
+        formData.name,
+        formData.number,
+        formData.type,
+        formData.year,
+        formData.startDate,
+        formData.endDate,
+        1,
+        10
+      );
     };
 
     const options1 = ref<typeof SelectTypes["options"]>([
-       {
-        value: ""+dayjs().year(),
-        label: ""+dayjs().year(),
+      {
+        value: "" + dayjs().year(),
+        label: "" + dayjs().year(),
       },
       {
-        value: ""+(dayjs().year()+1),
-        label: ""+(dayjs().year()+1),
+        value: "" + (dayjs().year() + 1),
+        label: "" + (dayjs().year() + 1),
       },
 
       {
-        value: ""+(dayjs().year()+2),
-        label: ""+(dayjs().year()+2),
+        value: "" + (dayjs().year() + 2),
+        label: "" + (dayjs().year() + 2),
       },
     ]);
 
@@ -314,10 +373,32 @@ export default defineComponent({
       showPreview.value = true;
       state.previewURL = srcURL;
     };
-     const onChangeRangePicker = (value, dateString)=>{
-      filterFormState.startDate=dateString.slice(0,1).toString()
-      filterFormState.endDate=dateString.slice(1,2).toString()
-    }
+    const onChangeRangePicker = (value, dateString) => {
+      filterFormState.startDate = dateString.slice(0, 1).toString();
+      filterFormState.endDate = dateString.slice(1, 2).toString();
+    };
+
+    let current1 = ref(1);
+    let pageSize1 = ref(10);
+    const onPaginationChange = (page, pageSize) => {
+      pageSize1.value = pageSize;
+      const formData = toRaw(filterFormState);
+      const values = Object.values(formData);
+      console.log("我看看参数");
+      console.log(values);
+      tableLoading.value = true;
+      console.log("pagesiez", page, pageSize);
+      fetchData(
+        formData.name,
+        formData.number,
+        formData.type,
+        formData.year,
+        formData.startDate,
+        formData.endDate,
+        page,
+        pageSize
+      );
+    };
 
     return {
       TYPE_MAP,
@@ -338,7 +419,10 @@ export default defineComponent({
       filterOption,
       showImg,
       showPreview,
-      onChangeRangePicker
+      onChangeRangePicker,
+      current1,
+      pageSize1,
+      onPaginationChange,
     };
   },
 });
@@ -367,5 +451,10 @@ export default defineComponent({
 }
 .doneTask__container {
   padding: 0 20px;
+}
+.page-wrapper {
+  display: flex;
+  justify-content: end;
+  margin-top: 30px;
 }
 </style>
