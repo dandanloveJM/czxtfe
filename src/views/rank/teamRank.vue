@@ -1,7 +1,7 @@
 <template>
   <div class="doneTask__container">
     <div class="table-wrapper">
-      <div class="tableWithData" v-if="state.taskList.length > 0">
+      <div class="tableWithData" v-if="state.taskList.length >= 0">
         <header class="header-wrapper">
           <CalendarTwoTone />
           <span>按年度筛选：</span>
@@ -51,6 +51,7 @@ import { teamMap } from "@/utils/config";
 import { getTeamRank, getTeamMembers } from "@/api/display";
 import { CalendarTwoTone } from "@ant-design/icons-vue";
 import  SelectTypes from "ant-design-vue/es/select";
+import dayjs from "dayjs";
 
 export default defineComponent({
   name: "el_user_rank",
@@ -122,7 +123,7 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      fetchData(2022);
+      fetchData(dayjs().year());
       // watchEffect(() => {
 
       // });
@@ -155,7 +156,7 @@ export default defineComponent({
       state,
       columns,
       TEAM_MAP,
-      value1: ref("2022"),
+      value1: ref(""+dayjs().year()),
       options1,
       handleChange,
       tableLoading,

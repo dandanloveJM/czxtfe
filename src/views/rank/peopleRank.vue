@@ -58,6 +58,7 @@ import { getAllUserRank } from "@/api/display";
 import { debounce } from "lodash-es";
 import { CalendarTwoTone } from "@ant-design/icons-vue";
 import  SelectTypes  from "ant-design-vue/es/select";
+import dayjs from "dayjs";
 
 interface filterFormState {
   team: string;
@@ -113,7 +114,7 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      fetchData("2022", "");
+      fetchData("" + dayjs().year(), "");
       // watchEffect(() => {
       //   fetchData(2022);
       // });
@@ -150,7 +151,7 @@ export default defineComponent({
 
     const createFilterFormState = () => ({
       team: "",
-      year: "2022",
+      year: ""+dayjs().year(),
     });
 
     const filterFormState: UnwrapRef<filterFormState> = reactive(
@@ -176,7 +177,7 @@ export default defineComponent({
     return {
       state,
       columns,
-      value1: ref("2022"),
+      value1: ref(""+dayjs().year()),
       options1,
       handleChange,
       tableLoading,

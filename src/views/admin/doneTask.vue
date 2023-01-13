@@ -303,7 +303,7 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      fetchData("", "", "", "2022");
+      fetchData("", "", "", "" + dayjs().year());
     });
 
     const showProducts = (products) => {
@@ -324,7 +324,7 @@ export default defineComponent({
       name: "",
       number: "",
       type: "",
-      year: "2022",
+      year: "" + dayjs().year(),
     });
     const typeOptions = TYPE_OPTIONS;
 
@@ -376,7 +376,7 @@ export default defineComponent({
           deleteProject(processId)
             .then((response) => {
               message.success("删除成功");
-              fetchData("", "", "", "2022");
+              fetchData("", "", "", "" + dayjs().year());
             })
             .catch((err) => {
               console.log(err);

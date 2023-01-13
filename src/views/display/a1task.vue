@@ -751,7 +751,7 @@ export default defineComponent({
       name: "",
       number: "",
       type: "",
-      year: "2022",
+      year: "" + dayjs().year(),
       month: null,
       startDate: "",
       enddate: "",

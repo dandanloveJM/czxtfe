@@ -382,7 +382,7 @@ export default defineComponent({
     };
 
     onMounted(() => {
-      fetchData("", "", "", "2022");
+      fetchData("", "", "", "" + dayjs().year());
     });
 
     // 点击表单添加按钮
@@ -466,7 +466,7 @@ export default defineComponent({
       name: "",
       number: "",
       type: "",
-      year: "2022",
+      year: "" + dayjs().year(),
     });
 
     const filterFormState: UnwrapRef<filterFormState> = reactive(
@@ -510,7 +510,7 @@ export default defineComponent({
           deleteProject(processId)
             .then((response) => {
               message.success("删除成功");
-              fetchData("", "", "", "2022");
+              fetchData("", "", "", "" + dayjs().year());
             })
             .catch((err) => {
               console.log(err);
