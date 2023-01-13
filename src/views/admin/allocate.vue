@@ -58,6 +58,17 @@
         <a-form ref="formRef" :model="dynamicForm" :label-col="labelCol">
           <a-form-item>
             <div class="radio-wrapper">
+              <div class="radio-tip">部门选择：</div>
+              <a-radio-group name="radioGroup" v-model:value="radioValue">
+                <a-radio value="F1">方法一shi</a-radio>
+                <a-radio value="F2">10%待分配产值</a-radio>
+                <a-radio value="Z1">10%待分配产值</a-radio>
+                <a-radio value="Z2">10%待分配产值</a-radio>
+              </a-radio-group>
+            </div>
+          </a-form-item>
+          <a-form-item>
+            <div class="radio-wrapper">
               <div class="radio-tip">分配产值选择：</div>
               <a-radio-group name="radioGroup" v-model:value="radioValue">
                 <a-radio value="R4">20%待分配产值</a-radio>
