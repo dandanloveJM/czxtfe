@@ -277,6 +277,10 @@ export default defineComponent({
     const searchValue = ref<string>("");
 
     const options1 = ref<typeof SelectTypes["options"]>([
+      {
+        value: "" + (dayjs().year() - 1),
+        label: "" + (dayjs().year() - 1),
+      },
         {
         value: ""+dayjs().year(),
         label: ""+dayjs().year(),

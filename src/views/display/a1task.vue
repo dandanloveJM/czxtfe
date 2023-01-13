@@ -787,17 +787,21 @@ export default defineComponent({
 
     const options1 = ref<typeof SelectTypes["options"]>([
       {
-        value: "2022",
-        label: "2022",
+        value: "" + (dayjs().year() - 1),
+        label: "" + (dayjs().year() - 1),
       },
       {
-        value: "2023",
-        label: "2023",
+        value: "" + dayjs().year(),
+        label: "" + dayjs().year(),
+      },
+      {
+        value: "" + (dayjs().year() + 1),
+        label: "" + (dayjs().year() + 1),
       },
 
       {
-        value: "2024",
-        label: "2024",
+        value: "" + (dayjs().year() + 2),
+        label: "" + (dayjs().year() + 2),
       },
     ]);
 
