@@ -38,7 +38,7 @@ export default defineComponent({
       const department = localCache.getCache("setInfo").department;
       const year = dayjs().year()
 
-      const data = await getR2PivotParams(department, year).then((response) => {
+      const data = await getR2PivotParams(department).then((response) => {
         return response.data.data;
       });
 
