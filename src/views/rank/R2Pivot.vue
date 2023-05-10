@@ -20,6 +20,7 @@ import { getR2PivotParams } from "@/api/display";
 import { CalendarTwoTone } from "@ant-design/icons-vue";
 import * as echarts from "echarts";
 import localCache from "@/utils/localCache";
+import dayjs from "dayjs";
 
 export default defineComponent({
   name: "el_user_rank",
@@ -35,8 +36,9 @@ export default defineComponent({
 
     const fetchData = async () => {
       const department = localCache.getCache("setInfo").department;
+      const year = dayjs().year()
 
-      const data = await getR2PivotParams(department).then((response) => {
+      const data = await getR2PivotParams(department, year).then((response) => {
         return response.data.data;
       });
 

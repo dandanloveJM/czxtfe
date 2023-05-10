@@ -70,6 +70,7 @@ import { teamMap } from "@/utils/config";
 import { teamPieCharts, getBarChart, getTeamRank } from "@/api/display";
 import { CalendarTwoTone } from "@ant-design/icons-vue";
 import * as echarts from "echarts";
+import dayjs from "dayjs";
 
 export default defineComponent({
   name: "el_user_rank",
@@ -101,7 +102,7 @@ export default defineComponent({
         return response.data.data;
       });
 
-      const rankData = await getTeamRank("2022").then((response) => {
+      const rankData = await getTeamRank(dayjs().year()).then((response) => {
         return response.data.data;
       });
 
@@ -190,6 +191,7 @@ export default defineComponent({
             "技术支持",
             "现场支持",
             "党建工作",
+            "专项激励"
           ],
             axisLabel: {
               fontSize: 16,
