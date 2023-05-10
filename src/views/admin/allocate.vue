@@ -5,7 +5,7 @@
     </div>
     
     <div class="table-wrapper">
-      <div class="tableWithData" v-if="state.taskList.length > 0">
+      <div class="tableWithData" v-if="state.taskList.length >= 0">
         <header class="header-wrapper">
           <CalendarTwoTone />
           <span>按年度筛选：</span>
@@ -146,6 +146,7 @@ import { CalendarTwoTone, PlusOutlined } from "@ant-design/icons-vue";
 import { message } from "ant-design-vue";
 import localStorageStore from "@/utils/localStorageStore";
 import  SelectTypes  from "ant-design-vue/es/select";
+import dayjs from "dayjs";
 
 interface PeopleAndProductRecord {
   peopleLabel: string;
@@ -231,7 +232,7 @@ export default defineComponent({
 
     onMounted(() => {
       fetchCandidates();
-      fetchData(2022);
+      fetchData(dayjs().year());
     });
 
     const options1 = ref<typeof SelectTypes["options"]>([
@@ -356,7 +357,7 @@ export default defineComponent({
             if (response.data.status === "ok") {
               visible.value = false;
               message.success("数据上传成功");
-              fetchData(2022);
+              fetchData(dayjs().year());
             } else {
               message.error("程序异常");
             }
@@ -385,7 +386,7 @@ export default defineComponent({
       state,
       columns,
       TEAM_MAP,
-      value1: ref("2022"),
+      value1: ref(dayjs().year()+""),
       options1,
       handleChange,
       tableLoading,

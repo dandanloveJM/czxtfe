@@ -392,13 +392,12 @@ export const deleteProject = (processId) => {
 
 
 export const getR2PivotParams = (
-  team:string,
-  year:number
+  team:string
 ) => {
   return request({
     url: "pivot/chart",
     method: "get",
-    params: { team: team, year:year},
+    params: { team: team},
   });
 };
 
