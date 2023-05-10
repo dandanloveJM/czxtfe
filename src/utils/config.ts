@@ -9,6 +9,7 @@ export const typeMap = {
     "8": "技术支持",
     "9": "现场支持",
     "10": "党建工作",
+    "11":"专项激励"
   };
 
 
@@ -23,6 +24,7 @@ export const typeMap = {
     "jishuzhichi": "技术支持",
     "xianchangzhichi": "现场支持",
     "dangjian": "党建工作",
+    "zhuanxiangjili":"专项激励"
   };
 
 
@@ -66,6 +68,10 @@ export const typeMap = {
     {
       value:'10',
       label: '党建工作'
+    },
+    {
+      value:'11',
+      label: '专项激励'
     },
 
   ]
